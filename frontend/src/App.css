@@ -561,3 +561,45 @@ footer {
   order: 2;
   margin-bottom: 12px;
 }
+/* Style pour l'Espace Membre */
+.dashboard-container {
+    max-width: 900px;
+    margin: 100px auto; /* Pour laisser de la place sous le header fixe */
+    padding: 20px;
+    color: white;
+}
+
+.admin-card {
+    background: #111; /* Un gris très foncé pour trancher avec le noir */
+    border: 1px solid #333;
+    padding: 30px;
+    margin-bottom: 30px;
+    border-radius: 4px;
+}
+
+.admin-card h2 {
+    color: #e31b23; /* Ton rouge fétiche */
+    text-transform: uppercase;
+    margin-top: 0;
+}
+
+/* Style des formulaires */
+.admin-form input {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    background: #222;
+    border: 1px solid #444;
+    color: white;
+}
+
+.admin-form button {
+    background: #e31b23;
+    color: white;
+    border: none;
+    padding: 15px;
+    font-weight: bold;
+    text-transform: uppercase;
+    cursor: pointer;
+    width: 100%;
+}

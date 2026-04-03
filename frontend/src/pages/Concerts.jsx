@@ -1,28 +1,23 @@
-/// pages/Concerts.jsx
+import { useState, useEffect } from 'react';
+
 function Concerts() {
-    const tourDates = [
-        {
-            id: 1,
-            jour: "09",
-            mois: "MAI",
-            annee: "2026",
-            ville: "SANARY-SUR-MER",
-            lieu: "Just Rosé",
-            heure: "14:00",
-            statut: "ENTRÉE LIBRE"
-        },
-        {
-            id: 2,
-            jour: "07",
-            mois: "AOUT",
-            annee: "2026",
-            ville: "LA LONDE-LES-MAURES",
-            lieu: "AZUREVA",
-            heure: "20:00",
-            statut: "ENTRÉE LIBRE"
-        },
-        //  ajouter d'autres dates ici plus tard
-    ];
+    const [tourDates, setTourDates] = useState([]);
+
+    useEffect(() => {
+        // On récupère les données de ton API Node
+        fetch('http://localhost:5000/api/concerts')
+            .then(res => res.json())
+            .then(data => setTourDates(data))
+            .catch(err => console.error("Erreur chargement concerts:", err));
+    }, []);
+
+    // Fonction utilitaire pour extraire le jour et le mois de la date SQL
+    const getFormattedDate = (dateString) => {
+        const date = new Date(dateString);
+        const jour = date.getDate().toString().padStart(2, '0');
+        const mois = date.toLocaleString('fr-FR', { month: 'short' }).toUpperCase().replace('.', '');
+        return { jour, mois };
+    };
 
     return (
         <div className="media-page">
@@ -32,23 +27,34 @@ function Concerts() {
             </div>
 
             <div className="tour-container">
-                {tourDates.map((d) => (
-                    <div key={d.id} className="tour-row">
-                        <div className="tour-date-box">
-                            <span className="tour-day">{d.jour}</span>
-                            <span className="tour-month">{d.mois}</span>
-                        </div>
+                {tourDates.length > 0 ? (
+                    tourDates.map((d) => {
+                        const { jour, mois } = getFormattedDate(d.date_concert);
+                        return (
+                            <div key={d.id} className="tour-row">
+                                <div className="tour-date-box">
+                                    <span className="tour-day">{jour}</span>
+                                    <span className="tour-month">{mois}</span>
+                                </div>
 
-                        <div className="tour-info">
-                            <h3 className="tour-city">{d.ville}</h3>
-                            <p className="tour-venue">{d.lieu} — {d.heure}</p>
-                        </div>
+                                <div className="tour-info">
+                                    <h3 className="tour-city">{d.titre}</h3>
+                                    <p className="tour-venue">
+                                        {d.lieu} — {d.heure.substring(0, 5)}
+                                    </p>
+                                </div>
 
-                        <div className="tour-status">
-                            <span className="status-badge">{d.statut}</span>
-                        </div>
-                    </div>
-                ))}
+                                <div className="tour-status">
+                                    <span className="status-badge">ENTRÉE LIBRE</span>
+                                </div>
+                            </div>
+                        );
+                    })
+                ) : (
+                    <p style={{ textAlign: 'center', color: '#666', marginTop: '20px' }}>
+                        Aucune date programmée pour le moment.
+                    </p>
+                )}
             </div>
         </div>
     );
