@@ -1,4 +1,5 @@
 // App.jsx
+import './App.css';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './hooks/useAuth.js';
 import MainLayout from './layouts/MainLayout.jsx';
@@ -8,6 +9,10 @@ import Home from './pages/Home.jsx';
 import Login from './pages/Login.jsx';
 import Register from './pages/Register.jsx';
 import Dashboard from './pages/Dashboard.jsx';
+import Concerts from './pages/Concerts.jsx';
+import Repetitions from './pages/Repetitions.jsx';
+import Videos from './pages/Videos.jsx';
+import Legroupe from './pages/Legroupe.jsx';
 function App() {
   const { loading } = useAuth();
   if (loading) return <div><p>Chargement...</p></div>;
@@ -16,6 +21,10 @@ function App() {
       {/* Routes AVEC Header + Footer */}
       <Route element={<MainLayout />}>
         <Route path="/" element={<Home />} />
+        <Route path="/legroupe" element={<Legroupe />} />
+        <Route path="/repetition" element={<Repetitions />} />
+        <Route path="/videos" element={<Videos />} />
+        <Route path="/concerts" element={<Concerts />} />
         <Route path="/dashboard" element={
           <PrivateRoute><Dashboard /></PrivateRoute>
         } />

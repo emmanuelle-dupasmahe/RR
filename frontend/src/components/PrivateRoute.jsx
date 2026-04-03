@@ -5,7 +5,13 @@ function PrivateRoute({ children }) {
     const { isAuthenticated, loading } = useAuth();
     const location = useLocation();
     if (loading) {
-        return <div><p>Chargement...</p></div>;
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-dark-bg">
+                <div className="text-center">
+                    <p className="text-white text-xl font-bold">Chargement...</p>
+                </div>
+            </div>
+        );
     }
     if (!isAuthenticated) {
         return <Navigate to="/login" state={{ from: location }} replace />;
