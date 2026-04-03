@@ -1,27 +1,49 @@
 -- schema.sql
-CREATE DATABASE IF NOT EXISTS starter_kit
+CREATE DATABASE IF NOT EXISTS reservoirrock
 CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 USE starter_kit;
 
 CREATE TABLE IF NOT EXISTS users (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    email VARCHAR(255) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL,
-    firstname VARCHAR(100) NOT NULL,
-    lastname VARCHAR(100) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_email (email)
+    email VARCHAR(255) NOT NULL UNIQUE
 ) ENGINE=InnoDB;
 
--- Table des réservations 
-CREATE TABLE IF NOT EXISTS reservations (
+
+-- Table des concerts
+CREATE TABLE IF NOT EXISTS concerts (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    user_id INT UNSIGNED NOT NULL,
-    date_resa DATE NOT NULL,
-    heure_debut TIME NOT NULL,
-    heure_fin TIME NOT NULL,
-    objet VARCHAR(255) NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    titre VARCHAR(255) NOT NULL,
+    date_concert DATE NOT NULL,
+    heure TIME,
+    lieu VARCHAR(255) NOT NULL,
+    description TEXT,
+    image_url VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_date (date_concert)
+) ENGINE=InnoDB;
+
+-- Table des vidéos
+CREATE TABLE IF NOT EXISTS videos (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    titre VARCHAR(255) NOT NULL,
+    url_youtube VARCHAR(255) NOT NULL,
+    description TEXT,
+    thumbnail_url VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+-- Table des répétitions
+CREATE TABLE IF NOT EXISTS repetitions (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    titre VARCHAR(255) NOT NULL,
+    date_repetition DATE NOT NULL,
+    heure TIME,
+    lieu VARCHAR(255),
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_date (date_repetition)
 ) ENGINE=InnoDB;

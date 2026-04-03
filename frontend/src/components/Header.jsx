@@ -31,10 +31,15 @@ function Header() {
                 {isAuthenticated && <NavLink to="/dashboard">Admin</NavLink>}
             </nav>
 
-            {isAuthenticated && (
+            {isAuthenticated ? (
                 <div className="auth-zone">
                     <span>{user?.firstname}</span>
                     <button onClick={handleLogout}>Déconnexion</button>
+                </div>
+            ) : (
+                <div className="auth-zone">
+                    <Link to="/login">Connexion</Link>
+                    <Link to="/register">S'inscrire</Link>
                 </div>
             )}
         </header>

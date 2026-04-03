@@ -7,7 +7,7 @@ function MainLayout() {
         <div className="flex flex-col min-h-screen">
             <Header />
             <main className="flex-grow">
-                <Outlet /> {/* ← La page enfant s'affiche ici */}
+                <Outlet /> 
             </main>
             <Footer />
         </div>
