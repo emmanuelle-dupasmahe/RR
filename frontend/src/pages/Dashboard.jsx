@@ -38,41 +38,39 @@ function Dashboard() {
     };
 
     return (
-        <div className="dashboard-container">
-            <div className="media-header">
-                <h1 style={{color: 'white', textAlign: 'center', fontSize: '3rem', fontWeight: '900'}}>ADMINISTRATION</h1>
+        <div className="mt-[100px] max-w-[900px] mx-auto px-[20px] pb-[40px] text-white">
+            <div className="text-center py-[48px]">
+                <h1 className="text-[3rem] font-[900] uppercase text-white leading-tight">ADMINISTRATION</h1>
             </div>
 
             {/* FORMULAIRE D'AJOUT */}
-            <div className="admin-card">
-                <h2>Ajouter un Concert</h2>
-                <form onSubmit={handleSubmit} className="admin-form">
-                    <input type="text" placeholder="VILLE" value={formData.titre} onChange={(e) => setFormData({...formData, titre: e.target.value.toUpperCase()})} required />
-                    <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px'}}>
-                        <input type="date" value={formData.date_concert} onChange={(e) => setFormData({...formData, date_concert: e.target.value})} required />
-                        <input type="time" value={formData.heure} onChange={(e) => setFormData({...formData, heure: e.target.value})} required />
+            <div className="bg-[#111] border border-[#333] p-[30px] mb-[30px] rounded-[4px]">
+                <h2 className="text-primary uppercase mt-0 mb-[20px] font-bold text-xl">Ajouter un Concert</h2>
+                <form onSubmit={handleSubmit} className="space-y-[10px]">
+                    <input type="text" placeholder="VILLE" className="w-full p-[12px] bg-[#222] border border-[#444] text-white focus:outline-none focus:border-primary" value={formData.titre} onChange={(e) => setFormData({ ...formData, titre: e.target.value.toUpperCase() })} required />
+                    <div className="grid grid-cols-2 gap-[10px]">
+                        <input type="date" className="w-full p-[12px] bg-[#222] border border-[#444] text-white focus:outline-none focus:border-primary" value={formData.date_concert} onChange={(e) => setFormData({ ...formData, date_concert: e.target.value })} required />
+                        <input type="time" className="w-full p-[12px] bg-[#222] border border-[#444] text-white focus:outline-none focus:border-primary" value={formData.heure} onChange={(e) => setFormData({ ...formData, heure: e.target.value })} required />
                     </div>
-                    <input type="text" placeholder="LIEU" value={formData.lieu} onChange={(e) => setFormData({...formData, lieu: e.target.value})} required />
-                    <button type="submit">Publier la date</button>
+                    <input type="text" placeholder="LIEU" className="w-full p-[12px] bg-[#222] border border-[#444] text-white focus:outline-none focus:border-primary" value={formData.lieu} onChange={(e) => setFormData({ ...formData, lieu: e.target.value })} required />
+                    <button type="submit" className="bg-primary text-white border-none p-[15px] font-bold uppercase cursor-pointer w-full transition-colors hover:bg-[#b8151b]">Publier la date</button>
                 </form>
             </div>
 
             {/* LISTE DES CONCERTS EXISTANTS */}
-            <div className="admin-card">
-                <h2>Dates programmées</h2>
-                <div style={{marginTop: '20px'}}>
+            <div className="bg-[#111] border border-[#333] p-[30px] mb-[30px] rounded-[4px]">
+                <h2 className="text-primary uppercase mt-0 font-bold text-xl">Dates programmées</h2>
+                <div className="mt-[20px] space-y-[15px]">
                     {concerts.map(c => (
-                        <div key={c.id} style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '15px 0', borderBottom: '1px solid #222'}}>
+                        <div key={c.id} className="flex justify-between items-center py-[15px] border-b border-[#222]">
                             <div>
-                                <span style={{color: '#e31b23', fontWeight: 'bold'}}>{new Date(c.date_concert).toLocaleDateString('fr-FR')}</span>
-                                <span style={{marginLeft: '15px', fontWeight: 'bold'}}>{c.titre}</span>
-                                <p style={{fontSize: '12px', color: '#666', margin: 0}}>{c.lieu}</p>
+                                <span className="text-primary font-bold">{new Date(c.date_concert).toLocaleDateString('fr-FR')}</span>
+                                <span className="ml-[15px] font-bold">{c.titre}</span>
+                                <p className="text-[12px] text-[#666] m-0">{c.lieu}</p>
                             </div>
-                            <button 
+                            <button
                                 onClick={() => handleDelete(c.id)}
-                                style={{background: 'transparent', border: '1px solid #444', color: '#666', padding: '5px 10px', cursor: 'pointer', fontSize: '10px'}}
-                                onMouseOver={(e) => e.target.style.color = 'red'}
-                                onMouseOut={(e) => e.target.style.color = '#666'}
+                                className="bg-transparent border border-[#444] text-[#666] px-[10px] py-[5px] cursor-pointer text-[10px] hover:text-red-600 transition-colors"
                             >
                                 SUPPRIMER
                             </button>

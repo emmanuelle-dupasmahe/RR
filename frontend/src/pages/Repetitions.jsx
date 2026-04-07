@@ -10,24 +10,24 @@ function Repetitions() {
     ];
 
     return (
-        <div className="media-page">
-            <div className="media-header">
-                <h1>Studio Répétitions</h1>
-                <p>Enregistrements bruts - Réservoir Rock</p>
+        <div className="mt-[80px] min-h-[calc(100vh-82px)] bg-dark-bg">
+            <div className="text-center py-[48px] border-b border-[#1f2937]">
+                <h1 className="text-[3rem] font-[900] uppercase mb-[12px] text-white leading-tight">Studio Répétitions</h1>
+                <p className="text-[#9ca3af] text-[1.125rem]">Enregistrements bruts - Réservoir Rock</p>
             </div>
 
-            <div className="playlist-container">
+            <div className="max-w-[56rem] mx-auto px-[20px] py-[40px] flex flex-col gap-[16px]">
                 {morceaux.map((m) => (
-                    <div key={m.id} className="track-card">
-                        <div className="track-info">
-                            <span className="track-number">{m.id.toString().padStart(2, '0')}</span>
-                            <div className="track-text">
-                                <span className="track-name">{m.titre}</span>
-                                <small className="track-detail">{m.detail}</small>
+                    <div key={m.id} className="flex items-center gap-[24px] bg-[#1f2937] p-[16px] rounded-[0.5rem] transition-colors duration-200 hover:bg-[#111827]">
+                        <div className="flex items-center gap-[16px] flex-1">
+                            <span className="text-[1.5rem] font-[900] text-primary min-w-[40px]">{m.id.toString().padStart(2, '0')}</span>
+                            <div className="flex flex-col">
+                                <span className="text-white font-bold">{m.titre}</span>
+                                <small className="text-[#9ca3af] text-[0.75rem]">{m.detail}</small>
                             </div>
                         </div>
-                        <div className="audio-player-wrapper">
-                            <audio controls src={m.url}>
+                        <div className="w-full max-w-[320px]">
+                            <audio controls src={m.url} className="w-full h-[32px]">
                                 Votre navigateur ne supporte pas l'élément audio.
                             </audio>
                         </div>

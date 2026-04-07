@@ -24,70 +24,44 @@ function Header() {
 
 
 
+    const navLinkClass = ({ isActive }) =>
+        `text-[0.95rem] font-[700] uppercase no-underline tracking-[1px] transition-colors duration-300 ${isActive ? 'text-white' : 'text-[#888888] hover:text-white'
+        }`;
+
+    const authLinkClass = "bg-transparent text-black text-[0.65rem] font-[900] uppercase no-underline tracking-[1px] transition-colors duration-300 hover:text-[#666666]";
+
     return (
-
-        <header>
-
-            <Link to="/" className="logo-link">
-
+        <header className="fixed top-0 left-0 z-[1000] w-full flex justify-start items-center px-[40px] bg-black border-b-2 border-[#222] h-[80px] box-border">
+            <Link to="/" className="flex items-center no-underline w-[150px] shrink-0">
                 <img
-
                     src="/images/logo_rr.png"
-
                     alt="Réservoir Rock Logo"
-
-                    className="logo-image"
-
+                    className="w-[80px] h-auto transition-transform duration-200 hover:scale-105"
                 />
-
             </Link>
 
-
-
-            <nav>
-
-                <NavLink to="/legroupe">Le groupe</NavLink>
-
-                <NavLink to="/repetition">Répétitions</NavLink>
-
-                <NavLink to="/videos">Vidéos</NavLink>
-
-                <NavLink to="/concerts">Concerts</NavLink>
-
-
-
-                {/* Le Dashboard ne s'affiche que si on est connecté */}
-
-                {isAuthenticated && <NavLink to="/dashboard">Admin</NavLink>}
-
+            <nav className="flex gap-[35px] ml-[30px]">
+                <NavLink to="/legroupe" className={navLinkClass}>Le groupe</NavLink>
+                <NavLink to="/repetition" className={navLinkClass}>Répétitions</NavLink>
+                <NavLink to="/videos" className={navLinkClass}>Vidéos</NavLink>
+                <NavLink to="/concerts" className={navLinkClass}>Concerts</NavLink>
+                {isAuthenticated && <NavLink to="/dashboard" className={navLinkClass}>Admin</NavLink>}
             </nav>
 
-
-
-            {isAuthenticated ? (
-
-                <div className="auth-zone">
-
-                    <span>{user?.firstname}</span>
-
-                    <button onClick={handleLogout}>Déconnexion</button>
-
-                </div>
-
-            ) : (
-
-                <div className="auth-zone">
-
-                    <Link to="/login">Connexion</Link>
-
-                    <Link to="/register">S'inscrire</Link>
-
-                </div>
-
-            )}
-
+            <div className="flex items-center bg-white px-[15px] py-[6px] ml-auto gap-[15px] whitespace-nowrap shrink-0">
+                {isAuthenticated ? (
+                    <>
+                        <span className="text-black text-[0.65rem] font-[900] uppercase">{user?.firstname}</span>
+                        <button onClick={handleLogout} className={`${authLinkClass} cursor-pointer border-none font-black`}>Déconnexion</button>
+                    </>
+                ) : (
+                    <>
+                        <Link to="/login" className={authLinkClass}>Connexion</Link>
+                        <Link to="/register" className={authLinkClass}>S'inscrire</Link>
+                    </>
+                )}
+            </div>
         </header>
-
     );
 
 }
