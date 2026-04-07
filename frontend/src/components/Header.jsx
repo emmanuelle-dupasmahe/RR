@@ -10,6 +10,7 @@ function Header() {
 
     const { user, isAuthenticated, logout } = useAuth();
 
+
     const navigate = useNavigate();
 
 
@@ -45,7 +46,8 @@ function Header() {
                 <NavLink to="/repetition" className={navLinkClass}>Répétitions</NavLink>
                 <NavLink to="/videos" className={navLinkClass}>Vidéos</NavLink>
                 <NavLink to="/concerts" className={navLinkClass}>Concerts</NavLink>
-                {isAuthenticated && <NavLink to="/dashboard" className={navLinkClass}>Admin</NavLink>}
+                <NavLink to="/livredor" className={navLinkClass}>Livre d'or</NavLink>
+                {isAuthenticated && user?.role === 'admin' && <NavLink to="/dashboard" className={navLinkClass}>Admin</NavLink>}
             </nav>
 
             <div className="flex items-center bg-white px-[15px] py-[6px] ml-auto gap-[15px] whitespace-nowrap shrink-0">

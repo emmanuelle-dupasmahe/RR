@@ -11,7 +11,7 @@ const pool = mysql.createPool({
 });
 // Fonction utilitaire pour les requêtes
 export async function query(sql, params = []) {
-    const [results] = await pool.execute(sql, params);
+    const [results] = await pool.query(sql, params);
     return results;
 }
 // Test de connexion

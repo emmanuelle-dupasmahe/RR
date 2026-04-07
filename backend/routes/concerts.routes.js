@@ -1,6 +1,7 @@
 // routes/concerts.routes.js
 import express from 'express';
 import { query } from '../config/db.js';
+import authMiddleware from '../middlewares/auth.middleware.js';
 
 const router = express.Router();
 
@@ -16,9 +17,9 @@ router.get('/', async (req, res) => {
     }
 });
 // Ajouter un concert
-router.post('/', async (req, res) => {
+router.post('/', authMiddleware, async (req, res) => {
     const { titre, date_concert, heure, lieu } = req.body;
-    
+
     try {
         const sql = 'INSERT INTO concerts (titre, date_concert, heure, lieu) VALUES (?, ?, ?, ?)';
         await query(sql, [titre, date_concert, heure, lieu]);
@@ -29,7 +30,7 @@ router.post('/', async (req, res) => {
     }
 });
 // Supprimer un concert
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', authMiddleware, async (req, res) => {
     try {
         const { id } = req.params;
         await query('DELETE FROM concerts WHERE id = ?', [id]);

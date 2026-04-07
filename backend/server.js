@@ -5,6 +5,8 @@ import cors from 'cors';
 import { testConnection } from './config/db.js';
 import authRoutes from './routes/auth.routes.js';
 import concertRoutes from './routes/concerts.routes.js';
+import repetitionRoutes from './routes/repetitions.routes.js';
+import livredorRoutes from './routes/livredor.routes.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -36,6 +38,8 @@ GET  /api/auth/me
 */
 app.use('/api/auth', authRoutes);
 app.use('/api/concerts', concertRoutes);
+app.use('/api/repetitions', repetitionRoutes);
+app.use('/api/livredor', livredorRoutes);
 // 404
 app.use((req, res) => res.status(404).json({ error: 'Route non trouvée' }));
 

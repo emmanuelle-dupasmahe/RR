@@ -2,26 +2,41 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth.js';
 
 function Dashboard() {
-    const { user } = useAuth();
+    const { user, token } = useAuth();
     const [concerts, setConcerts] = useState([]);
     const [formData, setFormData] = useState({ titre: '', date_concert: '', heure: '', lieu: '' });
+    const [repetitions, setRepetitions] = useState([]);
+    const [repFormData, setRepFormData] = useState({ titre: '', detail: '', url: '' });
+
+    //pour charger les répetitions
+    const fetchRepetitions = async () => {
+        try {
+            const res = await fetch('http://localhost:5000/api/repetitions');
+            const data = await res.json();
+            setRepetitions(Array.isArray(data) ? data : []);
+        } catch (err) { console.error(err); }
+    };
+
 
     // Charger les concerts au démarrage et après chaque action
     const fetchConcerts = async () => {
         try {
             const res = await fetch('http://localhost:5000/api/concerts');
             const data = await res.json();
-            setConcerts(data);
+            setConcerts(Array.isArray(data) ? data : []);
         } catch (err) { console.error(err); }
     };
 
-    useEffect(() => { fetchConcerts(); }, []);
+    useEffect(() => { fetchConcerts(); fetchRepetitions(); }, []);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         const response = await fetch('http://localhost:5000/api/concerts', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
             body: JSON.stringify(formData)
         });
         if (response.ok) {
@@ -32,11 +47,43 @@ function Dashboard() {
 
     const handleDelete = async (id) => {
         if (window.confirm("Supprimer cette date ?")) {
-            await fetch(`http://localhost:5000/api/concerts/${id}`, { method: 'DELETE' });
+            await fetch(`http://localhost:5000/api/concerts/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
             fetchConcerts(); // On rafraîchit la liste
         }
     };
+    const handleRepSubmit = async (e) => {
+        e.preventDefault();
+        const response = await fetch('http://localhost:5000/api/repetitions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(repFormData)
+        });
+        if (response.ok) {
+            setRepFormData({ titre: '', detail: '', url: '' });
+            fetchRepetitions();
+        }
+    };
 
+    // Fonction pour supprimer une répétition
+    const handleRepDelete = async (id) => {
+        if (window.confirm("Supprimer ce morceau ?")) {
+            await fetch(`http://localhost:5000/api/repetitions/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            fetchRepetitions();
+        }
+    };
     return (
         <div className="mt-[100px] max-w-[900px] mx-auto px-[20px] pb-[40px] text-white">
             <div className="text-center py-[48px]">
@@ -78,7 +125,68 @@ function Dashboard() {
                     ))}
                 </div>
             </div>
+            {/* --- SECTION RÉPÉTITIONS --- */}
+            <div className="border-t border-[#333] pt-[40px] mt-[40px]">
+                <h1 className="text-[3rem] font-[900] uppercase text-white leading-tight text-center mb-[40px]">STUDIO RÉPÈTES</h1>
+
+                {/* FORMULAIRE D'AJOUT RÉPÉTITION */}
+                <div className="bg-[#111] border border-[#333] p-[30px] mb-[30px] rounded-[4px]">
+                    <h2 className="text-primary uppercase mt-0 mb-[20px] font-bold text-xl">Ajouter un Morceau</h2>
+                    <form onSubmit={handleRepSubmit} className="space-y-[10px]">
+                        <input
+                            type="text"
+                            placeholder="TITRE DU MORCEAU (ex: ATOMIC CITY - U2)"
+                            className="w-full p-[12px] bg-[#222] border border-[#444] text-white focus:outline-none focus:border-primary"
+                            value={repFormData.titre}
+                            onChange={(e) => setRepFormData({ ...repFormData, titre: e.target.value })}
+                            required
+                        />
+                        <input
+                            type="text"
+                            placeholder="DÉTAIL (ex: Répète du 12 Février 2026)"
+                            className="w-full p-[12px] bg-[#222] border border-[#444] text-white focus:outline-none focus:border-primary"
+                            value={repFormData.detail}
+                            onChange={(e) => setRepFormData({ ...repFormData, detail: e.target.value })}
+                            required
+                        />
+                        <input
+                            type="text"
+                            placeholder="CHEMIN DU FICHIER AUDIO (ex: /audio/mon_morceau.mp3)"
+                            className="w-full p-[12px] bg-[#222] border border-[#444] text-[#9ca3af] focus:outline-none focus:border-primary"
+                            value={repFormData.url}
+                            onChange={(e) => setRepFormData({ ...repFormData, url: e.target.value })}
+                            required
+                        />
+                        <button type="submit" className="bg-primary text-white border-none p-[15px] font-bold uppercase cursor-pointer w-full transition-colors hover:bg-[#b8151b]">
+                            Ajouter le morceau
+                        </button>
+                    </form>
+                </div>
+
+                {/* LISTE DES RÉPÉTITIONS EXISTANTES */}
+                <div className="bg-[#111] border border-[#333] p-[30px] mb-[30px] rounded-[4px]">
+                    <h2 className="text-primary uppercase mt-0 font-bold text-xl">Morceaux en ligne</h2>
+                    <div className="mt-[20px] space-y-[15px]">
+                        {repetitions.map(r => (
+                            <div key={r.id} className="flex justify-between items-center py-[15px] border-b border-[#222]">
+                                <div className="flex-1">
+                                    <span className="text-white font-bold block">{r.titre}</span>
+                                    <span className="text-[12px] text-[#666]">{r.detail}</span>
+                                    <p className="text-[10px] text-primary italic truncate max-w-[300px]">{r.url}</p>
+                                </div>
+                                <button
+                                    onClick={() => handleRepDelete(r.id)}
+                                    className="bg-transparent border border-[#444] text-[#666] px-[10px] py-[5px] cursor-pointer text-[10px] hover:text-red-600 transition-colors ml-4"
+                                >
+                                    SUPPRIMER
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
         </div>
+
     );
 }
 

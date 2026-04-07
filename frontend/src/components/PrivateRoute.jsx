@@ -1,8 +1,8 @@
 // components/PrivateRoute.jsx
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth.js';
-function PrivateRoute({ children }) {
-    const { isAuthenticated, loading } = useAuth();
+function PrivateRoute({ children, adminOnly = false }) {
+    const { user, isAuthenticated, loading } = useAuth();
     const location = useLocation();
     if (loading) {
         return (
@@ -16,6 +16,11 @@ function PrivateRoute({ children }) {
     if (!isAuthenticated) {
         return <Navigate to="/login" state={{ from: location }} replace />;
     }
+
+    if (adminOnly && user?.role !== 'admin') {
+        return <Navigate to="/" replace />;
+    }
+
     return children;
 }
 export default PrivateRoute;
