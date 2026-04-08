@@ -6,18 +6,33 @@ function Dashboard() {
     const [concerts, setConcerts] = useState([]);
     const [concertPages, setConcertPages] = useState({ current: 1, total: 1 });
     const [formData, setFormData] = useState({ titre: '', date_concert: '', heure: '', lieu: '' });
+    const [editingConcert, setEditingConcert] = useState(null);
 
     const [repetitions, setRepetitions] = useState([]);
     const [repPages, setRepPages] = useState({ current: 1, total: 1 });
     const [repFormData, setRepFormData] = useState({ titre: '', detail: '', url: '' });
     const [repFile, setRepFile] = useState(null);
+    const [editingRep, setEditingRep] = useState(null);
 
     const [videos, setVideos] = useState([]);
     const [videoPages, setVideoPages] = useState({ current: 1, total: 1 });
     const [videoFormData, setVideoFormData] = useState({ titre: '', description: '', url_youtube: '' });
     const [videoFile, setVideoFile] = useState(null);
+    const [editingVideo, setEditingVideo] = useState(null);
 
     const [tourTitle, setTourTitle] = useState('');
+
+    const [groupMembers, setGroupMembers] = useState([]);
+    const [editingMember, setEditingMember] = useState(null);
+    const [groupTexts, setGroupTexts] = useState({
+        group_slogan: '',
+        group_announce: '',
+        group_history_1: '',
+        group_history_2: ''
+    });
+    const [newMember, setNewMember] = useState({ nom: '', instrument: '', photo_url: '', ordre_affichage: 0 });
+
+    // --- LOGIQUE FETCH ---
 
     const fetchRepetitions = async (page = 1) => {
         try {
@@ -53,8 +68,18 @@ function Dashboard() {
         fetch('http://localhost:5000/api/settings/tour_title')
             .then(res => res.json())
             .then(data => setTourTitle(data.value || ''));
+        // Récupérer les membres
+        fetch('http://localhost:5000/api/membres')
+            .then(res => res.json())
+            .then(setGroupMembers);
+
+        // Récupérer les textes de Legroupe
+        fetch('http://localhost:5000/api/groupesettings')
+            .then(res => res.json())
+            .then(setGroupTexts);
     }, []);
 
+    // --- HANDLERS ---
     const handleSubmit = async (e) => {
         e.preventDefault();
         const response = await fetch('http://localhost:5000/api/concerts', {
@@ -67,24 +92,110 @@ function Dashboard() {
         });
         if (response.ok) {
             setFormData({ titre: '', date_concert: '', heure: '', lieu: '' });
-            fetchConcerts(); // On rafraîchit la liste
+            fetchConcerts();
+            alert('Concert publié !');
         } else {
             const errorData = await response.json();
-            alert(`Erreur : ${errorData.error}`);
+            alert(`Erreur: ${errorData.error || "Échec de la publication"}`);
         }
     };
 
     const handleDelete = async (id) => {
-        if (window.confirm("Supprimer cette date ?")) {
-            await fetch(`http://localhost:5000/api/concerts/${id}`, {
+        if (!window.confirm("Supprimer cette date ?")) return;
+        const res = await fetch(`http://localhost:5000/api/concerts/${id}`, {
                 method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
+                headers: { 'Authorization': `Bearer ${token}` }
             });
-            fetchConcerts(); // On rafraîchit la liste
+        if (res.ok) {
+            fetchConcerts();
+            alert('Date supprimée');
+        } else {
+            alert('Erreur lors de la suppression');
         }
     };
+
+    const handleUpdateConcert = async (concert) => {
+        // Préparation des données pour MySQL (nettoyage des formats)
+        const payload = {
+            titre: concert.titre,
+            // On ne garde que la partie YYYY-MM-DD si c'est une date ISO
+            date_concert: concert.date_concert.includes('T') ? concert.date_concert.split('T')[0] : concert.date_concert,
+            // On s'assure d'envoyer l'heure au format HH:mm
+            heure: concert.heure ? concert.heure.substring(0, 5) : '',
+            lieu: concert.lieu
+        };
+
+        console.log("Données envoyées :", payload);
+        try {
+            const res = await fetch(`http://localhost:5000/api/concerts/${concert.id}`, {
+                method: 'PUT', // On utilise PUT pour la mise à jour
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (res.ok) {
+                setEditingConcert(null); // On ferme le mode édition
+                fetchConcerts(); // On rafraîchit la liste
+                alert('Concert mis à jour avec succès !');
+            } else {
+                const errorData = await res.json();
+                alert(`Erreur: ${errorData.error || 'Impossible de mettre à jour'}`);
+            }
+        } catch (err) {
+            console.error("Erreur update concert", err);
+            alert("Erreur réseau lors de la mise à jour");
+        }
+    };
+
+    const handleUpdateRep = async (rep) => {
+        try {
+            const res = await fetch(`http://localhost:5000/api/repetitions/${rep.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ titre: rep.titre, detail: rep.detail, url: rep.url })
+            });
+            if (res.ok) {
+                setEditingRep(null);
+                fetchRepetitions();
+                alert('Morceau mis à jour');
+            }
+        } catch (err) { console.error(err); }
+    };
+
+    const handleUpdateVideo = async (video) => {
+        try {
+            const res = await fetch(`http://localhost:5000/api/videos/${video.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ titre: video.titre, description: video.description, url_youtube: video.url_youtube })
+            });
+            if (res.ok) {
+                setEditingVideo(null);
+                fetchVideos();
+                alert('Vidéo mise à jour');
+            }
+        } catch (err) { console.error(err); }
+    };
+
+    const handleUpdateMember = async (member) => {
+        try {
+            const res = await fetch(`http://localhost:5000/api/membres/${member.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify(member)
+            });
+            if (res.ok) {
+                setEditingMember(null);
+                const updated = await fetch('http://localhost:5000/api/membres').then(r => r.json());
+                setGroupMembers(updated);
+                alert('Musicien mis à jour');
+            }
+        } catch (err) { console.error(err); }
+    };
+
     const handleRepSubmit = async (e) => {
         e.preventDefault();
         const data = new FormData();
@@ -95,9 +206,7 @@ function Dashboard() {
 
         const response = await fetch('http://localhost:5000/api/repetitions', {
             method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`
-            },
+            headers: { 'Authorization': `Bearer ${token}` },
             body: data
         });
         if (response.ok) {
@@ -108,14 +217,65 @@ function Dashboard() {
         }
     };
 
-    // Fonction pour supprimer une répétition
+    // Mettre à jour un texte (Slogan, etc.)
+    const handleUpdateGroupText = async (key, value) => {
+        try {
+            await fetch('http://localhost:5000/api/groupesettings', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ key_name: key, value_text: value })
+            });
+        } catch (err) {
+            console.error("Erreur de mise à jour du texte");
+        }
+    };
+
+    // Ajouter un nouveau membre
+    const handleAddMember = async (e) => {
+        e.preventDefault();
+        const res = await fetch('http://localhost:5000/api/membres', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(newMember)
+        });
+        if (res.ok) {
+            // Rafraîchir la liste et vider le formulaire
+            const updated = await fetch('http://localhost:5000/api/membres').then(r => r.json());
+            setGroupMembers(updated);
+            setNewMember({ nom: '', instrument: '', photo_url: '', ordre_affichage: 0 });
+        }
+    };
+
+    // Supprimer un nouveau membre
+    const handleDeleteMember = async (id) => {
+        if (!window.confirm("Supprimer ce membre du groupe ?")) return;
+
+        const res = await fetch(`http://localhost:5000/api/membres/${id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        // Rafraîchir la liste
+        if (res.ok) {
+            setGroupMembers(groupMembers.filter(m => m.id !== id));
+            alert('Membre supprimé');
+        } else {
+            alert('Erreur lors de la suppression');
+        }
+    };
+
+
+
     const handleRepDelete = async (id) => {
         if (window.confirm("Supprimer ce morceau ?")) {
             await fetch(`http://localhost:5000/api/repetitions/${id}`, {
                 method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
+                headers: { 'Authorization': `Bearer ${token}` }
             });
             fetchRepetitions();
         }
@@ -144,9 +304,7 @@ function Dashboard() {
 
         const response = await fetch('http://localhost:5000/api/videos', {
             method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`
-            },
+            headers: { 'Authorization': `Bearer ${token}` },
             body: data
         });
         if (response.ok) {
@@ -167,216 +325,446 @@ function Dashboard() {
         }
     };
 
+    // --- COMPOSANTS  ---
     const Pagination = ({ pages, onPageChange }) => (
         pages.total > 1 && (
-            <div className="flex justify-center gap-2 mt-4">
-                <button disabled={pages.current === 1} onClick={() => onPageChange(pages.current - 1)} className="px-3 py-1 bg-[#222] disabled:opacity-50 text-xs uppercase font-bold border border-[#444]">Précédent</button>
-                <span className="text-xs self-center">Page {pages.current} / {pages.total}</span>
-                <button disabled={pages.current === pages.total} onClick={() => onPageChange(pages.current + 1)} className="px-3 py-1 bg-[#222] disabled:opacity-50 text-xs uppercase font-bold border border-[#444]">Suivant</button>
+            <div className="flex justify-center gap-4 mt-8">
+                <button
+                    disabled={pages.current === 1}
+                    onClick={() => onPageChange(pages.current - 1)}
+                    className="px-4 py-2 bg-black text-white text-[10px] uppercase font-black border border-white/10 hover:border-primary disabled:opacity-30 transition-all cursor-pointer"
+                >
+                    Précédent
+                </button>
+                <span className="text-[10px] font-bold self-center tracking-widest opacity-50">PAGE {pages.current} / {pages.total}</span>
+                <button
+                    disabled={pages.current === pages.total}
+                    onClick={() => onPageChange(pages.current + 1)}
+                    className="px-4 py-2 bg-black text-white text-[10px] uppercase font-black border border-white/10 hover:border-primary disabled:opacity-30 transition-all cursor-pointer"
+                >
+                    Suivant
+                </button>
             </div>
         )
     );
 
+    const SectionTitle = ({ children, subtitle }) => (
+        <div className="mb-10">
+            <h2 className="text-white text-2xl md:text-3xl font-[900] uppercase tracking-tighter italic">
+                {children} <span className="text-primary">.</span>
+            </h2>
+            {subtitle && <p className="text-primary font-black tracking-[4px] uppercase text-[0.65rem] mt-1 opacity-80">{subtitle}</p>}
+        </div>
+    );
+
+    const inputClass = "w-full p-4 bg-[#0a0a0a] border border-white/5 text-white focus:outline-none focus:border-primary/50 placeholder:text-white/20 transition-all rounded-lg text-sm font-medium";
+    const btnClass = "bg-primary text-white border-none p-4 font-black uppercase tracking-widest cursor-pointer w-full transition-all hover:bg-white hover:text-black rounded-lg shadow-lg active:scale-[0.98]";
+
     return (
-        <div className="mt-[100px] max-w-[900px] mx-auto px-[20px] pb-[40px] text-white">
-            <div className="text-center py-[48px]">
-                <h1 className="text-[3rem] font-[900] uppercase text-primary leading-tight">ADMINISTRATION</h1>
+        <div className="mt-[80px] min-h-screen bg-black text-white pb-20">
+            {/* HEADER DASHBOARD */}
+            <div className="text-center py-16 bg-gradient-to-b from-[#111] to-black px-4 mb-12 border-b border-white/5">
+                <h1 className="text-[3rem] md:text-[3.5rem] font-[900] uppercase mb-[12px] text-white leading-tight tracking-tighter">
+                    BackStage
+                </h1>
+                <p className="text-primary font-black tracking-[5px] uppercase text-sm">Control Panel // Admin Only</p>
             </div>
 
-            {/* RÉGLAGES GÉNÉRAUX */}
-            <div className="bg-[#111] border border-[#333] p-[30px] mb-[30px] rounded-[4px]">
-                <h2 className="text-primary uppercase mt-0 mb-[20px] font-bold text-xl">Nom de la tournée</h2>
-                <form onSubmit={handleUpdateTitle} className="flex gap-[10px]">
-                    <input
-                        type="text"
-                        className="flex-1 p-[12px] bg-[#222] border border-[#444] text-white focus:outline-none focus:border-primary uppercase font-bold"
-                        value={tourTitle}
-                        onChange={(e) => setTourTitle(e.target.value)}
-                        placeholder="ex: TOURNÉE 2026"
-                        required
-                    />
-                    <button type="submit" className="bg-primary text-white border-none px-[25px] font-bold uppercase cursor-pointer hover:bg-[#b8151b] transition-colors">
-                        Enregistrer
-                    </button>
-                </form>
-            </div>
+            <div className="max-w-[1000px] mx-auto px-6 space-y-24">
 
-            {/* FORMULAIRE D'AJOUT */}
-            <div className="bg-[#111] border border-[#333] p-[30px] mb-[30px] rounded-[4px]">
-                <h2 className="text-primary uppercase mt-0 mb-[20px] font-bold text-xl">Ajouter un Concert</h2>
-                <form onSubmit={handleSubmit} className="space-y-[10px]">
-                    <input type="text" placeholder="VILLE" className="w-full p-[12px] bg-[#222] border border-[#444] text-white focus:outline-none focus:border-primary" value={formData.titre} onChange={(e) => setFormData({ ...formData, titre: e.target.value.toUpperCase() })} required />
-                    <div className="grid grid-cols-2 gap-[10px]">
-                        <input type="date" className="w-full p-[12px] bg-[#222] border border-[#444] text-white focus:outline-none focus:border-primary" value={formData.date_concert} onChange={(e) => setFormData({ ...formData, date_concert: e.target.value })} required />
-                        <input type="time" className="w-full p-[12px] bg-[#222] border border-[#444] text-white focus:outline-none focus:border-primary" value={formData.heure} onChange={(e) => setFormData({ ...formData, heure: e.target.value })} required />
-                    </div>
-                    <input type="text" placeholder="LIEU" className="w-full p-[12px] bg-[#222] border border-[#444] text-white focus:outline-none focus:border-primary" value={formData.lieu} onChange={(e) => setFormData({ ...formData, lieu: e.target.value })} required />
-                    <button type="submit" className="bg-primary text-white border-none p-[15px] font-bold uppercase cursor-pointer w-full transition-colors hover:bg-[#b8151b]">Publier la date</button>
-                </form>
-            </div>
-
-            {/* LISTE DES CONCERTS EXISTANTS */}
-            <div className="bg-[#111] border border-[#333] p-[30px] mb-[30px] rounded-[4px]">
-                <h2 className="text-primary uppercase mt-0 font-bold text-xl">Dates programmées</h2>
-                <div className="mt-[20px] space-y-[15px]">
-                    {concerts.map(c => (
-                        <div key={c.id} className="flex justify-between items-center py-[15px] border-b border-[#222]">
-                            <div>
-                                <span className="text-primary font-bold">{new Date(c.date_concert).toLocaleDateString('fr-FR')}</span>
-                                <span className="ml-[15px] font-bold">{c.titre}</span>
-                                <p className="text-[12px] text-[#666] m-0">{c.lieu}</p>
-                            </div>
-                            <button
-                                onClick={() => handleDelete(c.id)}
-                                className="bg-transparent border border-[#444] text-[#666] px-[10px] py-[5px] cursor-pointer text-[10px] hover:text-red-600 transition-colors"
-                            >
-                                SUPPRIMER
+                {/* RÉGLAGES GÉNÉRAUX */}
+                <section>
+                    <SectionTitle subtitle="Global Settings">Tournée en cours</SectionTitle>
+                    <div className="bg-[#0a0a0a] border border-white/5 p-8 rounded-2xl shadow-2xl">
+                        <form onSubmit={handleUpdateTitle} className="flex flex-col md:flex-row gap-4">
+                            <input
+                                type="text"
+                                className={inputClass}
+                                value={tourTitle}
+                                onChange={(e) => setTourTitle(e.target.value)}
+                                placeholder="ex: TOURNÉE 2026"
+                                required
+                            />
+                            <button type="submit" className="md:w-auto bg-white text-black px-8 py-4 font-black uppercase text-xs tracking-widest hover:bg-primary hover:text-white transition-all rounded-lg">
+                                Update
                             </button>
+                        </form>
+                    </div>
+                </section>
+
+
+                {/* SECTION CONCERTS */}
+                <section>
+                    <SectionTitle subtitle="Live Dates Management">Calendrier Concerts</SectionTitle>
+                    <div className="grid lg:grid-cols-2 gap-12">
+                        {/* Form */}
+                        <div className="bg-[#0a0a0a] border border-white/5 p-8 rounded-2xl">
+                            <h3 className="text-sm font-black uppercase tracking-widest mb-6 opacity-40">Ajouter une date</h3>
+                            <form onSubmit={handleSubmit} className="space-y-4">
+                                <input type="text" placeholder="VILLE" className={inputClass} value={formData.titre} onChange={(e) => setFormData({ ...formData, titre: e.target.value.toUpperCase() })} required />
+                                <div className="grid grid-cols-2 gap-4">
+                                    <input type="date" className={inputClass} value={formData.date_concert} onChange={(e) => setFormData({ ...formData, date_concert: e.target.value })} required />
+                                    <input type="time" className={inputClass} value={formData.heure} onChange={(e) => setFormData({ ...formData, heure: e.target.value })} required />
+                                </div>
+                                <input type="text" placeholder="LIEU (NOM DE LA SALLE)" className={inputClass} value={formData.lieu} onChange={(e) => setFormData({ ...formData, lieu: e.target.value })} required />
+                                <button type="submit" className={btnClass}>Publier la date</button>
+                            </form>
                         </div>
-                    ))}
-                    <Pagination pages={concertPages} onPageChange={fetchConcerts} />
-                </div>
-            </div>
-            {/* --- SECTION RÉPÉTITIONS --- */}
-            <div className="border-t border-[#333] pt-[40px] mt-[40px]">
-                <h1 className="text-[3rem] font-[900] uppercase text-white leading-tight text-center mb-[40px]">STUDIO RÉPÈTES</h1>
-
-                {/* FORMULAIRE D'AJOUT RÉPÉTITION */}
-                <div className="bg-[#111] border border-[#333] p-[30px] mb-[30px] rounded-[4px]">
-                    <h2 className="text-primary uppercase mt-0 mb-[20px] font-bold text-xl">Ajouter un Morceau</h2>
-                    <form onSubmit={handleRepSubmit} className="space-y-[10px]">
-                        <input
-                            type="text"
-                            placeholder="TITRE DU MORCEAU (ex: ATOMIC CITY - U2)"
-                            className="w-full p-[12px] bg-[#222] border border-[#444] text-white focus:outline-none focus:border-primary"
-                            value={repFormData.titre}
-                            onChange={(e) => setRepFormData({ ...repFormData, titre: e.target.value })}
-                            required
-                        />
-                        <input
-                            type="text"
-                            placeholder="DÉTAIL (ex: Répète du 12 Février 2026)"
-                            className="w-full p-[12px] bg-[#222] border border-[#444] text-white focus:outline-none focus:border-primary"
-                            value={repFormData.detail}
-                            onChange={(e) => setRepFormData({ ...repFormData, detail: e.target.value })}
-                            required
-                        />
-                        <input
-                            type="file"
-                            accept="audio/*"
-                            className="w-full p-[12px] bg-[#222] border border-[#444] text-[#9ca3af]"
-                            onChange={(e) => setRepFile(e.target.files[0])}
-                        />
-                        <input
-                            type="text"
-                            placeholder="CHEMIN DU FICHIER AUDIO (ex: /audio/mon_morceau.mp3)"
-                            className="w-full p-[12px] bg-[#222] border border-[#444] text-[#9ca3af] focus:outline-none focus:border-primary"
-                            value={repFormData.url}
-                            onChange={(e) => setRepFormData({ ...repFormData, url: e.target.value })}
-                            required={!repFile}
-                        />
-                        <button type="submit" className="bg-primary text-white border-none p-[15px] font-bold uppercase cursor-pointer w-full transition-colors hover:bg-[#b8151b]">
-                            Ajouter le morceau
-                        </button>
-                    </form>
-                </div>
-
-                {/* LISTE DES RÉPÉTITIONS EXISTANTES */}
-                <div className="bg-[#111] border border-[#333] p-[30px] mb-[30px] rounded-[4px]">
-                    <h2 className="text-primary uppercase mt-0 font-bold text-xl">Morceaux en ligne</h2>
-                    <div className="mt-[20px] space-y-[15px]">
-                        {repetitions.map(r => (
-                            <div key={r.id} className="flex justify-between items-center py-[15px] border-b border-[#222]">
-                                <div className="flex-1">
-                                    <span className="text-white font-bold block">{r.titre}</span>
-                                    <span className="text-[12px] text-[#666]">{r.detail}</span>
-                                    <p className="text-[10px] text-primary italic truncate max-w-[300px]">{r.url}</p>
+                        {/* List */}
+                        <div className="space-y-4">
+                            {concerts.map(c => (
+                                <div key={c.id} className="p-5 bg-[#0a0a0a] border border-white/5 rounded-xl">
+                                    {editingConcert === c.id ? (
+                                        /* --- MODE ÉDITION --- */
+                                        <div className="space-y-3">
+                                            <input
+                                                className={inputClass}
+                                                value={c.titre}
+                                                onChange={(e) => setConcerts(concerts.map(con => con.id === c.id ? { ...con, titre: e.target.value.toUpperCase() } : con))}
+                                            />
+                                            <div className="grid grid-cols-2 gap-2">
+                                                <input
+                                                    type="date" className={inputClass}
+                                                    value={c.date_concert.split('T')[0]}
+                                                    onChange={(e) => setConcerts(concerts.map(con => con.id === c.id ? { ...con, date_concert: e.target.value } : con))}
+                                                />
+                                                <input
+                                                    type="time" className={inputClass}
+                                                    value={c.heure ? c.heure.substring(0, 5) : ""}
+                                                    onChange={(e) => setConcerts(concerts.map(con =>
+                                                        con.id === c.id ? { ...con, heure: e.target.value } : con))}
+                                                />
+                                            </div>
+                                            <input
+                                                className={inputClass}
+                                                value={c.lieu}
+                                                onChange={(e) => setConcerts(concerts.map(con => con.id === c.id ? { ...con, lieu: e.target.value } : con))}
+                                            />
+                                            <div className="flex gap-2">
+                                                <button onClick={() => handleUpdateConcert(c)} className="bg-green-600 text-white text-[10px] font-black p-2 rounded uppercase flex-1">Sauvegarder</button>
+                                                <button onClick={() => setEditingConcert(null)} className="bg-white/10 text-white text-[10px] font-black p-2 rounded uppercase flex-1">Annuler</button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        /* --- MODE AFFICHAGE --- */
+                                        <div className="group flex justify-between items-center">
+                                            <div>
+                                                <span className="text-primary font-black text-xs tracking-tighter uppercase block mb-1">
+                                                    {new Date(c.date_concert).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}
+                                                </span>
+                                                <span className="text-lg font-bold uppercase tracking-tight">{c.titre}</span>
+                                                <p className="text-[11px] text-[#666] uppercase font-bold tracking-widest mt-1">{c.lieu}</p>
+                                            </div>
+                                            <div className="flex gap-4">
+                                                <button onClick={() => setEditingConcert(c.id)} className="text-white/50 hover:text-white transition-all text-[10px] font-black uppercase">Edit</button>
+                                                <button onClick={() => handleDelete(c.id)} className="text-[#444] hover:text-primary transition-all text-[10px] font-black uppercase">Delete</button>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
-                                {/* Ajout d'un petit lecteur pour vérifier l'upload */}
-                                <audio
-                                    src={r.url.startsWith('/uploads') ? `http://localhost:5000${r.url}` : r.url}
-                                    controls
-                                    className="h-8 w-40 md:w-48 ml-4"
+                            ))}
+                            <Pagination pages={concertPages} onPageChange={fetchConcerts} />
+                        </div>
+                    </div>
+                </section>
+
+                {/* SECTION RÉPÉTITIONS */}
+                <section className="pt-12 border-t border-white/5">
+                    <SectionTitle subtitle="Audio Archives">Studio & Répètes</SectionTitle>
+                    <div className="grid lg:grid-cols-2 gap-12">
+                        {/* Formulaire */}
+                        <div className="bg-[#0a0a0a] border border-white/5 p-8 rounded-2xl">
+                            <h3 className="text-sm font-black uppercase tracking-widest mb-6 opacity-40">Ajouter un morceau</h3>
+                            <form onSubmit={handleRepSubmit} className="space-y-4">
+                                <input
+                                    type="text"
+                                    placeholder="TITRE (ex: ATOMIC CITY)"
+                                    className={inputClass}
+                                    value={repFormData.titre}
+                                    onChange={(e) => setRepFormData({ ...repFormData, titre: e.target.value })}
+                                    required
                                 />
-                                <button
-                                    onClick={() => handleRepDelete(r.id)}
-                                    className="bg-transparent border border-[#444] text-[#666] px-[10px] py-[5px] cursor-pointer text-[10px] hover:text-red-600 transition-colors ml-4"
-                                >
-                                    SUPPRIMER
-                                </button>
-                            </div>
-                        ))}
-                        <Pagination pages={repPages} onPageChange={fetchRepetitions} />
-                    </div>
-                </div>
-            </div>
+                                <input
+                                    type="text"
+                                    placeholder="DÉTAIL (ex: Session Live 12.02)"
+                                    className={inputClass}
+                                    value={repFormData.detail}
+                                    onChange={(e) => setRepFormData({ ...repFormData, detail: e.target.value })}
+                                    required
+                                />
 
-            {/* --- SECTION VIDÉOS --- */}
-            <div className="border-t border-[#333] pt-[40px] mt-[40px]">
-                <h1 className="text-[3rem] font-[900] uppercase text-white leading-tight text-center mb-[40px]">GESTION VIDÉOS</h1>
+                                {/* Champ URL */}
+                                <input
+                                    type="text"
+                                    placeholder="URL AUDIO (ex: https://dropbox.com/mon-son.mp3)"
+                                    className={inputClass}
+                                    value={repFormData.url}
+                                    onChange={(e) => setRepFormData({ ...repFormData, url: e.target.value })}
+                                />
 
-                <div className="bg-[#111] border border-[#333] p-[30px] mb-[30px] rounded-[4px]">
-                    <h2 className="text-primary uppercase mt-0 mb-[20px] font-bold text-xl">Ajouter une Vidéo</h2>
-                    <form onSubmit={handleVideoSubmit} className="space-y-[10px]">
-                        <input
-                            type="text"
-                            placeholder="TITRE DE LA VIDÉO"
-                            className="w-full p-[12px] bg-[#222] border border-[#444] text-white focus:outline-none focus:border-primary"
-                            value={videoFormData.titre}
-                            onChange={(e) => setVideoFormData({ ...videoFormData, titre: e.target.value })}
-                            required
-                        />
-                        <input
-                            type="text"
-                            placeholder="DESCRIPTION / LIEU"
-                            className="w-full p-[12px] bg-[#222] border border-[#444] text-white focus:outline-none focus:border-primary"
-                            value={videoFormData.description}
-                            onChange={(e) => setVideoFormData({ ...videoFormData, description: e.target.value })}
-                        />
-                        <input
-                            type="text"
-                            placeholder="ID YOUTUBE (ex: UrrtAPj9Nzw)"
-                            className="w-full p-[12px] bg-[#222] border border-[#444] text-white focus:outline-none focus:border-primary"
-                            value={videoFormData.url_youtube}
-                            onChange={(e) => setVideoFormData({ ...videoFormData, url_youtube: e.target.value })}
-                        />
-                        <div className="text-xs text-[#666] italic">OU uploader un fichier :</div>
-                        <input
-                            type="file"
-                            accept="video/*"
-                            className="w-full p-[12px] bg-[#222] border border-[#444] text-[#9ca3af]"
-                            onChange={(e) => setVideoFile(e.target.files[0])}
-                        />
-                        <button type="submit" className="bg-primary text-white border-none p-[15px] font-bold uppercase cursor-pointer w-full transition-colors hover:bg-[#b8151b]">
-                            Ajouter la vidéo
-                        </button>
-                    </form>
-                </div>
+                                <div className="text-center text-[10px] font-black uppercase opacity-20 py-2">— OU —</div>
 
-                <div className="bg-[#111] border border-[#333] p-[30px] mb-[30px] rounded-[4px]">
-                    <h2 className="text-primary uppercase mt-0 font-bold text-xl">Vidéos en ligne</h2>
-                    <div className="mt-[20px] space-y-[15px]">
-                        {videos.map(v => (
-                            <div key={v.id} className="flex justify-between items-center py-[15px] border-b border-[#222]">
-                                <div className="flex-1">
-                                    <span className="text-white font-bold block">{v.titre}</span>
-                                    <span className="text-[12px] text-[#666]">{v.description}</span>
-                                    <p className="text-[10px] text-primary italic truncate max-w-[300px]">{v.url_youtube || v.file_path}</p>
+                                {/* Upload Fichier */}
+                                <div className="p-4 border-2 border-dashed border-white/5 rounded-lg text-center hover:border-primary/30 transition-all">
+                                    <input
+                                        type="file"
+                                        accept="audio/*"
+                                        className="hidden"
+                                        id="audio-upload"
+                                        onChange={(e) => {
+                                            const file = e.target.files[0];
+                                            if (file) {
+                                                setRepFile(file);
+                                                // Remplissage auto du titre si vide
+                                                if (!repFormData.titre) {
+                                                    const fileName = file.name.split('.').slice(0, -1).join('.');
+                                                    setRepFormData(prev => ({ ...prev, titre: fileName.toUpperCase() }));
+                                                }
+                                            }
+                                        }}
+                                    />
+                                    <label htmlFor="audio-upload" className="cursor-pointer text-[10px] font-black uppercase tracking-[2px] text-[#666] hover:text-white">
+                                        {repFile ? repFile.name : "Cliquez pour uploader un MP3"}
+                                    </label>
                                 </div>
-                                <button
-                                    onClick={() => handleVideoDelete(v.id)}
-                                    className="bg-transparent border border-[#444] text-[#666] px-[10px] py-[5px] cursor-pointer text-[10px] hover:text-red-600 transition-colors ml-4"
-                                >
-                                    SUPPRIMER
-                                </button>
-                            </div>
-                        ))}
-                        <Pagination pages={videoPages} onPageChange={fetchVideos} />
+
+                                <button type="submit" className={btnClass}>Ajouter au studio</button>
+                            </form>
+                        </div>
+
+                        {/* Liste */}
+                        <div className="space-y-4">
+                            {repetitions.map(r => (
+                                <div key={r.id} className="p-5 bg-[#0a0a0a] border border-white/5 rounded-xl hover:border-white/10 transition-all">
+                                    {editingRep === r.id ? (
+                                        <div className="space-y-2">
+                                            <input className={inputClass} value={r.titre} onChange={(e) => setRepetitions(repetitions.map(item => item.id === r.id ? {...item, titre: e.target.value} : item))} />
+                                            <input className={inputClass} value={r.detail} onChange={(e) => setRepetitions(repetitions.map(item => item.id === r.id ? {...item, detail: e.target.value} : item))} />
+                                            <div className="flex gap-2">
+                                                <button onClick={() => handleUpdateRep(r)} className="bg-green-600 text-[10px] font-black p-2 rounded flex-1">OK</button>
+                                                <button onClick={() => setEditingRep(null)} className="bg-white/10 text-[10px] font-black p-2 rounded flex-1">X</button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <div className="flex justify-between items-start mb-4">
+                                                <div>
+                                                    <span className="text-white font-bold block uppercase tracking-tight">{r.titre}</span>
+                                                    <span className="text-[11px] text-[#666] font-bold uppercase">{r.detail}</span>
+                                                </div>
+                                                <div className="flex gap-3">
+                                                    <button onClick={() => setEditingRep(r.id)} className="text-white/30 hover:text-white text-[10px] font-black uppercase">Edit</button>
+                                                    <button onClick={() => handleRepDelete(r.id)} className="text-[#444] hover:text-primary text-[10px] font-black uppercase">Delete</button>
+                                                </div>
+                                            </div>
+                                        </>
+                                    )}
+                                    <audio src={r.url.startsWith('/uploads') ? `http://localhost:5000${r.url}` : r.url} controls className="h-8 w-full opacity-40 hover:opacity-100 transition-all invert" />
+                                </div>
+                            ))}
+                            <Pagination pages={repPages} onPageChange={fetchRepetitions} />
+                        </div>
                     </div>
-                </div>
+                </section>
+
+                {/* SECTION VIDÉOS */}
+                <section className="pt-12 border-t border-white/5">
+                    <SectionTitle subtitle="Visual Content">Vidéo Management</SectionTitle>
+                    <div className="grid lg:grid-cols-2 gap-12">
+                        {/* Formulaire */}
+                        <div className="bg-[#0a0a0a] border border-white/5 p-8 rounded-2xl">
+                            <h3 className="text-sm font-black uppercase tracking-widest mb-6 opacity-40">Nouvelle Vidéo</h3>
+                            <form onSubmit={handleVideoSubmit} className="space-y-4">
+                                <input
+                                    type="text"
+                                    placeholder="TITRE"
+                                    className={inputClass}
+                                    value={videoFormData.titre}
+                                    onChange={(e) => setVideoFormData({ ...videoFormData, titre: e.target.value })}
+                                    required
+                                />
+                                <input
+                                    type="text"
+                                    placeholder="DESCRIPTION / LIEU"
+                                    className={inputClass}
+                                    value={videoFormData.description}
+                                    onChange={(e) => setVideoFormData({ ...videoFormData, description: e.target.value })}
+                                />
+
+                                {/* Option 1: URL Youtube */}
+                                <input
+                                    type="text"
+                                    placeholder="ID YOUTUBE (ex: UrrtAPj9Nzw)"
+                                    className={inputClass}
+                                    value={videoFormData.url_youtube}
+                                    onChange={(e) => setVideoFormData({ ...videoFormData, url_youtube: e.target.value })}
+                                />
+
+                                <div className="text-center text-[10px] font-black uppercase opacity-20 py-2">— OU —</div>
+
+                                {/* Option 2: Upload Fichier Vidéo */}
+                                <div className="p-4 border-2 border-dashed border-white/5 rounded-lg text-center hover:border-primary/30 transition-all">
+                                    <input
+                                        type="file"
+                                        accept="video/*"
+                                        className="hidden"
+                                        id="video-upload"
+                                        onChange={(e) => setVideoFile(e.target.files[0])}
+                                    />
+                                    <label htmlFor="video-upload" className="cursor-pointer text-[10px] font-black uppercase tracking-[2px] text-[#666] hover:text-white">
+                                        {videoFile ? videoFile.name : "Uploader un fichier vidéo (MP4...)"}
+                                    </label>
+                                </div>
+
+                                <button type="submit" className={btnClass}>Publier la vidéo</button>
+                            </form>
+                        </div>
+
+                        {/* Liste des vidéos */}
+                        <div className="space-y-4">
+                            {videos.map(v => (
+                                <div key={v.id} className="flex justify-between items-center p-5 bg-[#0a0a0a] border border-white/5 rounded-xl">
+                                    {editingVideo === v.id ? (
+                                        <div className="flex-1 flex gap-2">
+                                            <input className={inputClass} value={v.titre} onChange={(e) => setVideos(videos.map(item => item.id === v.id ? {...item, titre: e.target.value} : item))} />
+                                            <button onClick={() => handleUpdateVideo(v)} className="bg-green-600 px-3 rounded font-black">OK</button>
+                                            <button onClick={() => setEditingVideo(null)} className="bg-white/10 px-3 rounded font-black text-xs">X</button>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <div>
+                                                <span className="text-white font-bold block uppercase tracking-tight">{v.titre}</span>
+                                                <span className="text-[11px] text-[#666] font-bold uppercase tracking-widest">
+                                                    {v.description} {v.url_youtube ? "(Youtube)" : "(Fichier)"}
+                                                </span>
+                                            </div>
+                                            <div className="flex gap-3">
+                                                <button onClick={() => setEditingVideo(v.id)} className="text-white/30 hover:text-white text-[10px] font-black uppercase">Edit</button>
+                                                <button onClick={() => handleVideoDelete(v.id)} className="text-[#444] hover:text-primary text-[10px] font-black uppercase tracking-widest">
+                                                    Delete
+                                                </button>
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
+                            ))}
+                            <Pagination pages={videoPages} onPageChange={fetchVideos} />
+                        </div>
+                    </div>
+                </section>
+                {/* --- SECTION LE GROUPE (Harmonisée) --- */}
+                <section className="pt-12 border-t border-white/5">
+                    <SectionTitle subtitle="Band Identity">Le Groupe & Biographie</SectionTitle>
+
+                    <div className="bg-[#0a0a0a] border border-white/5 p-8 rounded-2xl space-y-8">
+
+                        {/* Ligne : Annonce et Slogan */}
+                        <div className="grid md:grid-cols-2 gap-6">
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-primary block">Annonce (Tribute...)</label>
+                                <input
+                                    type="text"
+                                    className={inputClass}
+                                    value={groupTexts.group_announce}
+                                    onChange={(e) => setGroupTexts({ ...groupTexts, group_announce: e.target.value })}
+                                    onBlur={() => handleUpdateGroupText('group_announce', groupTexts.group_announce)}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-primary block">Slogan de la page</label>
+                                <input
+                                    type="text"
+                                    className={inputClass}
+                                    value={groupTexts.group_slogan}
+                                    onChange={(e) => setGroupTexts({ ...groupTexts, group_slogan: e.target.value })}
+                                    onBlur={() => handleUpdateGroupText('group_slogan', groupTexts.group_slogan)}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Ligne : Histoire (2 colonnes) */}
+                        <div className="grid md:grid-cols-2 gap-6">
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-primary block">Histoire (Colonne Gauche)</label>
+                                <textarea
+                                    className={`${inputClass} min-h-[150px] leading-relaxed`}
+                                    value={groupTexts.group_history_1}
+                                    onChange={(e) => setGroupTexts({ ...groupTexts, group_history_1: e.target.value })}
+                                    onBlur={() => handleUpdateGroupText('group_history_1', groupTexts.group_history_1)}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-primary block">Histoire (Colonne Droite)</label>
+                                <textarea
+                                    className={`${inputClass} min-h-[150px] leading-relaxed`}
+                                    value={groupTexts.group_history_2}
+                                    onChange={(e) => setGroupTexts({ ...groupTexts, group_history_2: e.target.value })}
+                                    onBlur={() => handleUpdateGroupText('group_history_2', groupTexts.group_history_2)}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                {/* --- SECTION MUSICIENS (Harmonisée) --- */}
+                <section className="pt-12 border-t border-white/5">
+                    <SectionTitle subtitle="Band Members">Gestion des Musiciens</SectionTitle>
+
+                    <div className="bg-[#0a0a0a] border border-white/5 p-8 rounded-2xl">
+                        {/* Formulaire d'ajout */}
+                        <form onSubmit={handleAddMember} className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-10 p-6 bg-white/5 rounded-xl border border-white/5">
+                            <input
+                                type="text" placeholder="Nom"
+                                className={inputClass}
+                                value={newMember.nom}
+                                onChange={(e) => setNewMember({ ...newMember, nom: e.target.value })}
+                                required
+                            />
+                            <input
+                                type="text" placeholder="Instrument"
+                                className={inputClass}
+                                value={newMember.instrument}
+                                onChange={(e) => setNewMember({ ...newMember, instrument: e.target.value })}
+                                required
+                            />
+                            <input
+                                type="text" placeholder="URL Photo"
+                                className={inputClass}
+                                value={newMember.photo_url}
+                                onChange={(e) => setNewMember({ ...newMember, photo_url: e.target.value })}
+                            />
+                            <button type="submit" className={btnClass}>Ajouter</button>
+                        </form>
+
+                        {/* Liste des membres */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                            {groupMembers.map(m => (
+                                <div key={m.id} className="relative p-5 bg-black border border-white/10 rounded-xl hover:border-white/30 transition-all">
+                                    {editingMember === m.id ? (
+                                        <div className="space-y-2">
+                                            <input className="w-full bg-transparent text-xs border-b border-white/20" value={m.nom} onChange={(e) => setGroupMembers(groupMembers.map(item => item.id === m.id ? {...item, nom: e.target.value} : item))} />
+                                            <div className="flex gap-2">
+                                                <button onClick={() => handleUpdateMember(m)} className="text-green-500 text-[10px] font-black uppercase">Save</button>
+                                                <button onClick={() => setEditingMember(null)} className="text-white/50 text-[10px] font-black uppercase">Cancel</button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <div className="absolute top-2 right-2 flex gap-2">
+                                                <button onClick={() => setEditingMember(m.id)} className="text-white/20 hover:text-white text-[10px]">✎</button>
+                                                <button onClick={() => handleDeleteMember(m.id)} className="text-white/20 hover:text-primary">✕</button>
+                                            </div>
+                                            <p className="text-white font-bold uppercase tracking-tight">{m.nom}</p>
+                                            <p className="text-primary text-[10px] font-black uppercase tracking-widest mt-1">{m.instrument}</p>
+                                        </>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
             </div>
         </div>
-
     );
 }
 

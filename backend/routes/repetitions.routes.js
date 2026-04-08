@@ -29,6 +29,9 @@ router.get('/', async (req, res) => {
 // Ajouter un morceau
 router.post('/', authMiddleware, upload.single('audio'), async (req, res) => {
     const { titre, detail, url } = req.body;
+    if (!titre) {
+        return res.status(400).json({ error: "Le titre est obligatoire" });
+    }
     let finalUrl = url;
     let fileName = null, fileSize = null, mimeType = null;
 
@@ -49,11 +52,31 @@ router.post('/', authMiddleware, upload.single('audio'), async (req, res) => {
     }
 });
 
+// Modifier un morceau
+router.put('/:id', authMiddleware, async (req, res) => {
+    const { id } = req.params;
+    const { titre, detail, url } = req.body;
+    try {
+        const sql = `
+            UPDATE repetitions 
+            SET titre = ?, detail = ?, url = ?
+            WHERE id = ?
+        `;
+        await query(sql, [titre, detail, url, id]);
+        res.json({ message: 'Morceau mis à jour' });
+    } catch (error) {
+        res.status(500).json({ error: 'Erreur lors de la modification' });
+    }
+});
+
 // Supprimer un morceau
 router.delete('/:id', authMiddleware, async (req, res) => {
     try {
         const { id } = req.params;
-        await query('DELETE FROM repetitions WHERE id = ?', [id]);
+        const result = await query('DELETE FROM repetitions WHERE id = ?', [id]);
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: "Morceau non trouvé" });
+        }
         res.json({ message: 'Morceau supprimé avec succès' });
     } catch (error) {
         res.status(500).json({ error: 'Erreur lors de la suppression du morceau' });

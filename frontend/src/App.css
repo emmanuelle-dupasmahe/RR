@@ -16,3 +16,24 @@
   filter: invert(1) brightness(2);
   /* Rend les icônes blanches pour qu'elles ressortent sur le rouge */
 }
+
+@keyframes shimmer {
+  0% { background-position: 200% center; }
+  100% { background-position: -200% center; }
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg, 
+    #ffffff 0%, 
+    #ffffff 40%, 
+    #e31b23 50%, 
+    #ffffff 60%, 
+    #ffffff 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 8s infinite linear;
+}
+

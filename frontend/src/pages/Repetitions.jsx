@@ -23,7 +23,7 @@ function Repetitions() {
     return (
         <div className="mt-[80px] min-h-[calc(100vh-82px)] bg-black">
             {/* EN-TÊTE */}
-            <div className="text-center py-[48px] border-b border-[#1f2937] bg-gradient-to-b from-[#111] to-black">
+            <div className="text-center py-[48px]  bg-gradient-to-b from-[#111] to-black">
                 <h1 className="text-[3rem]  md:text-[3.5rem] font-[900] uppercase mb-[12px] text-white leading-tight">
                     Studio Répétitions
                 </h1>

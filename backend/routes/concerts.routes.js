@@ -43,6 +43,38 @@ router.post('/', authMiddleware, async (req, res) => {
         res.status(500).json({ error: 'Impossible d\'ajouter le concert' });
     }
 });
+
+
+// Modifier un concert
+router.put('/:id', authMiddleware, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { titre, date_concert, heure, lieu } = req.body;
+
+        // Validation simple pour s'assurer que les champs requis sont présents
+        if (!titre || !date_concert || !heure || !lieu) {
+            return res.status(400).json({ error: 'Tous les champs sont obligatoires' });
+        }
+
+        const sql = `
+            UPDATE concerts 
+            SET titre = ?, date_concert = ?, heure = ?, lieu = ? 
+            WHERE id = ?
+        `;
+
+        const result = await query(sql, [titre, date_concert, heure, lieu, id]);
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Concert non trouvé' });
+        }
+
+        res.json({ message: 'Concert mis à jour avec succès' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Erreur lors de la modification' });
+    }
+});
+
 // Supprimer un concert
 router.delete('/:id', authMiddleware, async (req, res) => {
     try {

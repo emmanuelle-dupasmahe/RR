@@ -25,6 +25,9 @@ router.get('/', async (req, res) => {
 
 router.post('/', authMiddleware, upload.single('video'), async (req, res) => {
     const { titre, description, url_youtube } = req.body;
+    if (!titre) {
+        return res.status(400).json({ error: "Le titre de la vidéo est obligatoire" });
+    }
     let filePath = null, fileName = null, fileSize = null, mimeType = null;
 
     if (req.file) {
@@ -47,12 +50,33 @@ router.post('/', authMiddleware, upload.single('video'), async (req, res) => {
     }
 });
 
+// Modifier une vidéo
+router.put('/:id', authMiddleware, async (req, res) => {
+    const { id } = req.params;
+    const { titre, description, url_youtube } = req.body;
+    try {
+        const sql = `
+            UPDATE videos 
+            SET titre = ?, description = ?, url_youtube = ?
+            WHERE id = ?
+        `;
+        const result = await query(sql, [titre, description, url_youtube, id]);
+        if (result.affectedRows === 0) return res.status(404).json({ error: "Vidéo non trouvée" });
+        res.json({ message: 'Vidéo mise à jour' });
+    } catch (error) {
+        res.status(500).json({ error: 'Erreur lors de la modification' });
+    }
+});
+
 router.delete('/:id', authMiddleware, async (req, res) => {
     try {
         const { id } = req.params;
         if (req.user.role !== 'admin') return res.status(403).json({ error: 'Interdit' });
 
-        await query('DELETE FROM videos WHERE id = ?', [id]);
+        const result = await query('DELETE FROM videos WHERE id = ?', [id]);
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: "Vidéo non trouvée" });
+        }
         res.json({ message: 'Vidéo supprimée' });
     } catch (error) {
         res.status(500).json({ error: 'Erreur lors de la suppression' });

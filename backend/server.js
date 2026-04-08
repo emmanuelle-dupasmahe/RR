@@ -9,6 +9,8 @@ import repetitionRoutes from './routes/repetitions.routes.js';
 import livredorRoutes from './routes/livredor.routes.js';
 import settingsRoutes from './routes/settings.routes.js';
 import videoRoutes from './routes/videos.routes.js';
+import membresRoutes from './routes/membres.routes.js';
+import groupeSettingsRoutes from './routes/groupesettings.routes.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -45,6 +47,8 @@ app.use('/api/repetitions', repetitionRoutes);
 app.use('/api/livredor', livredorRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/videos', videoRoutes);
+app.use('/api/membres', membresRoutes);
+app.use('/api/groupesettings', groupeSettingsRoutes);
 // 404
 app.use((req, res) => res.status(404).json({ error: 'Route non trouvée' }));
 
