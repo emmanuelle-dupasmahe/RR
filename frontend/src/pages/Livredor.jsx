@@ -28,12 +28,6 @@ function Livredor() {
         e.preventDefault();
         if (!content.trim()) return;
 
-        console.log("État Auth au clic:", { isAuthenticated, hasToken: !!token });
-        if (!token) {
-            alert("Votre session a expiré ou vous n'êtes pas connecté.");
-            return;
-        }
-
         try {
             const res = await fetch('http://localhost:5000/api/livredor', {
                 method: 'POST',
@@ -46,118 +40,135 @@ function Livredor() {
 
             if (res.ok) {
                 setContent('');
-                if (page === 1) {
-                    fetchMessages();
-                } else {
-                    setPage(1); // Revenir à la page 1 pour voir son nouveau message
-                }
+                setPage(1);
+                fetchMessages();
             } else {
                 const errorData = await res.json();
                 alert(`Erreur: ${errorData.error || 'Impossible d\'envoyer le message'}`);
             }
         } catch (err) {
             console.error("Erreur lors de l'envoi du message:", err);
-            alert("Une erreur de connexion au serveur est survenue.");
         }
     };
 
     const handleDelete = async (id) => {
         if (!window.confirm("Voulez-vous supprimer ce message ?")) return;
-
         try {
             const res = await fetch(`http://localhost:5000/api/livredor/${id}`, {
                 method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
+                headers: { 'Authorization': `Bearer ${token}` }
             });
-
-            if (res.ok) {
-                fetchMessages();
-            } else {
-                const errorData = await res.json();
-                alert(`Erreur: ${errorData.error}`);
-            }
+            if (res.ok) fetchMessages();
         } catch (err) {
             console.error("Erreur lors de la suppression:", err);
         }
     };
 
     return (
-        <div className="mt-[80px] min-h-[calc(100vh-82px)] bg-dark-bg text-white">
-            <div className="text-center py-[48px] border-b border-[#1f2937]">
-                <h1 className="text-[3rem] font-[900] uppercase mb-[12px] text-white leading-tight">Livre d'or</h1>
-                <p className="text-[#9ca3af] text-[1.125rem]">Laissez-nous un message !</p>
+        <div className="mt-[80px] min-h-[calc(100vh-82px)] bg-black text-white">
+            {/* EN-TÊTE HARMONISÉ */}
+            <div className="text-center py-[48px] border-b border-[#1f2937] bg-gradient-to-b from-[#111] to-black">
+                <h1 className="text-[3rem] md:text-[3.5rem] font-[900] uppercase mb-[12px] text-white leading-tight tracking-tighter">
+                    Livre d'or
+                </h1>
+                <p className="text-primary font-black tracking-[5px] uppercase text-sm">
+                    Voice of the Fans
+                </p>
             </div>
 
-            <div className="max-w-[800px] mx-auto px-[20px] py-[40px]">
+            <div className="max-w-[800px] mx-auto px-[20px] py-[60px]">
+                
+                {/* FORMULAIRE STYLE STUDIO */}
                 {isAuthenticated ? (
-                    <form onSubmit={handleSubmit} className="mb-12 bg-[#111] p-6 border border-[#333] rounded-md">
-                        <h2 className="text-primary font-bold uppercase mb-4">Votre message :</h2>
-                        <textarea
-                            className="w-full p-4 bg-[#222] border border-[#444] text-white focus:outline-none focus:border-primary min-h-[120px]"
-                            placeholder={`Écrivez quelque chose, ${user.firstname}...`}
-                            value={content}
-                            onChange={(e) => setContent(e.target.value)}
-                            required
-                        />
-                        <button type="submit" className="mt-4 bg-primary px-8 py-3 font-bold uppercase hover:bg-[#b8151b] transition-colors">
-                            Envoyer
-                        </button>
+                    <form onSubmit={handleSubmit} className="mb-20 p-[2px] rounded-xl bg-gradient-to-r from-primary/40 to-black">
+                        <div className="bg-[#0a0a0a] p-6 rounded-xl">
+                            <h2 className="text-white font-black uppercase tracking-widest mb-4 flex items-center gap-2">
+                                <span className="w-2 h-2 bg-primary rounded-full animate-pulse"></span>
+                                Laisser une trace
+                            </h2>
+                            <textarea
+                                className="w-full p-4 bg-black border border-white/10 text-white focus:outline-none focus:border-primary/50 min-h-[120px] rounded-lg transition-all"
+                                placeholder={`Écrivez votre message, ${user.firstname}...`}
+                                value={content}
+                                onChange={(e) => setContent(e.target.value)}
+                                required
+                            />
+                            <div className="flex justify-end mt-4">
+                                <button type="submit" className="bg-primary text-white px-10 py-3 font-black uppercase tracking-widest hover:bg-white hover:text-black transition-all duration-300 rounded-sm text-sm">
+                                    Publier
+                                </button>
+                            </div>
+                        </div>
                     </form>
                 ) : (
-                    <p className="text-center bg-[#111] p-6 border border-[#333] mb-12 italic text-[#9ca3af]">
-                        Connectez-vous pour laisser un message.
-                    </p>
+                    <div className="mb-20 text-center p-8 border border-white/5 bg-[#111] rounded-xl italic text-[#666]">
+                        Connectez-vous pour rejoindre la discussion.
+                    </div>
                 )}
 
-                <div className="space-y-8">
+                {/* LISTE DES MESSAGES */}
+                <div className="space-y-6">
                     {loading ? (
-                        <p className="text-center text-[#666]">Chargement des messages...</p>
+                        <p className="text-center text-[#444] animate-pulse">Récupération des transmissions...</p>
                     ) : messages.length > 0 ? (
                         messages.map((msg) => (
-                            <div key={msg.id} className="border-l-4 border-primary bg-[#111] p-6">
-                                <div className="flex justify-between items-center mb-2">
-                                    <span className="font-bold text-white uppercase text-lg">{msg.firstname}</span>
-                                    <span className="text-[#666] text-sm">
-                                        {new Date(msg.created_at).toLocaleDateString('fr-FR')}
-                                    </span>
-                                </div>
-                                <p className="text-gray-300 italic">"{msg.content}"</p>
-                                {isAuthenticated && user?.role === 'admin' && (
-                                    <div className="mt-4 flex justify-end">
-                                        <button
-                                            onClick={() => handleDelete(msg.id)}
-                                            className="text-[10px] text-[#666] border border-[#444] px-2 py-1 hover:text-primary transition-colors uppercase font-bold cursor-pointer"
-                                        >
-                                            Supprimer
-                                        </button>
+                            <div key={msg.id} className="group relative p-[1px] rounded-xl bg-white/5 hover:bg-gradient-to-r hover:from-primary/30 hover:to-transparent transition-all duration-500">
+                                <div className="bg-black p-6 rounded-xl border border-white/5 transition-all group-hover:translate-x-1">
+                                    <div className="flex justify-between items-start mb-4">
+                                        <div>
+                                            <span className="block font-black text-primary uppercase tracking-tighter text-xl">
+                                                {msg.firstname}
+                                            </span>
+                                            <span className="text-[#444] text-[0.7rem] font-bold uppercase tracking-[2px]">
+                                                {new Date(msg.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })}
+                                            </span>
+                                        </div>
+                                        <div className="text-primary/20 group-hover:text-primary/40 transition-colors">
+                                            <svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor"><path d="M14.017 21L14.017 18C14.017 16.8954 14.9124 16 16.017 16H19.017C19.5693 16 20.017 15.5523 20.017 15V9C20.017 8.44772 19.5693 8 19.017 8H15.017C14.4647 8 14.017 7.55228 14.017 7V4H20.017C21.1216 4 22.017 4.89543 22.017 6V15C22.017 16.6569 20.6739 18 19.017 18H17.017L14.017 21ZM2.017 21L2.017 18C2.017 16.8954 2.91243 16 4.017 16H7.017C7.56928 16 8.017 15.5523 8.017 15V9C8.017 8.44772 7.56928 8 7.017 8H3.017C2.46472 8 2.017 7.55228 2.017 7V4H8.017C9.12157 4 10.017 4.89543 10.017 6V15C10.017 16.6569 8.67386 18 7.017 18H5.017L2.017 21Z"/></svg>
+                                        </div>
                                     </div>
-                                )}
+                                    
+                                    <p className="text-gray-400 leading-relaxed font-medium">
+                                        {msg.content}
+                                    </p>
+
+                                    {isAuthenticated && user?.role === 'admin' && (
+                                        <div className="mt-4 flex justify-end">
+                                            <button
+                                                onClick={() => handleDelete(msg.id)}
+                                                className="text-[9px] text-[#333] hover:text-primary border border-white/5 hover:border-primary/30 px-3 py-1 transition-all uppercase font-black tracking-widest cursor-pointer"
+                                            >
+                                                Supprimer Transmission
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         ))
                     ) : (
-                        <p className="text-center text-[#666]">Aucun message pour le moment.</p>
+                        <p className="text-center text-[#333] uppercase font-bold tracking-widest">Silence radio.</p>
                     )}
                 </div>
 
-                {/* PAGINATION */}
+                {/* PAGINATION HARMONISÉE */}
                 {totalPages > 1 && (
-                    <div className="mt-12 flex justify-center items-center gap-4">
+                    <div className="mt-16 flex justify-center items-center gap-6">
                         <button
                             disabled={page === 1}
                             onClick={() => setPage(prev => prev - 1)}
-                            className="px-4 py-2 bg-[#111] border border-[#333] hover:border-primary disabled:opacity-30 disabled:hover:border-[#333] transition-colors uppercase font-bold text-sm"
+                            className="w-12 h-12 flex items-center justify-center border border-white/10 hover:border-primary disabled:opacity-20 transition-all text-white bg-black rounded-full"
                         >
-                            Précédent
+                            ←
                         </button>
-                        <span className="text-[#666] font-bold">Page {page} sur {totalPages}</span>
+                        <span className="text-primary font-black text-sm uppercase tracking-[3px]">
+                             {page} / {totalPages}
+                        </span>
                         <button
                             disabled={page === totalPages}
                             onClick={() => setPage(prev => prev + 1)}
-                            className="px-4 py-2 bg-[#111] border border-[#333] hover:border-primary disabled:opacity-30 disabled:hover:border-[#333] transition-colors uppercase font-bold text-sm"
+                            className="w-12 h-12 flex items-center justify-center border border-white/10 hover:border-primary disabled:opacity-20 transition-all text-white bg-black rounded-full"
                         >
-                            Suivant
+                            →
                         </button>
                     </div>
                 )}

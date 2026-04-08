@@ -5,3 +5,14 @@
   --color-dark-bg: #121212;
   --font-sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
+
+/* Style personnalisé pour les lecteurs audio */
+.custom-audio::-webkit-media-controls-panel {
+  background-image: linear-gradient(to right, #e31b23, #000000) !important;
+}
+
+.custom-audio::-webkit-media-controls-play-button,
+.custom-audio::-webkit-media-controls-mute-button {
+  filter: invert(1) brightness(2);
+  /* Rend les icônes blanches pour qu'elles ressortent sur le rouge */
+}
