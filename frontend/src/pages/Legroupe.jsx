@@ -7,7 +7,8 @@ export default function Groupe() {
         group_slogan: '',
         group_announce: '',
         group_history_1: '',
-        group_history_2: ''
+        group_history_2: '',
+        group_title_history: ''
     });
 
     // 2. Récupération des données au chargement
@@ -27,12 +28,12 @@ export default function Groupe() {
 
     return (
         <div className="mt-[80px] min-h-[calc(100vh-82px)] bg-black text-white">
-            
+
             <div className="text-center pt-[48px] pb-[20px] bg-gradient-to-b from-[#111] to-black px-4">
                 <h1 className="text-[3rem] md:text-[3.5rem] font-[900] uppercase mb-[4px] text-white leading-tight tracking-tighter">
                     Le Groupe
                 </h1>
-                
+
                 <p className="text-primary font-black tracking-[5px] uppercase text-[0.7rem] md:text-xs mb-8">
                     Origin: Six-Fours-les-Plages // Established 2011
                 </p>
@@ -51,7 +52,7 @@ export default function Groupe() {
                             <p className="text-white font-black tracking-[4px] uppercase text-sm md:text-lg">
                                 {groupTexts.group_announce.includes("Tribute") ? (
                                     <>
-                                        {groupTexts.group_announce.split(':')[0]} : 
+                                        {groupTexts.group_announce.split(':')[0]} :
                                         <span className="text-primary animate-pulse">
                                             {groupTexts.group_announce.split(':')[1]}
                                         </span>
@@ -91,9 +92,19 @@ export default function Groupe() {
             <div className="max-w-[900px] mx-auto px-6 py-16 border-t border-white/5">
                 <div className="text-center">
                     <h2 className="text-white text-2xl md:text-3xl font-black uppercase mb-10 tracking-tight">
-                        L'ÉNERGIE BRUTE, <span className="text-primary">L'EXIGENCE DU SON</span>
+                        {/* On vérifie si group_title_history contient une virgule pour le style bicolore */}
+                        {groupTexts.group_title_history && groupTexts.group_title_history.includes(',') ? (
+                            <>
+                                {groupTexts.group_title_history.split(',')[0]},
+                                <span className="text-primary">
+                                    {groupTexts.group_title_history.split(',')[1]}
+                                </span>
+                            </>
+                        ) : (
+                            groupTexts.group_title_history
+                        )}
                     </h2>
-                    
+
                     <div className="grid md:grid-cols-2 gap-12 text-left">
                         <div>
                             <p className="text-[#9ca3af] leading-relaxed text-lg font-medium">
@@ -109,12 +120,12 @@ export default function Groupe() {
                 </div>
             </div>
 
-            {/* RÉPERTOIRE (Reste statique pour l'instant car c'est une longue liste) */}
+            {/* RÉPERTOIRE  */}
             <div className="bg-[#0a0a0a] py-16 px-6">
                 <div className="max-w-[1100px] mx-auto text-center">
                     <h3 className="text-white font-black uppercase tracking-[6px] text-[0.6rem] mb-8 opacity-30 italic">Expanded Repertoire</h3>
                     <p className="text-[#685c5c] text-[9px] md:text-[11px] leading-[3] uppercase tracking-[4px] font-bold">
-                        U2 • Muse • Téléphone • Police • Genesis • Rita Mitsouko • Eminem • Axel Bauer • Bruno Mars • Harry Styles • Santana • BB brunes • Queen • The supermen lovers • AC/DC • Kaleo • Trust • DNCE • Lenny Kravitz • Zucchero • Bob Marley...
+                        U2 • Muse • Téléphone • The Police • Genesis • Rita Mitsouko • Eminem • Axel Bauer • Bruno Mars • Harry Styles • Santana • BB brunes • Queen • The supermen lovers • AC/DC • Kaleo • Trust • DNCE • Lenny Kravitz • Zucchero • Bob Marley • Mathieu Chedid • Rare Earth • Junkie XL • Nickelback • The Killers • Rage Against The Machine...
                     </p>
                 </div>
             </div>

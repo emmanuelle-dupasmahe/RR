@@ -44,7 +44,7 @@ GET  /api/auth/me
 app.use('/api/auth', authRoutes);
 app.use('/api/concerts', concertRoutes);
 app.use('/api/repetitions', repetitionRoutes);
-app.use('/api/livredor', livredorRoutes);
+app.use('/api/guestbook', livredorRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/videos', videoRoutes);
 app.use('/api/membres', membresRoutes);

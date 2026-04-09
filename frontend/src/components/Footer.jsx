@@ -3,7 +3,15 @@ function Footer() {
     return (
         <footer className="bg-black border-t-2 border-[#222] px-[40px] py-[20px] text-center text-[#888888] text-[0.875rem]">
             <div className="max-w-[80rem] mx-auto flex flex-col items-center gap-[16px]">
-                <p className="m-0 text-[#888888]">Réservoir Rock - © {new Date().getFullYear()} Manux</p>
+                <div className="space-y-1">
+                    <p className="m-0 text-[#888888]">
+                        Réservoir Rock - © {new Date().getFullYear()} Tous droits réservés.
+                    </p>
+                    {/* Mention Copyright Photographe */}
+                    <p className="m-0 text-[10px] text-[#555] uppercase tracking-[2px] font-medium italic">
+                        Crédits photographiques : Mika
+                    </p>
+                </div>
 
                 <div className="flex gap-[24px] justify-center">
                     <a href="https://www.facebook.com/people/R%C3%A9servoir-Rock/100063633513580/" target="_blank" rel="noopener noreferrer" title="Facebook" className="group inline-flex items-center justify-center w-[40px] h-[40px] no-underline transition-transform duration-300 hover:scale-110">

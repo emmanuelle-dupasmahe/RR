@@ -18,7 +18,7 @@ router.get('/', async (req, res) => {
         const sql = `
             SELECT g.*, u.firstname 
             FROM guestbook g 
-            JOIN users u ON g.user_id = u.id 
+            LEFT JOIN users u ON g.user_id = u.id 
             ORDER BY g.created_at DESC
             LIMIT ? OFFSET ?
         `;
@@ -45,6 +45,23 @@ router.post('/', authMiddleware, async (req, res) => {
     } catch (error) {
         console.error('Erreur POST Livredor:', error);
         res.status(500).json({ error: 'Impossible d\'ajouter le message' });
+    }
+});
+
+// Route pour répondre à un message du Livre d'Or
+router.put('/:id/reponse', async (req, res) => { 
+    const { id } = req.params;
+    const { reponse } = req.body;
+
+    
+    const sql = "UPDATE guestbook SET reponse = ? WHERE id = ?";
+    
+    try {
+        await query(sql, [reponse, id]); 
+        res.status(200).json({ message: "Réponse publiée avec succès !" });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Erreur serveur." });
     }
 });
 

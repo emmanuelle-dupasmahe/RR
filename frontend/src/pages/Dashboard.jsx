@@ -28,10 +28,17 @@ function Dashboard() {
         group_slogan: '',
         group_announce: '',
         group_history_1: '',
-        group_history_2: ''
+        group_history_2: '',
+        group_title_history: ''
     });
     const [newMember, setNewMember] = useState({ nom: '', instrument: '', photo_url: '', ordre_affichage: 0 });
 
+    const [messages, setMessages] = useState([]);
+    const [reponses, setReponses] = useState({}); // Objet pour stocker { messageId: "le texte" }
+
+    const handleChangementReponse = (id, texte) => {
+        setReponses(prev => ({ ...prev, [id]: texte }));
+    };
     // --- LOGIQUE FETCH ---
 
     const fetchRepetitions = async (page = 1) => {
@@ -68,6 +75,7 @@ function Dashboard() {
         fetch('http://localhost:5000/api/settings/tour_title')
             .then(res => res.json())
             .then(data => setTourTitle(data.value || ''));
+
         // Récupérer les membres
         fetch('http://localhost:5000/api/membres')
             .then(res => res.json())
@@ -77,6 +85,12 @@ function Dashboard() {
         fetch('http://localhost:5000/api/groupesettings')
             .then(res => res.json())
             .then(setGroupTexts);
+
+        // Récupérer les messages
+        fetch('http://localhost:5000/api/guestbook')
+            .then(res => res.json())
+            .then(data => setMessages(data.messages || []))
+            .catch(err => console.error("Erreur livre d'or:", err));
     }, []);
 
     // --- HANDLERS ---
@@ -103,9 +117,9 @@ function Dashboard() {
     const handleDelete = async (id) => {
         if (!window.confirm("Supprimer cette date ?")) return;
         const res = await fetch(`http://localhost:5000/api/concerts/${id}`, {
-                method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
         if (res.ok) {
             fetchConcerts();
             alert('Date supprimée');
@@ -161,6 +175,9 @@ function Dashboard() {
                 setEditingRep(null);
                 fetchRepetitions();
                 alert('Morceau mis à jour');
+            } else {
+                const errorData = await res.json();
+                alert(`Erreur: ${errorData.error || 'Impossible de mettre à jour'}`);
             }
         } catch (err) { console.error(err); }
     };
@@ -176,6 +193,9 @@ function Dashboard() {
                 setEditingVideo(null);
                 fetchVideos();
                 alert('Vidéo mise à jour');
+            } else {
+                const errorData = await res.json();
+                alert(`Erreur: ${errorData.error || 'Impossible de mettre à jour'}`);
             }
         } catch (err) { console.error(err); }
     };
@@ -185,13 +205,21 @@ function Dashboard() {
             const res = await fetch(`http://localhost:5000/api/membres/${member.id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify(member)
+                body: JSON.stringify({
+                    nom: member.nom,
+                    instrument: member.instrument,
+                    photo_url: member.photo_url,
+                    ordre_affichage: member.ordre_affichage
+                })
             });
             if (res.ok) {
                 setEditingMember(null);
                 const updated = await fetch('http://localhost:5000/api/membres').then(r => r.json());
                 setGroupMembers(updated);
                 alert('Musicien mis à jour');
+            } else {
+                const errorData = await res.json();
+                alert(`Erreur: ${errorData.error || 'Impossible de mettre à jour'}`);
             }
         } catch (err) { console.error(err); }
     };
@@ -214,6 +242,10 @@ function Dashboard() {
             setRepFile(null);
             e.target.reset();
             fetchRepetitions();
+            alert('Morceau ajouté au studio !');
+        } else {
+            const errorData = await response.json();
+            alert(`Erreur: ${errorData.error || "Échec de l'ajout"}`);
         }
     };
 
@@ -249,6 +281,10 @@ function Dashboard() {
             const updated = await fetch('http://localhost:5000/api/membres').then(r => r.json());
             setGroupMembers(updated);
             setNewMember({ nom: '', instrument: '', photo_url: '', ordre_affichage: 0 });
+            alert('Musicien ajouté !');
+        } else {
+            const errorData = await res.json();
+            alert(`Erreur: ${errorData.error || "Échec de l'ajout"}`);
         }
     };
 
@@ -269,15 +305,54 @@ function Dashboard() {
         }
     };
 
+    // Sauvegarder la réponse 
+    const handleUpdateResponse = async (id, texte) => {
+        try {
+            const res = await fetch(`http://localhost:5000/api/guestbook/${id}/reponse`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    
+                body: JSON.stringify({ reponse: texte })
+            });
 
+            if (res.ok) {
+                alert("Réponse enregistrée avec succès !");
+            } else {
+                alert("Erreur lors de la sauvegarde sur le serveur.");
+            }
+        } catch (err) {
+            console.error("Erreur login réponse:", err);
+        }
+    };
 
-    const handleRepDelete = async (id) => {
-        if (window.confirm("Supprimer ce morceau ?")) {
-            await fetch(`http://localhost:5000/api/repetitions/${id}`, {
+    // Supprimer un message
+    const handleDeleteMessage = async (id) => {
+        if (!window.confirm("Supprimer ce message ?")) return;
+        try {
+            const res = await fetch(`http://localhost:5000/api/guestbook/${id}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
+            if (res.ok) {
+                setMessages(messages.filter(m => m.id !== id));
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const handleRepDelete = async (id) => {
+        if (!window.confirm("Supprimer ce morceau ?")) return;
+        const res = await fetch(`http://localhost:5000/api/repetitions/${id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
             fetchRepetitions();
+            alert('Morceau supprimé');
+        } else {
+            alert('Erreur lors de la suppression');
         }
     };
 
@@ -312,16 +387,24 @@ function Dashboard() {
             setVideoFile(null);
             e.target.reset();
             fetchVideos();
+            alert('Vidéo publiée !');
+        } else {
+            const errorData = await response.json();
+            alert(`Erreur: ${errorData.error || "Échec de la publication"}`);
         }
     };
 
     const handleVideoDelete = async (id) => {
-        if (window.confirm("Supprimer cette vidéo ?")) {
-            await fetch(`http://localhost:5000/api/videos/${id}`, {
-                method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
+        if (!window.confirm("Supprimer cette vidéo ?")) return;
+        const res = await fetch(`http://localhost:5000/api/videos/${id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
             fetchVideos();
+            alert('Vidéo supprimée');
+        } else {
+            alert('Erreur lors de la suppression');
         }
     };
 
@@ -470,7 +553,7 @@ function Dashboard() {
 
                 {/* SECTION RÉPÉTITIONS */}
                 <section className="pt-12 border-t border-white/5">
-                    <SectionTitle subtitle="Audio Archives">Studio & Répètes</SectionTitle>
+                    <SectionTitle subtitle="Audio Archives">Répètes</SectionTitle>
                     <div className="grid lg:grid-cols-2 gap-12">
                         {/* Formulaire */}
                         <div className="bg-[#0a0a0a] border border-white/5 p-8 rounded-2xl">
@@ -538,8 +621,8 @@ function Dashboard() {
                                 <div key={r.id} className="p-5 bg-[#0a0a0a] border border-white/5 rounded-xl hover:border-white/10 transition-all">
                                     {editingRep === r.id ? (
                                         <div className="space-y-2">
-                                            <input className={inputClass} value={r.titre} onChange={(e) => setRepetitions(repetitions.map(item => item.id === r.id ? {...item, titre: e.target.value} : item))} />
-                                            <input className={inputClass} value={r.detail} onChange={(e) => setRepetitions(repetitions.map(item => item.id === r.id ? {...item, detail: e.target.value} : item))} />
+                                            <input className={inputClass} value={r.titre} onChange={(e) => setRepetitions(repetitions.map(item => item.id === r.id ? { ...item, titre: e.target.value } : item))} />
+                                            <input className={inputClass} value={r.detail} onChange={(e) => setRepetitions(repetitions.map(item => item.id === r.id ? { ...item, detail: e.target.value } : item))} />
                                             <div className="flex gap-2">
                                                 <button onClick={() => handleUpdateRep(r)} className="bg-green-600 text-[10px] font-black p-2 rounded flex-1">OK</button>
                                                 <button onClick={() => setEditingRep(null)} className="bg-white/10 text-[10px] font-black p-2 rounded flex-1">X</button>
@@ -569,7 +652,7 @@ function Dashboard() {
 
                 {/* SECTION VIDÉOS */}
                 <section className="pt-12 border-t border-white/5">
-                    <SectionTitle subtitle="Visual Content">Vidéo Management</SectionTitle>
+                    <SectionTitle subtitle="Visual Content">Vidéos</SectionTitle>
                     <div className="grid lg:grid-cols-2 gap-12">
                         {/* Formulaire */}
                         <div className="bg-[#0a0a0a] border border-white/5 p-8 rounded-2xl">
@@ -626,7 +709,7 @@ function Dashboard() {
                                 <div key={v.id} className="flex justify-between items-center p-5 bg-[#0a0a0a] border border-white/5 rounded-xl">
                                     {editingVideo === v.id ? (
                                         <div className="flex-1 flex gap-2">
-                                            <input className={inputClass} value={v.titre} onChange={(e) => setVideos(videos.map(item => item.id === v.id ? {...item, titre: e.target.value} : item))} />
+                                            <input className={inputClass} value={v.titre} onChange={(e) => setVideos(videos.map(item => item.id === v.id ? { ...item, titre: e.target.value } : item))} />
                                             <button onClick={() => handleUpdateVideo(v)} className="bg-green-600 px-3 rounded font-black">OK</button>
                                             <button onClick={() => setEditingVideo(null)} className="bg-white/10 px-3 rounded font-black text-xs">X</button>
                                         </div>
@@ -652,9 +735,9 @@ function Dashboard() {
                         </div>
                     </div>
                 </section>
-                {/* --- SECTION LE GROUPE (Harmonisée) --- */}
+                {/* --- SECTION LE GROUPE --- */}
                 <section className="pt-12 border-t border-white/5">
-                    <SectionTitle subtitle="Band Identity">Le Groupe & Biographie</SectionTitle>
+                    <SectionTitle subtitle="Band Identity">Le Groupe</SectionTitle>
 
                     <div className="bg-[#0a0a0a] border border-white/5 p-8 rounded-2xl space-y-8">
 
@@ -665,7 +748,7 @@ function Dashboard() {
                                 <input
                                     type="text"
                                     className={inputClass}
-                                    value={groupTexts.group_announce}
+                                    value={groupTexts.group_announce || ''}
                                     onChange={(e) => setGroupTexts({ ...groupTexts, group_announce: e.target.value })}
                                     onBlur={() => handleUpdateGroupText('group_announce', groupTexts.group_announce)}
                                 />
@@ -675,11 +758,24 @@ function Dashboard() {
                                 <input
                                     type="text"
                                     className={inputClass}
-                                    value={groupTexts.group_slogan}
+                                    value={groupTexts.group_slogan || ''}
                                     onChange={(e) => setGroupTexts({ ...groupTexts, group_slogan: e.target.value })}
                                     onBlur={() => handleUpdateGroupText('group_slogan', groupTexts.group_slogan)}
                                 />
                             </div>
+                        </div>
+
+                        {/* Nouveau : Titre de la section Histoire */}
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black uppercase tracking-widest text-primary block">Titre de la section Histoire (ex: "Our Story")</label>
+                            <input
+                                type="text"
+                                className={inputClass}
+                                value={groupTexts.group_title_history || ''}
+                                onChange={(e) => setGroupTexts({ ...groupTexts, group_title_history: e.target.value })}
+                                onBlur={() => handleUpdateGroupText('group_title_history', groupTexts.group_title_history)}
+                                placeholder="L'histoire du groupe..."
+                            />
                         </div>
 
                         {/* Ligne : Histoire (2 colonnes) */}
@@ -688,7 +784,7 @@ function Dashboard() {
                                 <label className="text-[10px] font-black uppercase tracking-widest text-primary block">Histoire (Colonne Gauche)</label>
                                 <textarea
                                     className={`${inputClass} min-h-[150px] leading-relaxed`}
-                                    value={groupTexts.group_history_1}
+                                    value={groupTexts.group_history_1 || ''}
                                     onChange={(e) => setGroupTexts({ ...groupTexts, group_history_1: e.target.value })}
                                     onBlur={() => handleUpdateGroupText('group_history_1', groupTexts.group_history_1)}
                                 />
@@ -697,7 +793,7 @@ function Dashboard() {
                                 <label className="text-[10px] font-black uppercase tracking-widest text-primary block">Histoire (Colonne Droite)</label>
                                 <textarea
                                     className={`${inputClass} min-h-[150px] leading-relaxed`}
-                                    value={groupTexts.group_history_2}
+                                    value={groupTexts.group_history_2 || ''}
                                     onChange={(e) => setGroupTexts({ ...groupTexts, group_history_2: e.target.value })}
                                     onBlur={() => handleUpdateGroupText('group_history_2', groupTexts.group_history_2)}
                                 />
@@ -706,61 +802,133 @@ function Dashboard() {
                     </div>
                 </section>
 
-                {/* --- SECTION MUSICIENS (Harmonisée) --- */}
+                {/* --- SECTION MUSICIENS --- */}
                 <section className="pt-12 border-t border-white/5">
                     <SectionTitle subtitle="Band Members">Gestion des Musiciens</SectionTitle>
 
                     <div className="bg-[#0a0a0a] border border-white/5 p-8 rounded-2xl">
-                        {/* Formulaire d'ajout */}
+                        {/* Formulaire d'ajout amélioré */}
                         <form onSubmit={handleAddMember} className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-10 p-6 bg-white/5 rounded-xl border border-white/5">
                             <input
-                                type="text" placeholder="Nom"
+                                type="text" placeholder="Nom du musicien"
                                 className={inputClass}
                                 value={newMember.nom}
                                 onChange={(e) => setNewMember({ ...newMember, nom: e.target.value })}
                                 required
                             />
                             <input
-                                type="text" placeholder="Instrument"
+                                type="text" placeholder="Instrument (ex: Guitar)"
                                 className={inputClass}
                                 value={newMember.instrument}
                                 onChange={(e) => setNewMember({ ...newMember, instrument: e.target.value })}
                                 required
                             />
                             <input
-                                type="text" placeholder="URL Photo"
+                                type="text" placeholder="URL de la photo"
                                 className={inputClass}
                                 value={newMember.photo_url}
                                 onChange={(e) => setNewMember({ ...newMember, photo_url: e.target.value })}
                             />
-                            <button type="submit" className={btnClass}>Ajouter</button>
+                            <button type="submit" className={btnClass}>Ajouter au groupe</button>
                         </form>
 
-                        {/* Liste des membres */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        {/* Liste des membres avec Edition complète */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                             {groupMembers.map(m => (
-                                <div key={m.id} className="relative p-5 bg-black border border-white/10 rounded-xl hover:border-white/30 transition-all">
+                                <div key={m.id} className="relative p-5 bg-black border border-white/10 rounded-xl hover:border-primary/30 transition-all group">
                                     {editingMember === m.id ? (
-                                        <div className="space-y-2">
-                                            <input className="w-full bg-transparent text-xs border-b border-white/20" value={m.nom} onChange={(e) => setGroupMembers(groupMembers.map(item => item.id === m.id ? {...item, nom: e.target.value} : item))} />
+                                        <div className="space-y-3">
+                                            <input
+                                                className="w-full bg-white/5 border border-white/10 p-2 text-xs rounded text-white"
+                                                value={m.nom}
+                                                onChange={(e) => setGroupMembers(groupMembers.map(item => item.id === m.id ? { ...item, nom: e.target.value } : item))}
+                                            />
+                                            <input
+                                                className="w-full bg-white/5 border border-white/10 p-2 text-xs rounded text-primary"
+                                                value={m.instrument}
+                                                onChange={(e) => setGroupMembers(groupMembers.map(item => item.id === m.id ? { ...item, instrument: e.target.value } : item))}
+                                            />
                                             <div className="flex gap-2">
-                                                <button onClick={() => handleUpdateMember(m)} className="text-green-500 text-[10px] font-black uppercase">Save</button>
-                                                <button onClick={() => setEditingMember(null)} className="text-white/50 text-[10px] font-black uppercase">Cancel</button>
+                                                <button onClick={() => handleUpdateMember(m)} className="bg-primary/20 text-primary px-3 py-1 rounded text-[10px] font-black uppercase hover:bg-primary hover:text-black">Save</button>
+                                                <button onClick={() => setEditingMember(null)} className="text-white/50 text-[10px] font-black uppercase underline">Cancel</button>
                                             </div>
                                         </div>
                                     ) : (
                                         <>
-                                            <div className="absolute top-2 right-2 flex gap-2">
-                                                <button onClick={() => setEditingMember(m.id)} className="text-white/20 hover:text-white text-[10px]">✎</button>
-                                                <button onClick={() => handleDeleteMember(m.id)} className="text-white/20 hover:text-primary">✕</button>
+                                            <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <button onClick={() => setEditingMember(m.id)} className="text-white/40 hover:text-white text-[10px]">Modifier</button>
+                                                <button onClick={() => handleDeleteMember(m.id)} className="text-white/40 hover:text-red-500 text-[10px]">Supprimer</button>
                                             </div>
-                                            <p className="text-white font-bold uppercase tracking-tight">{m.nom}</p>
-                                            <p className="text-primary text-[10px] font-black uppercase tracking-widest mt-1">{m.instrument}</p>
+
+                                            {/* Visualisation rapide de la photo si elle existe */}
+                                            <div className="flex items-center gap-4">
+                                                {m.photo_url && (
+                                                    <img src={m.photo_url} alt={m.nom} className="w-10 h-10 rounded-full object-cover border border-white/10" />
+                                                )}
+                                                <div>
+                                                    <p className="text-white font-bold uppercase tracking-tight leading-none">{m.nom}</p>
+                                                    <p className="text-primary text-[10px] font-black uppercase tracking-widest mt-1">{m.instrument}</p>
+                                                </div>
+                                            </div>
                                         </>
                                     )}
                                 </div>
                             ))}
                         </div>
+                    </div>
+                </section>
+
+                {/* --- SECTION LIVRE D'OR --- */}
+                <section className="pt-12 border-t border-white/5">
+                    <SectionTitle subtitle="Fan Messages">Livre d'Or</SectionTitle>
+
+                    <div className="space-y-4">
+                        {Array.isArray(messages) && messages.length > 0 ? (
+                            messages.map((msg) => (
+                                <div key={msg.id} className="bg-[#0a0a0a] border border-white/5 p-6 rounded-2xl">
+                                    <div className="flex justify-between items-start mb-4">
+                                        <div>
+                                            <span className="text-primary text-[10px] font-black uppercase tracking-widest block mb-1">
+                                                Par Utilisateur #{msg.user_id} — {msg.created_at ? new Date(msg.created_at).toLocaleDateString() : 'Date inconnue'}
+                                            </span>
+                                            <p className="text-white text-sm italic">"{msg.content}"</p>
+                                        </div>
+                                        <button
+                                            onClick={() => handleDeleteMessage(msg.id)}
+                                            className="text-white/20 hover:text-red-500 transition-colors text-[10px] font-black uppercase"
+                                        >
+                                            Supprimer
+                                        </button>
+                                    </div>
+
+                                    <div className="mt-4 pt-4 border-t border-white/5">
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-primary/60 block mb-2">Réponse du groupe</label>
+                                        <div className="flex flex-col gap-3">
+                                            <textarea
+                                                className={`${inputClass} min-h-[80px] text-sm`}
+                                                placeholder="Votre réponse..."
+                                                value={msg.reponse || ''}
+                                                onChange={(e) => {
+                                                    const nouveauTexte = e.target.value;
+                                                    setMessages(messages.map(m => m.id === msg.id ? { ...m, reponse: nouveauTexte } : m));
+                                                }}
+                                            />
+                                            <button
+                                                onClick={() => handleUpdateResponse(msg.id, msg.reponse)}
+                                                className="self-end bg-white/5 hover:bg-white/10 text-white px-4 py-2 rounded-lg border border-white/5 text-[10px] font-black uppercase transition-all"
+                                            >
+                                                Enregistrer la réponse
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            /* C'est ce bloc ":" qui manquait et causait l'erreur Babel */
+                            <p className="text-white/30 text-[10px] uppercase tracking-widest text-center py-8">
+                                Aucun message dans le livre d'or
+                            </p>
+                        )}
                     </div>
                 </section>
             </div>

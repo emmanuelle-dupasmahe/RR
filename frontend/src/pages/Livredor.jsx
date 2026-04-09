@@ -11,7 +11,7 @@ function Livredor() {
 
     const fetchMessages = async () => {
         try {
-            const res = await fetch(`http://localhost:5000/api/livredor?page=${page}&limit=5`);
+            const res = await fetch(`http://localhost:5000/api/guestbook?page=${page}&limit=5`);
             const data = await res.json();
             setMessages(Array.isArray(data.messages) ? data.messages : []);
             setTotalPages(data.totalPages || 1);
@@ -29,7 +29,7 @@ function Livredor() {
         if (!content.trim()) return;
 
         try {
-            const res = await fetch('http://localhost:5000/api/livredor', {
+            const res = await fetch('http://localhost:5000/api/guestbook', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -54,7 +54,7 @@ function Livredor() {
     const handleDelete = async (id) => {
         if (!window.confirm("Voulez-vous supprimer ce message ?")) return;
         try {
-            const res = await fetch(`http://localhost:5000/api/livredor/${id}`, {
+            const res = await fetch(`http://localhost:5000/api/guestbook/${id}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -66,7 +66,6 @@ function Livredor() {
 
     return (
         <div className="mt-[80px] min-h-[calc(100vh-82px)] bg-black text-white">
-            {/* EN-TÊTE */}
             <div className="text-center py-[48px] bg-gradient-to-b from-[#111] to-black">
                 <h1 className="text-[3rem] md:text-[3.5rem] font-[900] uppercase mb-[12px] text-white leading-tight tracking-tighter">
                     Livre d'or
@@ -76,37 +75,34 @@ function Livredor() {
                 </p>
             </div>
 
-            <div className="max-w-[800px] mx-auto px-[20px] py-[60px]">
-                
-                {/* FORMULAIRE STYLE STUDIO */}
+            <div className="max-w-[800px] mx-auto px-[20px] pt-10 pb-16">
                 {isAuthenticated ? (
-                    <form onSubmit={handleSubmit} className="mb-20 p-[2px] rounded-xl bg-gradient-to-r from-primary/40 to-black">
-                        <div className="bg-[#0a0a0a] p-6 rounded-xl">
-                            <h2 className="text-white font-black uppercase tracking-widest mb-4 flex items-center gap-2">
+                    <form onSubmit={handleSubmit} className="mb-6 p-[1px] rounded-xl bg-gradient-to-r from-primary/40 to-black">
+                        <div className="bg-[#0a0a0a] p-4 rounded-xl">
+                            <h2 className="text-white font-black uppercase tracking-widest mb-2 flex items-center gap-2 text-xs">
                                 <span className="w-2 h-2 bg-primary rounded-full animate-pulse"></span>
                                 Laisser une trace
                             </h2>
                             <textarea
-                                className="w-full p-4 bg-black border border-white/10 text-white focus:outline-none focus:border-primary/50 min-h-[120px] rounded-lg transition-all"
+                                className="w-full p-3 bg-black border border-white/10 text-white focus:outline-none focus:border-primary/50 min-h-[80px] rounded-lg transition-all text-sm"
                                 placeholder={`Écrivez votre message, ${user.firstname}...`}
                                 value={content}
                                 onChange={(e) => setContent(e.target.value)}
                                 required
                             />
-                            <div className="flex justify-end mt-4">
-                                <button type="submit" className="bg-primary text-white px-10 py-3 font-black uppercase tracking-widest hover:bg-white hover:text-black transition-all duration-300 rounded-sm text-sm">
+                            <div className="flex justify-end mt-3">
+                                <button type="submit" className="bg-primary text-white px-6 py-2 font-black uppercase tracking-widest hover:bg-white hover:text-black transition-all duration-300 rounded-sm text-[10px]">
                                     Publier
                                 </button>
                             </div>
                         </div>
                     </form>
                 ) : (
-                    <div className="mb-20 text-center p-8 border border-white/5 bg-[#111] rounded-xl italic text-[#666]">
+                    <div className="mb-6 text-center p-4 border border-white/5 bg-[#111] rounded-xl italic text-[#666] text-sm">
                         Connectez-vous pour rejoindre la discussion.
                     </div>
                 )}
 
-                {/* LISTE DES MESSAGES */}
                 <div className="space-y-6">
                     {loading ? (
                         <p className="text-center text-[#444] animate-pulse">Récupération des transmissions...</p>
@@ -124,13 +120,25 @@ function Livredor() {
                                             </span>
                                         </div>
                                         <div className="text-primary/20 group-hover:text-primary/40 transition-colors">
-                                            <svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor"><path d="M14.017 21L14.017 18C14.017 16.8954 14.9124 16 16.017 16H19.017C19.5693 16 20.017 15.5523 20.017 15V9C20.017 8.44772 19.5693 8 19.017 8H15.017C14.4647 8 14.017 7.55228 14.017 7V4H20.017C21.1216 4 22.017 4.89543 22.017 6V15C22.017 16.6569 20.6739 18 19.017 18H17.017L14.017 21ZM2.017 21L2.017 18C2.017 16.8954 2.91243 16 4.017 16H7.017C7.56928 16 8.017 15.5523 8.017 15V9C8.017 8.44772 7.56928 8 7.017 8H3.017C2.46472 8 2.017 7.55228 2.017 7V4H8.017C9.12157 4 10.017 4.89543 10.017 6V15C10.017 16.6569 8.67386 18 7.017 18H5.017L2.017 21Z"/></svg>
+                                            <svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor"><path d="M14.017 21L14.017 18C14.017 16.8954 14.9124 16 16.017 16H19.017C19.5693 16 20.017 15.5523 20.017 15V9C20.017 8.44772 19.5693 8 19.017 8H15.017C14.4647 8 14.017 7.55228 14.017 7V4H20.017C21.1216 4 22.017 4.89543 22.017 6V15C22.017 16.6569 20.6739 18 19.017 18H17.017L14.017 21ZM2.017 21L2.017 18C2.017 16.8954 2.91243 16 4.017 16H7.017C7.56928 16 8.017 15.5523 8.017 15V9C8.017 8.44772 7.56928 8 7.017 8H3.017C2.46472 8 2.017 7.55228 2.017 7V4H8.017C9.12157 4 10.017 4.89543 10.017 6V15C10.017 16.6569 8.67386 18 7.017 18H5.017L2.017 21Z" /></svg>
                                         </div>
                                     </div>
-                                    
+
                                     <p className="text-gray-400 leading-relaxed font-medium">
                                         {msg.content}
                                     </p>
+
+                                    {/* BLOC RÉPONSE DÉPLACÉ ICI (À L'INTÉRIEUR DU MAP) */}
+                                    {msg.reponse && (
+                                        <div className="mt-4 ml-4 p-4 bg-primary/5 border-l-2 border-primary rounded-r-lg">
+                                            <span className="text-primary text-[10px] font-black uppercase tracking-[2px] block mb-1">
+                                                Réponse de Réservoir Rock
+                                            </span>
+                                            <p className="text-gray-300 text-sm italic">
+                                                {msg.reponse}
+                                            </p>
+                                        </div>
+                                    )}
 
                                     {isAuthenticated && user?.role === 'admin' && (
                                         <div className="mt-4 flex justify-end">
@@ -150,7 +158,6 @@ function Livredor() {
                     )}
                 </div>
 
-                {/* PAGINATION HARMONISÉE */}
                 {totalPages > 1 && (
                     <div className="mt-16 flex justify-center items-center gap-6">
                         <button
@@ -161,7 +168,7 @@ function Livredor() {
                             ←
                         </button>
                         <span className="text-primary font-black text-sm uppercase tracking-[3px]">
-                             {page} / {totalPages}
+                            {page} / {totalPages}
                         </span>
                         <button
                             disabled={page === totalPages}
