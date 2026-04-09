@@ -25,7 +25,7 @@ function Home() {
             </h1>
             {/* Section Concert */}
             <section className="bg-[rgba(227,27,35,0.4)] border border-primary px-[40px] py-[20px] mt-[60px] rounded-[4px] animate-pulse-rock">
-                <h2 className="text-[1.875rem] font-[900] uppercase mb-[8px] text-white">
+                <h2 className="text-[1.875rem] font-[800] uppercase mb-[8px] text-white">
                     Prochain Concert
                 </h2>
                 {nextConcert ? (

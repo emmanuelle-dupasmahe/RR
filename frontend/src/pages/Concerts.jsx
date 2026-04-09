@@ -30,7 +30,7 @@ function Concerts() {
         <div className="mt-[80px] min-h-[calc(100vh-82px)] bg-black">
             {/* EN-TÊTE */}
             <div className="text-center py-[48px]  bg-gradient-to-b from-[#111] to-black">
-                <h1 className="text-[3rem] md:text-[3.5rem] font-[900] uppercase mb-[12px] text-white leading-tight tracking-tighter">
+                <h1 className="text-[3rem] md:text-[3.5rem] font-[300] uppercase m-0 leading-[1.2] tracking-[0.1em] text-white inline-block">
                     {tourTitle}
                 </h1>
                 <p className="text-primary font-black tracking-[5px] uppercase text-sm">

@@ -30,7 +30,7 @@ export default function Groupe() {
         <div className="mt-[80px] min-h-[calc(100vh-82px)] bg-black text-white">
 
             <div className="text-center pt-[48px] pb-[20px] bg-gradient-to-b from-[#111] to-black px-4">
-                <h1 className="text-[3rem] md:text-[3.5rem] font-[900] uppercase mb-[4px] text-white leading-tight tracking-tighter">
+                <h1 className="text-[3rem] md:text-[3.5rem] font-[300] uppercase m-0 leading-[1.2] tracking-[0.1em] text-white inline-block">
                     Le Groupe
                 </h1>
 

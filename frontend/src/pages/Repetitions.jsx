@@ -24,7 +24,7 @@ function Repetitions() {
         <div className="mt-[80px] min-h-[calc(100vh-82px)] bg-black">
             {/* EN-TÊTE */}
             <div className="text-center py-[48px]  bg-gradient-to-b from-[#111] to-black">
-                <h1 className="text-[3rem]  md:text-[3.5rem] font-[900] uppercase mb-[12px] text-white leading-tight">
+                <h1 className="text-[3rem] md:text-[3.5rem] font-[300] uppercase m-0 leading-[1.2] tracking-[0.1em] text-white inline-block">
                     Studio Répétitions
                 </h1>
                 <p className="text-primary font-black tracking-[5px] uppercase text-sm">
@@ -70,7 +70,8 @@ function Repetitions() {
                 )}
             </div>
 
-            <style dangerouslySetInnerHTML={{ __html: `
+            <style dangerouslySetInnerHTML={{
+                __html: `
                 audio::-webkit-media-controls-enclosure {
                     background-color: transparent;
                 }

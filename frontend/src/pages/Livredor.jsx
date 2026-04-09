@@ -67,7 +67,7 @@ function Livredor() {
     return (
         <div className="mt-[80px] min-h-[calc(100vh-82px)] bg-black text-white">
             <div className="text-center py-[48px] bg-gradient-to-b from-[#111] to-black">
-                <h1 className="text-[3rem] md:text-[3.5rem] font-[900] uppercase mb-[12px] text-white leading-tight tracking-tighter">
+                <h1 className="text-[3rem] md:text-[3.5rem] font-[300] uppercase m-0 leading-[1.2] tracking-[0.1em] text-white inline-block">
                     Livre d'or
                 </h1>
                 <p className="text-primary font-black tracking-[5px] uppercase text-sm">
@@ -112,7 +112,7 @@ function Livredor() {
                                 <div className="bg-black p-6 rounded-xl border border-white/5 transition-all group-hover:translate-x-1">
                                     <div className="flex justify-between items-start mb-4">
                                         <div>
-                                            <span className="block font-black text-primary uppercase tracking-tighter text-xl">
+                                            <span className="block font-[800] text-primary uppercase tracking-[0.1em] text-xl transform scale-x-[0.85] origin-left">
                                                 {msg.firstname}
                                             </span>
                                             <span className="text-[#444] text-[0.7rem] font-bold uppercase tracking-[2px]">
