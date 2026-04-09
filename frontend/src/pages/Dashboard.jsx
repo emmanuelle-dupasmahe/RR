@@ -448,7 +448,7 @@ function Dashboard() {
         <div className="mt-[80px] min-h-screen bg-black text-white pb-20">
             {/* HEADER DASHBOARD */}
             <div className="text-center py-16 bg-gradient-to-b from-[#111] to-black px-4 mb-12 border-b border-white/5">
-                <h1 className="text-[3rem] md:text-[3.5rem] font-[900] uppercase mb-[12px] text-white leading-tight tracking-tighter">
+                <h1 className="text-[3rem] md:text-[3.5rem] font-[300] uppercase m-0 leading-[1.2] tracking-[0.1em] text-white inline-block">
                     BackStage
                 </h1>
                 <p className="text-primary font-black tracking-[5px] uppercase text-sm">Control Panel // Admin Only</p>
