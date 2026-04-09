@@ -91,8 +91,7 @@ export default function Groupe() {
             {/* HISTOIRE DYNAMIQUE */}
             <div className="max-w-[900px] mx-auto px-6 py-16 border-t border-white/5">
                 <div className="text-center">
-                    <h2 className="text-white text-2xl md:text-3xl font-black uppercase mb-10 tracking-tight">
-                        {/* On vérifie si group_title_history contient une virgule pour le style bicolore */}
+                    <h2 className="text-white text-2xl md:text-4xl font-[300] uppercase mb-12 tracking-[0.1em] inline-block transform scale-x-[0.90] origin-center">
                         {groupTexts.group_title_history && groupTexts.group_title_history.includes(',') ? (
                             <>
                                 {groupTexts.group_title_history.split(',')[0]},
@@ -123,9 +122,11 @@ export default function Groupe() {
             {/* RÉPERTOIRE  */}
             <div className="bg-[#0a0a0a] py-16 px-6">
                 <div className="max-w-[1100px] mx-auto text-center">
-                    <h3 className="text-white font-black uppercase tracking-[6px] text-[0.6rem] mb-8 opacity-30 italic">Expanded Repertoire</h3>
-                    <p className="text-[#685c5c] text-[9px] md:text-[11px] leading-[3] uppercase tracking-[4px] font-bold">
-                        U2 • Muse • Téléphone • The Police • Genesis • Rita Mitsouko • Eminem • Axel Bauer • Bruno Mars • Harry Styles • Santana • BB brunes • Queen • The supermen lovers • AC/DC • Kaleo • Trust • DNCE • Lenny Kravitz • Zucchero • Bob Marley • Mathieu Chedid • Rare Earth • Junkie XL • Nickelback • The Killers • Rage Against The Machine...
+                    <h3 className="text-[#685c5c] font-black uppercase tracking-[8px] text-[0.85rem] mb-6">
+                        Expanded Repertoire
+                    </h3>
+                    <p className="text-[#888] text-[10px] md:text-[12px] leading-[2.5] uppercase tracking-[3px] font-medium">
+                        U2 • Muse • Téléphone • The Police • Genesis • Les Rita Mitsouko • Eminem • Axel Bauer • Bruno Mars • Harry Styles • Santana • BB Brunes • Queen • The Supermen Lovers • AC/DC • Kaleo • Trust • DNCE • Lenny Kravitz • Zucchero • Bob Marley • -M- • Rare Earth • Junkie XL • Nickelback • The Killers • Rage Against The Machine...
                     </p>
                 </div>
             </div>
