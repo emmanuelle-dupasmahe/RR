@@ -27,7 +27,7 @@ function Footer() {
                         Réservoir Rock - © {new Date().getFullYear()} Tous droits réservés.
                     </p>
                     <p className="m-0 text-[11px] text-[#aaaaaa] uppercase tracking-[2.5px] font-semibold">
-                        Crédits photographiques : <span className="text-primary italic">Mika</span>
+                        Crédits photographiques : <span className="text-primary">Mika</span>
                     </p>
                 </div>
 
