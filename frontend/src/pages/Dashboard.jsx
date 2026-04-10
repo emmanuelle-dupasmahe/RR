@@ -434,7 +434,7 @@ function Dashboard() {
 
     const SectionTitle = ({ children, subtitle }) => (
         <div className="mb-10">
-            <h2 className="text-white text-2xl md:text-3xl font-[900] uppercase tracking-tighter italic">
+            <h2 className="text-white text-2xl md:text-3xl font-[600] uppercase tracking-tightergit">
                 {children} <span className="text-primary">.</span>
             </h2>
             {subtitle && <p className="text-primary font-black tracking-[4px] uppercase text-[0.65rem] mt-1 opacity-80">{subtitle}</p>}

@@ -22,7 +22,7 @@ function Footer() {
                     </a>
                 </div>
 
-                <div className="space-y-2"> {/* J'ai augmenté un peu l'espace ici */}
+                <div className="space-y-1">
                     <p className="m-0 text-[0.875rem] text-[#888]">
                         Réservoir Rock - © {new Date().getFullYear()} Tous droits réservés.
                     </p>
