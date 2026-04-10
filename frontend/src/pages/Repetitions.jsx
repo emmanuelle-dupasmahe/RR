@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import RepetitionsSkeleton from '../components/RepetitionsSkeleton';
 
 function Repetitions() {
     const [morceaux, setMorceaux] = useState([]);
@@ -35,7 +36,7 @@ function Repetitions() {
             {/* LISTE DES MORCEAUX */}
             <div className="max-w-[56rem] mx-auto px-[20px] py-[40px] flex flex-col gap-[16px]">
                 {loading ? (
-                    <p className="text-center text-[#9ca3af]">Chargement du studio...</p>
+                    <RepetitionsSkeleton />
                 ) : morceaux.length > 0 ? (
                     morceaux.map((m, index) => (
                         <div

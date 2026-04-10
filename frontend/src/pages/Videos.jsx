@@ -42,7 +42,7 @@ function Videos() {
             <div className="mt-[60px] max-w-[80rem] mx-auto px-[20px] pb-[40px]">
                 {/* LOGIQUE D'AFFICHAGE CONDITIONNEL */}
                 {loading ? (
-                    <VideosSkeleton /> // skeleton à la place du texte gris
+                    <VideosSkeleton /> // skeleton 
                 ) : videos.length > 0 ? (
                     <>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-[32px]">
