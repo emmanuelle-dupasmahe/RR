@@ -1,5 +1,6 @@
 // pages/Videos.jsx
 import { useState, useEffect } from 'react';
+import VideosSkeleton from '../components/VideosSkeleton';
 
 function Videos() {
     const [videos, setVideos] = useState([]);
@@ -8,6 +9,8 @@ function Videos() {
     const [totalPages, setTotalPages] = useState(1);
 
     const fetchVideos = async () => {
+        // skeleton au début de chaque chargement 
+        setLoading(true);
         try {
             const res = await fetch(`http://localhost:5000/api/videos?page=${page}&limit=6`);
             const data = await res.json();
@@ -25,20 +28,21 @@ function Videos() {
     }, [page]);
 
     return (
-        <div className="mt-[80px] min-h-[calc(100vh-82px)] bg-black">
-            {/* EN-TÊTE HARMONISÉ */}
-            <div className="text-center py-[48px]  bg-gradient-to-b from-[#111] to-black">
-                <h1 className="text-[3rem] md:text-[3.5rem] font-[300] uppercase m-0 leading-[1.2] tracking-[0.1em] text-white inline-block">Vidéos Live</h1>
-                
+        <div className="mt-[80px] min-h-[calc(100vh-82px)] bg-black font-sans">
+            {/* EN-TÊTE */}
+            <div className="text-center py-[48px] bg-gradient-to-b from-[#111] to-black">
+                <h1 className="text-[3rem] md:text-[3.5rem] font-[300] uppercase m-0 leading-[1.2] tracking-[0.1em] text-white inline-block">
+                    Vidéos Live
+                </h1>
                 <p className="text-primary font-black tracking-[5px] uppercase text-sm">
                     L'expérience Réservoir Rock en images
                 </p>
-                
             </div>
 
             <div className="mt-[60px] max-w-[80rem] mx-auto px-[20px] pb-[40px]">
+                {/* LOGIQUE D'AFFICHAGE CONDITIONNEL */}
                 {loading ? (
-                    <p className="text-center text-[#9ca3af]">Chargement des vidéos...</p>
+                    <VideosSkeleton /> // skeleton à la place du texte gris
                 ) : videos.length > 0 ? (
                     <>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-[32px]">
@@ -47,20 +51,26 @@ function Videos() {
                             ))}
                         </div>
 
-                        {/* PAGINATION STYLE DASHBOARD */}
+                        {/* PAGINATION */}
                         {totalPages > 1 && (
                             <div className="mt-16 flex justify-center items-center gap-4 text-white">
                                 <button
                                     disabled={page === 1}
-                                    onClick={() => setPage(prev => prev - 1)}
+                                    onClick={() => {
+                                        setPage(prev => prev - 1);
+                                        window.scrollTo(0, 300);
+                                    }}
                                     className="px-6 py-2 bg-[#111] border border-[#333] hover:border-primary text-white disabled:opacity-30 transition-all uppercase font-bold text-sm cursor-pointer"
                                 >
                                     Précédent
                                 </button>
-                                <span className="font-black text-primary">PAGE {page} / {totalPages}</span>
+                                <span className="font-black text-primary uppercase">PAGE {page} / {totalPages}</span>
                                 <button
                                     disabled={page === totalPages}
-                                    onClick={() => setPage(prev => prev + 1)}
+                                    onClick={() => {
+                                        setPage(prev => prev + 1);
+                                        window.scrollTo(0, 300);
+                                    }}
                                     className="px-6 py-2 bg-[#111] border border-[#333] hover:border-primary text-white disabled:opacity-30 transition-all uppercase font-bold text-sm cursor-pointer"
                                 >
                                     Suivant
@@ -69,12 +79,15 @@ function Videos() {
                         )}
                     </>
                 ) : (
-                    <p className="text-center text-[#9ca3af]">Aucune vidéo disponible pour le moment.</p>
+                    <p className="text-center text-[#9ca3af] font-bold uppercase tracking-widest">
+                        Aucune vidéo disponible pour le moment.
+                    </p>
                 )}
             </div>
         </div>
     );
 }
+
 
 function VideoCard({ video }) {
     const isYoutube = !!video.url_youtube;
@@ -86,7 +99,7 @@ function VideoCard({ video }) {
         /* 1. Bloc entier avec dégradé subtil */
         <div className="p-[2px] rounded-[1.2rem] bg-gradient-to-br from-primary/20 via-black to-black border border-white/5 transition-all duration-500 hover:from-primary/40 shadow-2xl group">
             <div className="bg-[#0a0a0a] rounded-[1.1rem] overflow-hidden">
-                
+
                 {/* 2. Le "Halo" rouge autour du lecteur vidéo */}
                 <div className="p-[6px] bg-gradient-to-r from-primary/60 via-black/80 to-black">
                     <div className="w-full aspect-video overflow-hidden rounded-[0.8rem] relative z-[1] bg-black">
