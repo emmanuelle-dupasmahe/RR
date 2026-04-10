@@ -1,3 +1,4 @@
+// pages/Home.jsx
 import { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth.js';
 

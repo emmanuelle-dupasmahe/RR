@@ -71,7 +71,7 @@ router.put('/:id', authMiddleware, async (req, res) => {
 router.delete('/:id', authMiddleware, async (req, res) => {
     try {
         const { id } = req.params;
-        if (req.user.role !== 'admin') return res.status(403).json({ error: 'Interdit' });
+
 
         const result = await query('DELETE FROM videos WHERE id = ?', [id]);
         if (result.affectedRows === 0) {

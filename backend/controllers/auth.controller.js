@@ -20,7 +20,7 @@ export const register = async (req, res) => {
         if (existingUser) {
             return res.status(409).json({ error: 'Email déjà utilisé' });
         }
-        const user = await User.create({ email, password, firstname, lastname });
+        const user = await User.create({ email, password, firstname, lastname, role: 'user' });
         const token = generateToken(user);
         res.status(201).json({ message: 'Inscription réussie', user, token });
     } catch (error) {
