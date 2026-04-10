@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import LegroupeSkeleton from '../components/LegroupeSkeleton';
 
 export default function Groupe() {
     // 1. États pour stocker les données de la BDD
@@ -10,21 +11,27 @@ export default function Groupe() {
         group_history_2: '',
         group_title_history: ''
     });
+    const [loading, setLoading] = useState(true);
 
     // 2. Récupération des données au chargement
     useEffect(() => {
-        // Récupérer les membres
-        fetch('http://localhost:5000/api/membres')
-            .then(res => res.json())
-            .then(data => setMembres(data))
-            .catch(err => console.error("Erreur membres:", err));
-
-        // Récupérer les textes (Slogan, Annonce, etc.)
-        fetch('http://localhost:5000/api/groupesettings')
-            .then(res => res.json())
-            .then(data => setGroupTexts(data))
-            .catch(err => console.error("Erreur settings groupe:", err));
+        
+        Promise.all([
+            fetch('http://localhost:5000/api/membres').then(res => res.json()),
+            fetch('http://localhost:5000/api/groupesettings').then(res => res.json())
+        ])
+            .then(([membresData, textsData]) => {
+                setMembres(membresData);
+                setGroupTexts(textsData);
+                setLoading(false);
+            })
+            .catch(err => {
+                console.error("Erreur chargement groupe:", err);
+                setLoading(false);
+            });
     }, []);
+
+    if (loading) return <LegroupeSkeleton />;
 
     return (
         <div className="mt-[80px] min-h-[calc(100vh-82px)] bg-black text-white">
