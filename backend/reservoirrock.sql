@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Apr 09, 2026 at 11:55 AM
+-- Generation Time: Apr 10, 2026 at 08:28 AM
 -- Server version: 8.0.30
 -- PHP Version: 8.1.10
 
@@ -68,7 +68,7 @@ INSERT INTO `group_settings` (`key_name`, `value_text`) VALUES
 ('group_history_1', 'Composé de Jean-Marc, Martial, Romain et Éric, le groupe a forgé son identité sur une obsession : la précision sonore. Ils allient le pur plaisir du jeu à des prestations de qualité professionnelle.'),
 ('group_history_2', 'Une importance capitale est accordée à la technique et au matériel de pointe, transformant chaque scène en un spectacle soigné et immersif.'),
 ('group_slogan', 'Plus qu\'un simple groupe de reprises, Réservoir Rock puise son énergie dans un répertoire éclectique et puissant.'),
-('group_title_history', 'L\'ÉNERGIE BRUTE, L\'EXIGENCE DU SON');
+('group_title_history', 'L\'ÉMOTION PURE, L\'EXIGENCE DU SON');
 
 -- --------------------------------------------------------
 
@@ -213,9 +213,9 @@ CREATE TABLE `videos` (
 --
 
 INSERT INTO `videos` (`id`, `titre`, `url_youtube`, `file_path`, `file_name`, `file_size`, `mime_type`, `description`, `created_at`, `updated_at`) VALUES
-(4, 'RESERVOIR ROCK à BORMES ', 'ac_1MdSA9u0?si=brawqtRe5s_i7Kkj', NULL, NULL, NULL, NULL, 'BORMES LES MIMOSAS', '2026-04-07 13:14:13', '2026-04-08 12:33:11'),
-(5, 'RESERVOIR ROCK au RAYOLET', 'UrrtAPj9Nzw?si=UmM5TPfUqaAht5zo', NULL, NULL, NULL, NULL, 'SIX FOURS', '2026-04-07 13:15:31', '2026-04-07 13:15:31'),
-(7, 'Réservoir Rock à la Coudoulière', NULL, '/uploads/1775719463358-528721700.MOV', 'XVIQ1353.MOV', 519875242, 'video/quicktime', 'Restaurant de la piscine SIX-FOURS', '2026-04-09 07:24:24', '2026-04-09 07:24:24');
+(4, 'RéSERVOIR ROCK à BORMES ', 'ac_1MdSA9u0?si=brawqtRe5s_i7Kkj', NULL, NULL, NULL, NULL, 'BORMES LES MIMOSAS', '2026-04-07 13:14:13', '2026-04-10 07:41:56'),
+(5, 'RéSERVOIR ROCK au RAYOLET', 'UrrtAPj9Nzw?si=UmM5TPfUqaAht5zo', NULL, NULL, NULL, NULL, 'SIX FOURS', '2026-04-07 13:15:31', '2026-04-10 07:41:47'),
+(9, 'Réservoir Rock à la Coudoulière', 'tn8qVJyVRtc', NULL, NULL, NULL, NULL, 'SIX-FOURS', '2026-04-10 08:19:21', '2026-04-10 08:19:21');
 
 --
 -- Indexes for dumped tables
@@ -317,7 +317,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `videos`
 --
 ALTER TABLE `videos`
-  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- Constraints for dumped tables
