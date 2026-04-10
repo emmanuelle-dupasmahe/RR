@@ -11,7 +11,7 @@ function Header() {
     const handleLogout = () => {
         logout();
         setIsMenuOpen(false);
-        navigate('/login');
+        navigate(isAdmin ? '/login' : '/');
     };
 
     const navLinkClass = ({ isActive }) =>
