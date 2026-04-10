@@ -20,12 +20,12 @@ function Home() {
         <div className="mt-[80px] min-h-[calc(100vh-82px)] flex flex-col justify-center items-center text-center bg-[linear-gradient(rgba(0,0,0,0.5),rgba(0,0,0,0.8)),url('/images/groupe.jpg')] bg-no-repeat bg-center bg-cover">
 
             {/* Titre avec effet de balayage rouge */}
-            <h1 className="text-[3.5rem] md:text-[5.5rem] font-[300] uppercase m-0 leading-[1] tracking-[0.15em] animate-shimmer inline-block transform scale-x-[0.95] origin-center">
+            <h1 className="text-[3.5rem] md:text-[5.5rem] uppercase m-0 leading-[1.2] tracking-[0.1em] animate-shimmer inline-block transform origin-center">
                 Réservoir Rock
             </h1>
             {/* Section Concert */}
             <section className="bg-[rgba(227,27,35,0.4)] border border-primary px-[40px] py-[20px] mt-[60px] rounded-[4px] animate-pulse-rock">
-                <h2 className="text-[1.875rem] font-[800] uppercase mb-[8px] text-white">
+                <h2 className="text-[1.875rem] font-[700] uppercase mb-[8px] text-white">
                     Prochain Concert
                 </h2>
                 {nextConcert ? (

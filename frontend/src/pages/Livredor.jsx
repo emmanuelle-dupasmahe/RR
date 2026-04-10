@@ -77,7 +77,7 @@ function Livredor() {
 
             <div className="max-w-[800px] mx-auto px-[20px] pt-10 pb-16">
                 {isAuthenticated ? (
-                    <form onSubmit={handleSubmit} className="mb-6 p-[1px] rounded-xl bg-gradient-to-r from-primary/40 to-black">
+                    <form onSubmit={handleSubmit} className="mb-4 p-[1px] rounded-xl bg-gradient-to-r from-primary/40 to-black">
                         <div className="bg-[#0a0a0a] p-4 rounded-xl">
                             <h2 className="text-white font-black uppercase tracking-widest mb-2 flex items-center gap-2 text-xs">
                                 <span className="w-2 h-2 bg-primary rounded-full animate-pulse"></span>
@@ -98,7 +98,7 @@ function Livredor() {
                         </div>
                     </form>
                 ) : (
-                    <div className="mb-6 text-center p-4 border border-white/5 bg-[#111] rounded-xl italic text-[#666] text-sm">
+                    <div className="mb-4 text-center p-4 border border-white/5 bg-[#111] rounded-xl italic text-[#666] text-sm">
                         Connectez-vous pour rejoindre la discussion.
                     </div>
                 )}
