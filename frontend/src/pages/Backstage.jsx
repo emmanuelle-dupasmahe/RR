@@ -29,13 +29,20 @@ const Backstage = () => {
     if (loading) return <div className="text-center py-20 text-red-600 font-bold uppercase tracking-widest">Chargement du studio...</div>;
 
     return (
-        <div className="min-h-screen bg-black text-white p-8 pt-24">
-            {/* Titre standard pour remplacer SectionTitle */}
-            <div className="mb-12 border-l-4 border-red-600 pl-4">
-                <h1 className="text-4xl font-black uppercase tracking-tighter">Backstage</h1>
-                <p className="text-gray-500 uppercase text-xs font-bold tracking-widest">Espace Privé Groupe</p>
+        <div className="min-h-screen bg-black text-white">
+            {/* HEADER DE LA PAGE (Identique aux autres pages) */}
+            <div className="text-center pt-[100px] pb-[40px] bg-gradient-to-b from-[#111] to-black px-4 mb-8">
+                <h1 className="text-[3rem] md:text-[3.5rem] font-[300] uppercase m-0 leading-[1.2] tracking-[0.1em] text-white inline-block">
+                    Backstage
+                </h1>
+
+                <p className="text-primary font-black tracking-[5px] uppercase text-[0.7rem] md:text-xs mb-4">
+                    Espace Privé // Accès réservé aux membres
+                </p>
             </div>
 
+            {/* CONTENU DES MORCEAUX */}
+        <div className="max-w-7xl mx-auto px-6 pb-12">
             <div className="grid grid-cols-1 gap-6">
                 {morceaux && morceaux.length > 0 ? (
                     morceaux
@@ -57,8 +64,8 @@ const Backstage = () => {
                                     <div className="mt-4">
                                         <WavePlayer
                                             url={m.url.startsWith('/uploads') ? `http://localhost:5000${m.url}` : m.url}
-                                            startTime={m.start_time} 
-                                            endTime={m.end_time}    
+                                            startTime={m.start_time}
+                                            endTime={m.end_time}
                                         />
                                     </div>
                                 </div>
@@ -80,6 +87,7 @@ const Backstage = () => {
                     <p className="text-center opacity-30 py-10">Aucun morceau enregistré dans le studio.</p>
                 )}
             </div>
+        </div>
         </div>
     );
 };
