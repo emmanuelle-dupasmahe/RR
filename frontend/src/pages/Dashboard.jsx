@@ -47,12 +47,12 @@ function Dashboard() {
 
     const fetchRepetitions = async (page = 1) => {
         try {
-            
+
             const token = localStorage.getItem('token');
 
             const res = await fetch(`http://localhost:5000/api/repetitions?page=${page}&limit=5`, {
                 method: 'GET',
-                
+
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
@@ -621,12 +621,12 @@ function Dashboard() {
                     {/* SECTION RÉPÉTITIONS */}
                     {activeSection === 'repetitions' && (
                         <section id="repetitions" className="animate-in fade-in duration-500">
-                            <SectionTitle subtitle="Audio Archives">Répètes</SectionTitle>
+                            <SectionTitle subtitle="Audio Archives">Studio & Backstage</SectionTitle>
                             <div className="grid lg:grid-cols-2 gap-12">
 
                                 {/* Formulaire d'ajout */}
                                 <div className="bg-[#0a0a0a] border border-white/5 p-8 rounded-2xl shadow-2xl">
-                                    <h3 className="text-sm font-black uppercase tracking-widest mb-6 opacity-40">Ajouter un morceau</h3>
+                                    <h3 className="text-sm font-black uppercase tracking-widest mb-6 opacity-40">Nouveau morceau</h3>
                                     <form onSubmit={handleRepSubmit} className="space-y-4">
                                         <input
                                             type="text"
@@ -636,22 +636,20 @@ function Dashboard() {
                                             onChange={(e) => setRepFormData({ ...repFormData, titre: e.target.value })}
                                             required
                                         />
-                                        <input
-                                            type="text"
-                                            placeholder="DÉTAIL (ex: Session Live 12.02)"
-                                            className={inputClass}
+
+                                        <textarea
+                                            placeholder="NOTES TECHNIQUES (ex: Attention à la transition bridge/refrain)"
+                                            className={`${inputClass} h-24 resize-none py-3`}
                                             value={repFormData.detail}
                                             onChange={(e) => setRepFormData({ ...repFormData, detail: e.target.value })}
-                                            required
                                         />
 
-                                        {/* --- NOUVEAU : GESTION DU TEMPS --- */}
-                                        <div className="grid grid-cols-2 gap-4">
+                                        {/* --- GESTION DU TEMPS & STATUT --- */}
+                                        <div className="grid grid-cols-3 gap-4">
                                             <div className="space-y-1">
                                                 <label className="text-[9px] font-black text-primary/60 uppercase ml-1">Début (sec)</label>
                                                 <input
                                                     type="number"
-                                                    placeholder="0"
                                                     className={inputClass}
                                                     value={repFormData.start_time || 0}
                                                     onChange={(e) => setRepFormData({ ...repFormData, start_time: e.target.value })}
@@ -661,11 +659,21 @@ function Dashboard() {
                                                 <label className="text-[9px] font-black text-primary/60 uppercase ml-1">Fin (sec)</label>
                                                 <input
                                                     type="number"
-                                                    placeholder="Ex: 120"
                                                     className={inputClass}
                                                     value={repFormData.end_time || ''}
                                                     onChange={(e) => setRepFormData({ ...repFormData, end_time: e.target.value })}
                                                 />
+                                            </div>
+                                            <div className="space-y-1">
+                                                <label className="text-[9px] font-black text-primary/60 uppercase ml-1">Visibilité</label>
+                                                <select
+                                                    className={inputClass}
+                                                    value={repFormData.status || 'private'}
+                                                    onChange={(e) => setRepFormData({ ...repFormData, status: e.target.value })}
+                                                >
+                                                    <option value="private">Privé</option>
+                                                    <option value="public">Public</option>
+                                                </select>
                                             </div>
                                         </div>
 
@@ -701,7 +709,7 @@ function Dashboard() {
                                             </label>
                                         </div>
 
-                                        <button type="submit" className={btnClass}>Ajouter au studio</button>
+                                        <button type="submit" className={btnClass}>Envoyer au studio</button>
                                     </form>
                                 </div>
 
@@ -712,7 +720,6 @@ function Dashboard() {
                                             <div key={r.id} className="p-5 bg-[#0a0a0a] border border-white/5 rounded-xl hover:border-white/10 transition-all group">
                                                 {editingRep === r.id ? (
                                                     <div className="space-y-3 p-4 bg-white/5 rounded-lg border border-primary/20">
-                                                        {/* TITRE */}
                                                         <input
                                                             className={inputClass}
                                                             value={r.titre}
@@ -720,15 +727,13 @@ function Dashboard() {
                                                             placeholder="Titre"
                                                         />
 
-                                                        {/* DÉTAIL (Il manquait celui-là !) */}
-                                                        <input
-                                                            className={inputClass}
+                                                        <textarea
+                                                            className={`${inputClass} h-20 resize-none`}
                                                             value={r.detail}
                                                             onChange={(e) => setRepetitions(repetitions.map(item => item.id === r.id ? { ...item, detail: e.target.value } : item))}
-                                                            placeholder="Détail (ex: Session Live)"
+                                                            placeholder="Notes techniques"
                                                         />
 
-                                                        {/* TEMPS DE DÉBUT / FIN */}
                                                         <div className="grid grid-cols-2 gap-2">
                                                             <div className="space-y-1">
                                                                 <label className="text-[8px] uppercase text-white/30">Début (sec)</label>
@@ -740,26 +745,26 @@ function Dashboard() {
                                                             </div>
                                                         </div>
 
-                                                        {/* VISIBILITÉ (NOUVEAU) */}
                                                         <div className="flex items-center gap-3 py-2">
                                                             <span className="text-[8px] uppercase text-white/30">Visibilité:</span>
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => setRepetitions(repetitions.map(item => item.id === r.id ? { ...item, status: 'public' } : item))}
-                                                                className={`px-3 py-1 rounded text-[8px] font-black uppercase transition-all ${r.status === 'public' ? 'bg-green-600 text-white' : 'bg-white/10 text-white/40'}`}
-                                                            >
-                                                                Public
-                                                            </button>
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => setRepetitions(repetitions.map(item => item.id === r.id ? { ...item, status: 'private' } : item))}
-                                                                className={`px-3 py-1 rounded text-[8px] font-black uppercase transition-all ${r.status === 'private' ? 'bg-primary text-white' : 'bg-white/10 text-white/40'}`}
-                                                            >
-                                                                Privé
-                                                            </button>
+                                                            <div className="flex bg-black rounded p-1 gap-1">
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => setRepetitions(repetitions.map(item => item.id === r.id ? { ...item, status: 'public' } : item))}
+                                                                    className={`px-3 py-1 rounded text-[8px] font-black uppercase transition-all ${r.status === 'public' ? 'bg-green-600 text-white' : 'text-white/40'}`}
+                                                                >
+                                                                    Public
+                                                                </button>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => setRepetitions(repetitions.map(item => item.id === r.id ? { ...item, status: 'private' } : item))}
+                                                                    className={`px-3 py-1 rounded text-[8px] font-black uppercase transition-all ${r.status === 'private' ? 'bg-primary text-white' : 'text-white/40'}`}
+                                                                >
+                                                                    Privé
+                                                                </button>
+                                                            </div>
                                                         </div>
 
-                                                        {/* BOUTONS ACTIONS */}
                                                         <div className="flex gap-2 pt-2">
                                                             <button onClick={() => handleUpdateRep(r)} className="bg-green-600 text-white text-[10px] font-black p-2 rounded uppercase flex-1">Sauvegarder</button>
                                                             <button onClick={() => setEditingRep(null)} className="bg-white/10 text-white text-[10px] font-black p-2 rounded uppercase flex-1">Annuler</button>
@@ -768,25 +773,24 @@ function Dashboard() {
                                                 ) : (
                                                     <>
                                                         <div className="flex justify-between items-start mb-2">
-                                                            <div>
-                                                                <div className="flex items-center gap-2">
+                                                            <div className="flex-1">
+                                                                <div className="flex items-center gap-2 mb-1">
                                                                     <span className="text-white font-bold block uppercase tracking-tight text-base leading-none">{r.titre}</span>
-                                                                    {/* Badge de statut */}
                                                                     <span className={`text-[8px] px-1.5 py-0.5 rounded font-black uppercase ${r.status === 'public' ? 'bg-green-500/20 text-green-500' : 'bg-primary/20 text-primary'}`}>
                                                                         {r.status === 'public' ? 'Public' : 'Privé'}
                                                                     </span>
                                                                 </div>
-                                                                <span className="text-[11px] text-primary font-bold uppercase tracking-widest">{r.detail}</span>
+                                                                <p className="text-[11px] text-primary font-bold uppercase tracking-widest leading-tight">{r.detail}</p>
 
-                                                                {r.end_time && (
+                                                                {(r.start_time || r.end_time) && (
                                                                     <div className="mt-2 flex items-center gap-2">
                                                                         <span className="text-[9px] bg-white/5 px-2 py-0.5 rounded text-white/40 uppercase font-black">
-                                                                            Segment: {r.start_time || 0}s ➔ {r.end_time}s
+                                                                            Segment: {r.start_time || 0}s ➔ {r.end_time || 'fin'}s
                                                                         </span>
                                                                     </div>
                                                                 )}
                                                             </div>
-                                                            <div className="flex gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                            <div className="flex gap-3 opacity-0 group-hover:opacity-100 transition-opacity ml-4">
                                                                 <button onClick={() => setEditingRep(r.id)} className="text-white/30 hover:text-white text-[10px] font-black uppercase">Edit</button>
                                                                 <button onClick={() => handleRepDelete(r.id)} className="text-[#444] hover:text-primary text-[10px] font-black uppercase">Delete</button>
                                                             </div>

@@ -25,7 +25,7 @@ function Header() {
 
     // Style spécifique pour le lien Backstage (avec la puce rouge)
     const backstageClass = ({ isActive }) =>
-        `flex items-center gap-2 text-[1.1rem] lg:text-[0.95rem] font-[900] uppercase no-underline tracking-[1px] transition-all duration-300 ${isActive ? 'text-primary' : 'text-primary/60 hover:text-primary'
+        `flex items-center gap-2 text-[1.1rem] lg:text-[0.95rem] font-[700] uppercase no-underline tracking-[1px] transition-all duration-300 ${isActive ? 'text-primary' : 'text-primary/60 hover:text-primary'
         }`;
 
     return (
@@ -51,11 +51,11 @@ function Header() {
             </button>
 
             {/* NAVIGATION DESKTOP */}
-            <nav className="hidden lg:flex gap-[35px] ml-[30px] items-center">
+            <nav className="hidden lg:flex gap-[25px] ml-[15px] items-center">
                 <NavLink to="/legroupe" className={navLinkClass}>Le groupe</NavLink>
                 <NavLink to="/repetition" className={navLinkClass}>Répétitions</NavLink>
 
-                {/* --- LIEN BACKSTAGE (Admin & Membres uniquement) --- */}
+                {/* --- BACKSTAGE (Admin & Membres) --- */}
                 {isAuthenticated && (user?.role === 'admin' || user?.role === 'member') && (
                     <NavLink to="/backstage" className={backstageClass}>
                         <span className="relative flex h-2 w-2">
@@ -76,7 +76,7 @@ function Header() {
             </nav>
 
             {/* BLOC AUTH (Desktop) */}
-            <div className="hidden lg:flex items-center bg-white px-[15px] py-[6px] ml-auto gap-[15px] whitespace-nowrap shrink-0">
+            <div className="hidden lg:flex items-center bg-white px-[15px] py-[6px] ml-6 gap-[15px] whitespace-nowrap shrink-0">
                 {isAuthenticated ? (
                     <>
                         <span className="text-black text-[0.65rem] font-[900] uppercase">{user?.firstname}</span>
