@@ -1,33 +1,31 @@
 // components/Footer.jsx
-import MailOutlineIcon from '@mui/icons-material/MailOutline';
+import { useState, useEffect } from 'react';
 
 function Footer() {
+    const [credits, setCredits] = useState('Mika'); // Valeur par défaut
+
+    useEffect(() => {
+        // On récupère les réglages du groupe
+        fetch('http://localhost:5000/api/groupesettings')
+            .then(res => res.json())
+            .then(data => {
+                // Si la clé existe dans les données reçues, on met à jour
+                if (data.photo_credits) {
+                    setCredits(data.photo_credits);
+                }
+            })
+            .catch(err => console.error("Erreur crédits:", err));
+    }, []);
+
     return (
         <footer className="bg-black border-t-2 border-[#222] px-[40px] py-[30px] text-center text-[#888888] font-sans">
             <div className="max-w-[80rem] mx-auto flex flex-col items-center gap-[24px]">
-
-                {/* SECTION CONTACT */}
-                <div className="flex flex-col items-center gap-2">
-                    <a
-                        href="mailto:contact@resrock.fr"
-                        className="group flex items-center gap-2 text-[#888888] hover:text-white transition-colors duration-300 no-underline"
-                    >
-                        <MailOutlineIcon
-                            sx={{ fontSize: 20 }}
-                            className="group-hover:text-primary transition-colors"
-                        />
-                        <span className="text-[0.875rem] font-bold tracking-widest uppercase">
-                            contact@resrock.fr
-                        </span>
-                    </a>
-                </div>
-
                 <div className="space-y-1">
                     <p className="m-0 text-[0.875rem] text-[#888]">
                         Réservoir Rock - © {new Date().getFullYear()} Tous droits réservés.
                     </p>
                     <p className="m-0 text-[11px] text-[#aaaaaa] uppercase tracking-[2.5px] font-semibold">
-                        Crédits photographiques : <span className="text-primary">Mika</span>
+                        Crédits photographiques : <span className="text-primary">{credits}</span>
                     </p>
                 </div>
 

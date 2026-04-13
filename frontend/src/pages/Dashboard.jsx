@@ -29,7 +29,8 @@ function Dashboard() {
         group_announce: '',
         group_history_1: '',
         group_history_2: '',
-        group_title_history: ''
+        group_title_history: '',
+        photo_credits: ''
     });
     const [newMember, setNewMember] = useState({ nom: '', instrument: '', photo_url: '', ordre_affichage: 0 });
 
@@ -709,12 +710,38 @@ function Dashboard() {
                             {videos.map(v => (
                                 <div key={v.id} className="flex justify-between items-center p-5 bg-[#0a0a0a] border border-white/5 rounded-xl">
                                     {editingVideo === v.id ? (
-                                        <div className="flex-1 flex gap-2">
-                                            <input className={inputClass} value={v.titre} onChange={(e) => setVideos(videos.map(item => item.id === v.id ? { ...item, titre: e.target.value } : item))} />
-                                            <button onClick={() => handleUpdateVideo(v)} className="bg-green-600 px-3 rounded font-black">OK</button>
-                                            <button onClick={() => setEditingVideo(null)} className="bg-white/10 px-3 rounded font-black text-xs">X</button>
+                                        <div className="flex-1 flex flex-col gap-2"> {/* Passage en flex-col pour plus d'espace */}
+                                            {/* Champ TITRE */}
+                                            <input
+                                                className={inputClass}
+                                                value={v.titre}
+                                                onChange={(e) => setVideos(videos.map(item => item.id === v.id ? { ...item, titre: e.target.value } : item))}
+                                                placeholder="Titre"
+                                            />
+
+                                            {/* Champ DESCRIPTION (Lieu) */}
+                                            <input
+                                                className={inputClass}
+                                                value={v.description || ''}
+                                                onChange={(e) => setVideos(videos.map(item => item.id === v.id ? { ...item, description: e.target.value } : item))}
+                                                placeholder="Lieu (ex: SIX-FOURS)"
+                                            />
+
+                                            {/* Champ URL (Youtube) */}
+                                            <input
+                                                className={inputClass}
+                                                value={v.url_youtube || ''}
+                                                onChange={(e) => setVideos(videos.map(item => item.id === v.id ? { ...item, url_youtube: e.target.value } : item))}
+                                                placeholder="ID Youtube"
+                                            />
+
+                                            <div className="flex gap-2 justify-end">
+                                                <button onClick={() => handleUpdateVideo(v)} className="bg-green-600 px-3 py-1 rounded font-black text-xs">OK</button>
+                                                <button onClick={() => setEditingVideo(null)} className="bg-white/10 px-3 py-1 rounded font-black text-xs">X</button>
+                                            </div>
                                         </div>
                                     ) : (
+
                                         <>
                                             <div>
                                                 <span className="text-white font-bold block uppercase tracking-tight">{v.titre}</span>
@@ -736,6 +763,7 @@ function Dashboard() {
                         </div>
                     </div>
                 </section>
+
                 {/* --- SECTION LE GROUPE --- */}
                 <section className="pt-12 border-t border-white/5">
                     <SectionTitle subtitle="Band Identity">Le Groupe</SectionTitle>
@@ -798,6 +826,23 @@ function Dashboard() {
                                     onChange={(e) => setGroupTexts({ ...groupTexts, group_history_2: e.target.value })}
                                     onBlur={() => handleUpdateGroupText('group_history_2', groupTexts.group_history_2)}
                                 />
+                            </div>
+                            {/* Ligne : Crédits Photos */}
+                            <div className="space-y-2 pt-4 border-t border-white/5">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-primary block">
+                                    Crédits Photographiques (Footer)
+                                </label>
+                                <input
+                                    type="text"
+                                    className={inputClass}
+                                    value={groupTexts.photo_credits || ''}
+                                    onChange={(e) => setGroupTexts({ ...groupTexts, photo_credits: e.target.value })}
+                                    onBlur={() => handleUpdateGroupText('photo_credits', groupTexts.photo_credits)}
+                                    placeholder="Mika / Reservoir Rock..."
+                                />
+                                <p className="text-[9px] text-gray-500 uppercase tracking-tighter">
+                                    Ce texte s'affiche en bas de toutes les pages du site.
+                                </p>
                             </div>
                         </div>
                     </div>
