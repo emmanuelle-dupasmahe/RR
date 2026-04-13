@@ -8,6 +8,9 @@ function Header() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const navigate = useNavigate();
 
+    // Correction mineure : définition de isAdmin pour la navigation après logout
+    const isAdmin = user?.role === 'admin';
+
     const handleLogout = () => {
         logout();
         setIsMenuOpen(false);
@@ -15,15 +18,19 @@ function Header() {
     };
 
     const navLinkClass = ({ isActive }) =>
-        `text-[1.1rem] lg:text-[0.95rem] font-[700] uppercase no-underline tracking-[1px] transition-colors duration-300 ${
-            isActive ? 'text-white' : 'text-[#888888] hover:text-white'
+        `text-[1.1rem] lg:text-[0.95rem] font-[700] uppercase no-underline tracking-[1px] transition-colors duration-300 ${isActive ? 'text-white' : 'text-[#888888] hover:text-white'
         }`;
 
     const authLinkClass = "bg-transparent text-black text-[0.65rem] font-[900] uppercase no-underline tracking-[1px] transition-colors duration-300 hover:text-[#666666]";
 
+    // Style spécifique pour le lien Backstage (avec la puce rouge)
+    const backstageClass = ({ isActive }) =>
+        `flex items-center gap-2 text-[1.1rem] lg:text-[0.95rem] font-[900] uppercase no-underline tracking-[1px] transition-all duration-300 ${isActive ? 'text-primary' : 'text-primary/60 hover:text-primary'
+        }`;
+
     return (
         <header className="fixed top-0 left-0 z-[1000] w-full flex justify-between lg:justify-start items-center px-6 md:px-[40px] bg-black border-b-2 border-[#222] h-[80px] box-border">
-            
+
             {/* LOGO AVEC EFFET PULSATION */}
             <Link to="/" className="flex items-center no-underline w-[120px] lg:w-[150px] shrink-0">
                 <img
@@ -34,7 +41,7 @@ function Header() {
             </Link>
 
             {/* BOUTON BURGER (Mobile uniquement) */}
-            <button 
+            <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                 className="lg:hidden flex flex-col justify-center items-center gap-1.5 z-[1100] bg-transparent border-none cursor-pointer"
             >
@@ -44,13 +51,28 @@ function Header() {
             </button>
 
             {/* NAVIGATION DESKTOP */}
-            <nav className="hidden lg:flex gap-[35px] ml-[30px]">
+            <nav className="hidden lg:flex gap-[35px] ml-[30px] items-center">
                 <NavLink to="/legroupe" className={navLinkClass}>Le groupe</NavLink>
                 <NavLink to="/repetition" className={navLinkClass}>Répétitions</NavLink>
+
+                {/* --- LIEN BACKSTAGE (Admin & Membres uniquement) --- */}
+                {isAuthenticated && (user?.role === 'admin' || user?.role === 'member') && (
+                    <NavLink to="/backstage" className={backstageClass}>
+                        <span className="relative flex h-2 w-2">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                        </span>
+                        Backstage
+                    </NavLink>
+                )}
+
                 <NavLink to="/videos" className={navLinkClass}>Vidéos</NavLink>
                 <NavLink to="/concerts" className={navLinkClass}>Concerts</NavLink>
                 <NavLink to="/livredor" className={navLinkClass}>Livre d'or</NavLink>
-                {isAuthenticated && user?.role === 'admin' && <NavLink to="/dashboard" className={navLinkClass}>Admin</NavLink>}
+
+                {isAuthenticated && user?.role === 'admin' && (
+                    <NavLink to="/dashboard" className={navLinkClass}>Admin</NavLink>
+                )}
             </nav>
 
             {/* BLOC AUTH (Desktop) */}
@@ -69,15 +91,23 @@ function Header() {
             </div>
 
             {/* MENU MOBILE (OVERLAY) */}
-            <div className={`fixed inset-0 bg-black flex flex-col items-center justify-center transition-all duration-500 lg:hidden ${
-                isMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
-            }`}>
+            <div className={`fixed inset-0 bg-black flex flex-col items-center justify-center transition-all duration-500 lg:hidden ${isMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+                }`}>
                 <nav className="flex flex-col items-center gap-8 mb-12">
                     <NavLink to="/legroupe" onClick={() => setIsMenuOpen(false)} className={navLinkClass}>Le groupe</NavLink>
                     <NavLink to="/repetition" onClick={() => setIsMenuOpen(false)} className={navLinkClass}>Répétitions</NavLink>
+
+                    {/* BACKSTAGE MOBILE */}
+                    {isAuthenticated && (user?.role === 'admin' || user?.role === 'member') && (
+                        <NavLink to="/backstage" onClick={() => setIsMenuOpen(false)} className={backstageClass}>
+                            Backstage
+                        </NavLink>
+                    )}
+
                     <NavLink to="/videos" onClick={() => setIsMenuOpen(false)} className={navLinkClass}>Vidéos</NavLink>
                     <NavLink to="/concerts" onClick={() => setIsMenuOpen(false)} className={navLinkClass}>Concerts</NavLink>
                     <NavLink to="/livredor" onClick={() => setIsMenuOpen(false)} className={navLinkClass}>Livre d'or</NavLink>
+
                     {isAuthenticated && user?.role === 'admin' && (
                         <NavLink to="/dashboard" onClick={() => setIsMenuOpen(false)} className={navLinkClass}>Admin</NavLink>
                     )}

@@ -1,5 +1,40 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import RepetitionsSkeleton from '../components/RepetitionsSkeleton';
+
+// Sous-composant pour gérer la logique de lecture spécifique (Start/End)
+function AudioPlayer({ src, startTime, endTime }) {
+    const audioRef = useRef(null);
+
+    const handlePlay = () => {
+        const audio = audioRef.current;
+        // Si on est au début (0) et qu'un temps de début est défini, on saute au début
+        if (audio.currentTime < (startTime || 0)) {
+            audio.currentTime = startTime || 0;
+        }
+    };
+
+    const handleTimeUpdate = () => {
+        const audio = audioRef.current;
+        // Si un temps de fin est défini et qu'on le dépasse
+        if (endTime && audio.currentTime >= endTime) {
+            audio.pause();
+            audio.currentTime = startTime || 0; // On revient au début du segment
+        }
+    };
+
+    return (
+        <audio
+            ref={audioRef}
+            controls
+            src={src}
+            onPlay={handlePlay}
+            onTimeUpdate={handleTimeUpdate}
+            className="w-full h-[32px] opacity-90 hover:opacity-100 transition-opacity"
+        >
+            Votre navigateur ne supporte pas l'élément audio.
+        </audio>
+    );
+}
 
 function Repetitions() {
     const [morceaux, setMorceaux] = useState([]);
@@ -16,8 +51,6 @@ function Repetitions() {
             setLoading(false);
         }
     };
-
-    
 
     useEffect(() => {
         fetchMorceaux();
@@ -51,18 +84,24 @@ function Repetitions() {
                                 </span>
                                 <div className="flex flex-col">
                                     <span className="text-white font-bold tracking-wide text-lg uppercase">{m.titre}</span>
-                                    <small className="text-[#888] text-[0.8rem] font-medium">{m.detail}</small>
+                                    <div className="flex items-center gap-3">
+                                        <small className="text-[#888] text-[0.8rem] font-medium">{m.detail}</small>
+                                        {m.end_time && (
+                                            <span className="text-[10px] bg-primary/20 text-primary px-2 py-0.5 rounded font-bold uppercase tracking-tighter">
+                                                Segment: {m.start_time || 0}s - {m.end_time}s
+                                            </span>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
 
                             <div className="w-full max-w-[350px] p-[3px] rounded-full bg-gradient-to-r from-primary/60 via-black/80 to-black border border-white/10 shadow-lg">
-                                <audio
-                                    controls
+                                {/* Utilisation du nouveau lecteur intelligent */}
+                                <AudioPlayer 
                                     src={m.url.startsWith('/uploads') ? `http://localhost:5000${m.url}` : m.url}
-                                    className="w-full h-[32px] opacity-90 hover:opacity-100 transition-opacity"
-                                >
-                                    Votre navigateur ne supporte pas l'élément audio.
-                                </audio>
+                                    startTime={m.start_time}
+                                    endTime={m.end_time}
+                                />
                             </div>
                         </div>
                     ))

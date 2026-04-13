@@ -10,7 +10,7 @@ function Dashboard() {
 
     const [repetitions, setRepetitions] = useState([]);
     const [repPages, setRepPages] = useState({ current: 1, total: 1 });
-    const [repFormData, setRepFormData] = useState({ titre: '', detail: '', url: '' });
+    const [repFormData, setRepFormData] = useState({ titre: '', detail: '', url: '', start_time: 0, end_time: '', status: 'private' });
     const [repFile, setRepFile] = useState(null);
     const [editingRep, setEditingRep] = useState(null);
 
@@ -41,17 +41,35 @@ function Dashboard() {
         setReponses(prev => ({ ...prev, [id]: texte }));
     };
 
-    const [activeSection, setActiveSection] = useState('concerts');
-    
+    const [activeSection, setActiveSection] = useState('tournee');
+
     // --- LOGIQUE FETCH ---
 
     const fetchRepetitions = async (page = 1) => {
         try {
-            const res = await fetch(`http://localhost:5000/api/repetitions?page=${page}&limit=5`);
+            
+            const token = localStorage.getItem('token');
+
+            const res = await fetch(`http://localhost:5000/api/repetitions?page=${page}&limit=5`, {
+                method: 'GET',
+                
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
             const data = await res.json();
-            setRepetitions(data.repetitions || []);
-            setRepPages({ current: data.currentPage, total: data.totalPages });
-        } catch (err) { console.error(err); }
+
+            if (res.ok) {
+                setRepetitions(data.repetitions || []);
+                setRepPages({ current: data.currentPage, total: data.totalPages });
+            } else {
+                console.error("Erreur serveur:", data.error);
+            }
+        } catch (err) {
+            console.error("Erreur réseau:", err);
+        }
     };
 
     const fetchConcerts = async (page = 1) => {
@@ -180,7 +198,10 @@ function Dashboard() {
             const res = await fetch(`http://localhost:5000/api/repetitions/${rep.id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify({ titre: rep.titre, detail: rep.detail, url: rep.url })
+                body: JSON.stringify({
+                    titre: rep.titre, detail: rep.detail, url: rep.url, start_time: rep.start_time,
+                    end_time: rep.end_time, status: rep.status
+                })
             });
             if (res.ok) {
                 setEditingRep(null);
@@ -241,6 +262,9 @@ function Dashboard() {
         data.append('titre', repFormData.titre);
         data.append('detail', repFormData.detail);
         data.append('url', repFormData.url);
+        data.append('start_time', repFormData.start_time);
+        data.append('end_time', repFormData.end_time);
+
         if (repFile) data.append('audio', repFile);
 
         const response = await fetch('http://localhost:5000/api/repetitions', {
@@ -460,564 +484,730 @@ function Dashboard() {
             {/* HEADER DASHBOARD */}
             <div className="text-center py-16 bg-gradient-to-b from-[#111] to-black px-4 mb-12 border-b border-white/5">
                 <h1 className="text-[3rem] md:text-[3.5rem] font-[300] uppercase m-0 leading-[1.2] tracking-[0.1em] text-white inline-block">
-                    BackStage
+                    Dashboard
                 </h1>
                 <p className="text-primary font-black tracking-[5px] uppercase text-sm">Control Panel // Admin Only</p>
             </div>
 
-            <div className="max-w-[1000px] mx-auto px-6 space-y-24">
-
-                {/* RÉGLAGES GÉNÉRAUX */}
-                <section>
-                    <SectionTitle subtitle="Global Settings">Tournée en cours</SectionTitle>
-                    <div className="bg-[#0a0a0a] border border-white/5 p-8 rounded-2xl shadow-2xl">
-                        <form onSubmit={handleUpdateTitle} className="flex flex-col md:flex-row gap-4">
-                            <input
-                                type="text"
-                                className={inputClass}
-                                value={tourTitle}
-                                onChange={(e) => setTourTitle(e.target.value)}
-                                placeholder="ex: TOURNÉE 2026"
-                                required
-                            />
-                            <button type="submit" className="md:w-auto bg-white text-black px-8 py-4 font-black uppercase text-xs tracking-widest hover:bg-primary hover:text-white transition-all rounded-lg">
-                                Update
+            <div className="max-w-[1200px] mx-auto px-6 flex flex-col md:flex-row gap-12">
+                {/* SIDEBAR NAVIGATION */}
+                <aside className="md:w-64 flex-shrink-0">
+                    <nav className="flex flex-col gap-3 sticky top-[100px]">
+                        {[
+                            { id: 'tournee', label: 'Tournée' },
+                            { id: 'concerts', label: 'Concerts' },
+                            { id: 'repetitions', label: 'Répétitions' },
+                            { id: 'videos', label: 'Vidéos' },
+                            { id: 'groupe', label: 'Le Groupe' },
+                            { id: 'membres', label: 'Musiciens' },
+                            { id: 'messages', label: "Livre d'Or" },
+                        ].map((item) => (
+                            <button
+                                key={item.id}
+                                onClick={() => setActiveSection(item.id)}
+                                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-bold uppercase text-[11px] tracking-widest border ${activeSection === item.id
+                                    ? 'bg-primary text-black border-primary shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)]'
+                                    : 'text-white/40 border-transparent hover:text-white hover:bg-white/5'
+                                    }`}
+                            >
+                                <span className="text-base">{item.icon}</span>
+                                {item.label}
                             </button>
-                        </form>
-                    </div>
-                </section>
+                        ))}
+                    </nav>
+                </aside>
 
+                {/* CONTENU PRINCIPAL */}
+                <main className="flex-1 space-y-24">
 
-                {/* SECTION CONCERTS */}
-                <section>
-                    <SectionTitle subtitle="Live Dates Management">Calendrier Concerts</SectionTitle>
-                    <div className="grid lg:grid-cols-2 gap-12">
-                        {/* Form */}
-                        <div className="bg-[#0a0a0a] border border-white/5 p-8 rounded-2xl">
-                            <h3 className="text-sm font-black uppercase tracking-widest mb-6 opacity-40">Ajouter une date</h3>
-                            <form onSubmit={handleSubmit} className="space-y-4">
-                                <input type="text" placeholder="VILLE" className={inputClass} value={formData.titre} onChange={(e) => setFormData({ ...formData, titre: e.target.value.toUpperCase() })} required />
-                                <div className="grid grid-cols-2 gap-4">
-                                    <input type="date" className={inputClass} value={formData.date_concert} onChange={(e) => setFormData({ ...formData, date_concert: e.target.value })} required />
-                                    <input type="time" className={inputClass} value={formData.heure} onChange={(e) => setFormData({ ...formData, heure: e.target.value })} required />
-                                </div>
-                                <input type="text" placeholder="LIEU (NOM DE LA SALLE)" className={inputClass} value={formData.lieu} onChange={(e) => setFormData({ ...formData, lieu: e.target.value })} required />
-                                <button type="submit" className={btnClass}>Publier la date</button>
-                            </form>
-                        </div>
-                        {/* List */}
-                        <div className="space-y-4">
-                            {concerts.map(c => (
-                                <div key={c.id} className="p-5 bg-[#0a0a0a] border border-white/5 rounded-xl">
-                                    {editingConcert === c.id ? (
-                                        /* --- MODE ÉDITION --- */
-                                        <div className="space-y-3">
-                                            <input
-                                                className={inputClass}
-                                                value={c.titre}
-                                                onChange={(e) => setConcerts(concerts.map(con => con.id === c.id ? { ...con, titre: e.target.value.toUpperCase() } : con))}
-                                            />
-                                            <div className="grid grid-cols-2 gap-2">
-                                                <input
-                                                    type="date" className={inputClass}
-                                                    value={c.date_concert.split('T')[0]}
-                                                    onChange={(e) => setConcerts(concerts.map(con => con.id === c.id ? { ...con, date_concert: e.target.value } : con))}
-                                                />
-                                                <input
-                                                    type="time" className={inputClass}
-                                                    value={c.heure ? c.heure.substring(0, 5) : ""}
-                                                    onChange={(e) => setConcerts(concerts.map(con =>
-                                                        con.id === c.id ? { ...con, heure: e.target.value } : con))}
-                                                />
-                                            </div>
-                                            <input
-                                                className={inputClass}
-                                                value={c.lieu}
-                                                onChange={(e) => setConcerts(concerts.map(con => con.id === c.id ? { ...con, lieu: e.target.value } : con))}
-                                            />
-                                            <div className="flex gap-2">
-                                                <button onClick={() => handleUpdateConcert(c)} className="bg-green-600 text-white text-[10px] font-black p-2 rounded uppercase flex-1">Sauvegarder</button>
-                                                <button onClick={() => setEditingConcert(null)} className="bg-white/10 text-white text-[10px] font-black p-2 rounded uppercase flex-1">Annuler</button>
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        /* --- MODE AFFICHAGE --- */
-                                        <div className="group flex justify-between items-center">
-                                            <div>
-                                                <span className="text-primary font-black text-xs tracking-tighter uppercase block mb-1">
-                                                    {new Date(c.date_concert).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}
-                                                </span>
-                                                <span className="text-lg font-bold uppercase tracking-tight">{c.titre}</span>
-                                                <p className="text-[11px] text-[#666] uppercase font-bold tracking-widest mt-1">{c.lieu}</p>
-                                            </div>
-                                            <div className="flex gap-4">
-                                                <button onClick={() => setEditingConcert(c.id)} className="text-white/50 hover:text-white transition-all text-[10px] font-black uppercase">Edit</button>
-                                                <button onClick={() => handleDelete(c.id)} className="text-[#444] hover:text-primary transition-all text-[10px] font-black uppercase">Delete</button>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                            ))}
-                            <Pagination pages={concertPages} onPageChange={fetchConcerts} />
-                        </div>
-                    </div>
-                </section>
-
-                {/* SECTION RÉPÉTITIONS */}
-                <section className="pt-12 border-t border-white/5">
-                    <SectionTitle subtitle="Audio Archives">Répètes</SectionTitle>
-                    <div className="grid lg:grid-cols-2 gap-12">
-                        {/* Formulaire */}
-                        <div className="bg-[#0a0a0a] border border-white/5 p-8 rounded-2xl">
-                            <h3 className="text-sm font-black uppercase tracking-widest mb-6 opacity-40">Ajouter un morceau</h3>
-                            <form onSubmit={handleRepSubmit} className="space-y-4">
-                                <input
-                                    type="text"
-                                    placeholder="TITRE (ex: ATOMIC CITY)"
-                                    className={inputClass}
-                                    value={repFormData.titre}
-                                    onChange={(e) => setRepFormData({ ...repFormData, titre: e.target.value })}
-                                    required
-                                />
-                                <input
-                                    type="text"
-                                    placeholder="DÉTAIL (ex: Session Live 12.02)"
-                                    className={inputClass}
-                                    value={repFormData.detail}
-                                    onChange={(e) => setRepFormData({ ...repFormData, detail: e.target.value })}
-                                    required
-                                />
-
-                                {/* Champ URL */}
-                                <input
-                                    type="text"
-                                    placeholder="URL AUDIO (ex: https://dropbox.com/mon-son.mp3)"
-                                    className={inputClass}
-                                    value={repFormData.url}
-                                    onChange={(e) => setRepFormData({ ...repFormData, url: e.target.value })}
-                                />
-
-                                <div className="text-center text-[10px] font-black uppercase opacity-20 py-2">— OU —</div>
-
-                                {/* Upload Fichier */}
-                                <div className="p-4 border-2 border-dashed border-white/5 rounded-lg text-center hover:border-primary/30 transition-all">
+                    {/* RÉGLAGES GÉNÉRAUX */}
+                    {activeSection === 'tournee' && (
+                        <section id="tournee">
+                            <SectionTitle subtitle="Global Settings">Tournée en cours</SectionTitle>
+                            <div className="bg-[#0a0a0a] border border-white/5 p-8 rounded-2xl shadow-2xl">
+                                <form onSubmit={handleUpdateTitle} className="flex flex-col md:flex-row gap-4">
                                     <input
-                                        type="file"
-                                        accept="audio/*"
-                                        className="hidden"
-                                        id="audio-upload"
-                                        onChange={(e) => {
-                                            const file = e.target.files[0];
-                                            if (file) {
-                                                setRepFile(file);
-                                                // Remplissage auto du titre si vide
-                                                if (!repFormData.titre) {
-                                                    const fileName = file.name.split('.').slice(0, -1).join('.');
-                                                    setRepFormData(prev => ({ ...prev, titre: fileName.toUpperCase() }));
-                                                }
-                                            }
-                                        }}
+                                        type="text"
+                                        className={inputClass}
+                                        value={tourTitle}
+                                        onChange={(e) => setTourTitle(e.target.value)}
+                                        placeholder="ex: TOURNÉE 2026"
+                                        required
                                     />
-                                    <label htmlFor="audio-upload" className="cursor-pointer text-[10px] font-black uppercase tracking-[2px] text-[#666] hover:text-white">
-                                        {repFile ? repFile.name : "Cliquez pour uploader un MP3"}
-                                    </label>
+                                    <button type="submit" className="md:w-auto bg-white text-black px-8 py-4 font-black uppercase text-xs tracking-widest hover:bg-primary hover:text-white transition-all rounded-lg">
+                                        Update
+                                    </button>
+                                </form>
+                            </div>
+                        </section>
+                    )}
+
+                    {/* SECTION CONCERTS */}
+                    {activeSection === 'concerts' && (
+                        <section id="concerts">
+                            <SectionTitle subtitle="Live Dates Management">Calendrier Concerts</SectionTitle>
+                            <div className="grid lg:grid-cols-2 gap-12">
+                                {/* Formulaire d'ajout */}
+                                <div className="bg-[#0a0a0a] border border-white/5 p-8 rounded-2xl">
+                                    <h3 className="text-sm font-black uppercase tracking-widest mb-6 opacity-40">Ajouter une date</h3>
+                                    <form onSubmit={handleSubmit} className="space-y-4">
+                                        <input type="text" placeholder="VILLE" className={inputClass} value={formData.titre} onChange={(e) => setFormData({ ...formData, titre: e.target.value.toUpperCase() })} required />
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <input type="date" className={inputClass} value={formData.date_concert} onChange={(e) => setFormData({ ...formData, date_concert: e.target.value })} required />
+                                            <input type="time" className={inputClass} value={formData.heure} onChange={(e) => setFormData({ ...formData, heure: e.target.value })} required />
+                                        </div>
+                                        <input type="text" placeholder="LIEU (NOM DE LA SALLE)" className={inputClass} value={formData.lieu} onChange={(e) => setFormData({ ...formData, lieu: e.target.value })} required />
+                                        <button type="submit" className={btnClass}>Publier la date</button>
+                                    </form>
                                 </div>
 
-                                <button type="submit" className={btnClass}>Ajouter au studio</button>
-                            </form>
-                        </div>
+                                {/* Liste des concerts */}
+                                <div className="space-y-4">
+                                    {concerts.map(c => (
+                                        <div key={c.id} className="p-5 bg-[#0a0a0a] border border-white/5 rounded-xl">
+                                            {editingConcert === c.id ? (
+                                                <div className="space-y-3">
+                                                    <input
+                                                        className={inputClass}
+                                                        value={c.titre}
+                                                        onChange={(e) => setConcerts(concerts.map(con => con.id === c.id ? { ...con, titre: e.target.value.toUpperCase() } : con))}
+                                                    />
+                                                    <div className="grid grid-cols-2 gap-2">
+                                                        <input
+                                                            type="date" className={inputClass}
+                                                            value={c.date_concert.split('T')[0]}
+                                                            onChange={(e) => setConcerts(concerts.map(con => con.id === c.id ? { ...con, date_concert: e.target.value } : con))}
+                                                        />
+                                                        <input
+                                                            type="time" className={inputClass}
+                                                            value={c.heure ? c.heure.substring(0, 5) : ""}
+                                                            onChange={(e) => setConcerts(concerts.map(con => con.id === c.id ? { ...con, heure: e.target.value } : con))}
+                                                        />
+                                                    </div>
+                                                    <input
+                                                        className={inputClass}
+                                                        value={c.lieu}
+                                                        onChange={(e) => setConcerts(concerts.map(con => con.id === c.id ? { ...con, lieu: e.target.value } : con))}
+                                                    />
+                                                    <div className="flex gap-2">
+                                                        <button onClick={() => handleUpdateConcert(c)} className="bg-green-600 text-white text-[10px] font-black p-2 rounded uppercase flex-1">Sauvegarder</button>
+                                                        <button onClick={() => setEditingConcert(null)} className="bg-white/10 text-white text-[10px] font-black p-2 rounded uppercase flex-1">Annuler</button>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div className="group flex justify-between items-center">
+                                                    <div>
+                                                        <span className="text-primary font-black text-xs tracking-tighter uppercase block mb-1">
+                                                            {new Date(c.date_concert).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}
+                                                        </span>
+                                                        <span className="text-lg font-bold uppercase tracking-tight">{c.titre}</span>
+                                                        <p className="text-[11px] text-[#666] uppercase font-bold tracking-widest mt-1">{c.lieu}</p>
+                                                    </div>
+                                                    <div className="flex gap-4">
+                                                        <button onClick={() => setEditingConcert(c.id)} className="text-white/50 hover:text-white transition-all text-[10px] font-black uppercase">Edit</button>
+                                                        <button onClick={() => handleDelete(c.id)} className="text-[#444] hover:text-primary transition-all text-[10px] font-black uppercase">Delete</button>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                    <Pagination pages={concertPages} onPageChange={fetchConcerts} />
+                                </div>
+                            </div>
+                        </section>
+                    )}
 
-                        {/* Liste */}
-                        <div className="space-y-4">
-                            {repetitions.map(r => (
-                                <div key={r.id} className="p-5 bg-[#0a0a0a] border border-white/5 rounded-xl hover:border-white/10 transition-all">
-                                    {editingRep === r.id ? (
-                                        <div className="space-y-2">
-                                            <input className={inputClass} value={r.titre} onChange={(e) => setRepetitions(repetitions.map(item => item.id === r.id ? { ...item, titre: e.target.value } : item))} />
-                                            <input className={inputClass} value={r.detail} onChange={(e) => setRepetitions(repetitions.map(item => item.id === r.id ? { ...item, detail: e.target.value } : item))} />
-                                            <div className="flex gap-2">
-                                                <button onClick={() => handleUpdateRep(r)} className="bg-green-600 text-[10px] font-black p-2 rounded flex-1">OK</button>
-                                                <button onClick={() => setEditingRep(null)} className="bg-white/10 text-[10px] font-black p-2 rounded flex-1">X</button>
+
+                    {/* SECTION RÉPÉTITIONS */}
+                    {activeSection === 'repetitions' && (
+                        <section id="repetitions" className="animate-in fade-in duration-500">
+                            <SectionTitle subtitle="Audio Archives">Répètes</SectionTitle>
+                            <div className="grid lg:grid-cols-2 gap-12">
+
+                                {/* Formulaire d'ajout */}
+                                <div className="bg-[#0a0a0a] border border-white/5 p-8 rounded-2xl shadow-2xl">
+                                    <h3 className="text-sm font-black uppercase tracking-widest mb-6 opacity-40">Ajouter un morceau</h3>
+                                    <form onSubmit={handleRepSubmit} className="space-y-4">
+                                        <input
+                                            type="text"
+                                            placeholder="TITRE (ex: ATOMIC CITY)"
+                                            className={inputClass}
+                                            value={repFormData.titre}
+                                            onChange={(e) => setRepFormData({ ...repFormData, titre: e.target.value })}
+                                            required
+                                        />
+                                        <input
+                                            type="text"
+                                            placeholder="DÉTAIL (ex: Session Live 12.02)"
+                                            className={inputClass}
+                                            value={repFormData.detail}
+                                            onChange={(e) => setRepFormData({ ...repFormData, detail: e.target.value })}
+                                            required
+                                        />
+
+                                        {/* --- NOUVEAU : GESTION DU TEMPS --- */}
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="space-y-1">
+                                                <label className="text-[9px] font-black text-primary/60 uppercase ml-1">Début (sec)</label>
+                                                <input
+                                                    type="number"
+                                                    placeholder="0"
+                                                    className={inputClass}
+                                                    value={repFormData.start_time || 0}
+                                                    onChange={(e) => setRepFormData({ ...repFormData, start_time: e.target.value })}
+                                                />
+                                            </div>
+                                            <div className="space-y-1">
+                                                <label className="text-[9px] font-black text-primary/60 uppercase ml-1">Fin (sec)</label>
+                                                <input
+                                                    type="number"
+                                                    placeholder="Ex: 120"
+                                                    className={inputClass}
+                                                    value={repFormData.end_time || ''}
+                                                    onChange={(e) => setRepFormData({ ...repFormData, end_time: e.target.value })}
+                                                />
                                             </div>
                                         </div>
-                                    ) : (
-                                        <>
-                                            <div className="flex justify-between items-start mb-4">
-                                                <div>
-                                                    <span className="text-white font-bold block uppercase tracking-tight">{r.titre}</span>
-                                                    <span className="text-[11px] text-[#666] font-bold uppercase">{r.detail}</span>
-                                                </div>
-                                                <div className="flex gap-3">
-                                                    <button onClick={() => setEditingRep(r.id)} className="text-white/30 hover:text-white text-[10px] font-black uppercase">Edit</button>
-                                                    <button onClick={() => handleRepDelete(r.id)} className="text-[#444] hover:text-primary text-[10px] font-black uppercase">Delete</button>
-                                                </div>
-                                            </div>
-                                        </>
-                                    )}
-                                    <audio src={r.url.startsWith('/uploads') ? `http://localhost:5000${r.url}` : r.url} controls className="h-8 w-full opacity-40 hover:opacity-100 transition-all invert" />
-                                </div>
-                            ))}
-                            <Pagination pages={repPages} onPageChange={fetchRepetitions} />
-                        </div>
-                    </div>
-                </section>
 
-                {/* SECTION VIDÉOS */}
-                <section className="pt-12 border-t border-white/5">
-                    <SectionTitle subtitle="Visual Content">Vidéos</SectionTitle>
-                    <div className="grid lg:grid-cols-2 gap-12">
-                        {/* Formulaire */}
-                        <div className="bg-[#0a0a0a] border border-white/5 p-8 rounded-2xl">
-                            <h3 className="text-sm font-black uppercase tracking-widest mb-6 opacity-40">Nouvelle Vidéo</h3>
-                            <form onSubmit={handleVideoSubmit} className="space-y-4">
-                                <input
-                                    type="text"
-                                    placeholder="TITRE"
-                                    className={inputClass}
-                                    value={videoFormData.titre}
-                                    onChange={(e) => setVideoFormData({ ...videoFormData, titre: e.target.value })}
-                                    required
-                                />
-                                <input
-                                    type="text"
-                                    placeholder="DESCRIPTION / LIEU"
-                                    className={inputClass}
-                                    value={videoFormData.description}
-                                    onChange={(e) => setVideoFormData({ ...videoFormData, description: e.target.value })}
-                                />
+                                        <input
+                                            type="text"
+                                            placeholder="URL AUDIO DIRECTE (Optionnel)"
+                                            className={inputClass}
+                                            value={repFormData.url}
+                                            onChange={(e) => setRepFormData({ ...repFormData, url: e.target.value })}
+                                        />
 
-                                {/* Option 1: URL Youtube */}
-                                <input
-                                    type="text"
-                                    placeholder="ID YOUTUBE (ex: UrrtAPj9Nzw)"
-                                    className={inputClass}
-                                    value={videoFormData.url_youtube}
-                                    onChange={(e) => setVideoFormData({ ...videoFormData, url_youtube: e.target.value })}
-                                />
+                                        <div className="text-center text-[10px] font-black uppercase opacity-20 py-2">— OU —</div>
 
-                                <div className="text-center text-[10px] font-black uppercase opacity-20 py-2">— OU —</div>
-
-                                {/* Option 2: Upload Fichier Vidéo */}
-                                <div className="p-4 border-2 border-dashed border-white/5 rounded-lg text-center hover:border-primary/30 transition-all">
-                                    <input
-                                        type="file"
-                                        accept="video/*"
-                                        className="hidden"
-                                        id="video-upload"
-                                        onChange={(e) => setVideoFile(e.target.files[0])}
-                                    />
-                                    <label htmlFor="video-upload" className="cursor-pointer text-[10px] font-black uppercase tracking-[2px] text-[#666] hover:text-white">
-                                        {videoFile ? videoFile.name : "Uploader un fichier vidéo (MP4...)"}
-                                    </label>
-                                </div>
-
-                                <button type="submit" className={btnClass}>Publier la vidéo</button>
-                            </form>
-                        </div>
-
-                        {/* Liste des vidéos */}
-                        <div className="space-y-4">
-                            {videos.map(v => (
-                                <div key={v.id} className="flex justify-between items-center p-5 bg-[#0a0a0a] border border-white/5 rounded-xl">
-                                    {editingVideo === v.id ? (
-                                        <div className="flex-1 flex flex-col gap-2"> {/* Passage en flex-col pour plus d'espace */}
-                                            {/* Champ TITRE */}
+                                        <div className="p-4 border-2 border-dashed border-white/5 rounded-lg text-center hover:border-primary/30 transition-all bg-white/5">
                                             <input
-                                                className={inputClass}
-                                                value={v.titre}
-                                                onChange={(e) => setVideos(videos.map(item => item.id === v.id ? { ...item, titre: e.target.value } : item))}
-                                                placeholder="Titre"
+                                                type="file"
+                                                accept="audio/*"
+                                                className="hidden"
+                                                id="audio-upload"
+                                                onChange={(e) => {
+                                                    const file = e.target.files[0];
+                                                    if (file) {
+                                                        setRepFile(file);
+                                                        if (!repFormData.titre) {
+                                                            const fileName = file.name.split('.').slice(0, -1).join('.');
+                                                            setRepFormData(prev => ({ ...prev, titre: fileName.toUpperCase() }));
+                                                        }
+                                                    }
+                                                }}
                                             />
-
-                                            {/* Champ DESCRIPTION (Lieu) */}
-                                            <input
-                                                className={inputClass}
-                                                value={v.description || ''}
-                                                onChange={(e) => setVideos(videos.map(item => item.id === v.id ? { ...item, description: e.target.value } : item))}
-                                                placeholder="Lieu (ex: SIX-FOURS)"
-                                            />
-
-                                            {/* Champ URL (Youtube) */}
-                                            <input
-                                                className={inputClass}
-                                                value={v.url_youtube || ''}
-                                                onChange={(e) => setVideos(videos.map(item => item.id === v.id ? { ...item, url_youtube: e.target.value } : item))}
-                                                placeholder="ID Youtube"
-                                            />
-
-                                            <div className="flex gap-2 justify-end">
-                                                <button onClick={() => handleUpdateVideo(v)} className="bg-green-600 px-3 py-1 rounded font-black text-xs">OK</button>
-                                                <button onClick={() => setEditingVideo(null)} className="bg-white/10 px-3 py-1 rounded font-black text-xs">X</button>
-                                            </div>
+                                            <label htmlFor="audio-upload" className="cursor-pointer text-[10px] font-black uppercase tracking-[2px] text-[#666] hover:text-white block">
+                                                {repFile ? <span className="text-primary">🎵 {repFile.name}</span> : "Cliquez pour uploader un MP3"}
+                                            </label>
                                         </div>
-                                    ) : (
 
-                                        <>
-                                            <div>
-                                                <span className="text-white font-bold block uppercase tracking-tight">{v.titre}</span>
-                                                <span className="text-[11px] text-[#666] font-bold uppercase tracking-widest">
-                                                    {v.description} {v.url_youtube ? "(Youtube)" : "(Fichier)"}
-                                                </span>
-                                            </div>
-                                            <div className="flex gap-3">
-                                                <button onClick={() => setEditingVideo(v.id)} className="text-white/30 hover:text-white text-[10px] font-black uppercase">Edit</button>
-                                                <button onClick={() => handleVideoDelete(v.id)} className="text-[#444] hover:text-primary text-[10px] font-black uppercase tracking-widest">
-                                                    Delete
-                                                </button>
-                                            </div>
-                                        </>
-                                    )}
+                                        <button type="submit" className={btnClass}>Ajouter au studio</button>
+                                    </form>
                                 </div>
-                            ))}
-                            <Pagination pages={videoPages} onPageChange={fetchVideos} />
-                        </div>
-                    </div>
-                </section>
 
-                {/* --- SECTION LE GROUPE --- */}
-                <section className="pt-12 border-t border-white/5">
-                    <SectionTitle subtitle="Band Identity">Le Groupe</SectionTitle>
+                                {/* Liste des enregistrements */}
+                                <div className="space-y-4">
+                                    {repetitions.length > 0 ? (
+                                        repetitions.map(r => (
+                                            <div key={r.id} className="p-5 bg-[#0a0a0a] border border-white/5 rounded-xl hover:border-white/10 transition-all group">
+                                                {editingRep === r.id ? (
+                                                    <div className="space-y-3 p-4 bg-white/5 rounded-lg border border-primary/20">
+                                                        {/* TITRE */}
+                                                        <input
+                                                            className={inputClass}
+                                                            value={r.titre}
+                                                            onChange={(e) => setRepetitions(repetitions.map(item => item.id === r.id ? { ...item, titre: e.target.value } : item))}
+                                                            placeholder="Titre"
+                                                        />
 
-                    <div className="bg-[#0a0a0a] border border-white/5 p-8 rounded-2xl space-y-8">
+                                                        {/* DÉTAIL (Il manquait celui-là !) */}
+                                                        <input
+                                                            className={inputClass}
+                                                            value={r.detail}
+                                                            onChange={(e) => setRepetitions(repetitions.map(item => item.id === r.id ? { ...item, detail: e.target.value } : item))}
+                                                            placeholder="Détail (ex: Session Live)"
+                                                        />
 
-                        {/* Ligne : Annonce et Slogan */}
-                        <div className="grid md:grid-cols-2 gap-6">
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-primary block">Annonce (Tribute...)</label>
-                                <input
-                                    type="text"
-                                    className={inputClass}
-                                    value={groupTexts.group_announce || ''}
-                                    onChange={(e) => setGroupTexts({ ...groupTexts, group_announce: e.target.value })}
-                                    onBlur={() => handleUpdateGroupText('group_announce', groupTexts.group_announce)}
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-primary block">Slogan de la page</label>
-                                <input
-                                    type="text"
-                                    className={inputClass}
-                                    value={groupTexts.group_slogan || ''}
-                                    onChange={(e) => setGroupTexts({ ...groupTexts, group_slogan: e.target.value })}
-                                    onBlur={() => handleUpdateGroupText('group_slogan', groupTexts.group_slogan)}
-                                />
-                            </div>
-                        </div>
+                                                        {/* TEMPS DE DÉBUT / FIN */}
+                                                        <div className="grid grid-cols-2 gap-2">
+                                                            <div className="space-y-1">
+                                                                <label className="text-[8px] uppercase text-white/30">Début (sec)</label>
+                                                                <input type="number" className={inputClass} value={r.start_time || 0} onChange={(e) => setRepetitions(repetitions.map(item => item.id === r.id ? { ...item, start_time: e.target.value } : item))} />
+                                                            </div>
+                                                            <div className="space-y-1">
+                                                                <label className="text-[8px] uppercase text-white/30">Fin (sec)</label>
+                                                                <input type="number" className={inputClass} value={r.end_time || ''} onChange={(e) => setRepetitions(repetitions.map(item => item.id === r.id ? { ...item, end_time: e.target.value } : item))} />
+                                                            </div>
+                                                        </div>
 
-                        {/* Nouveau : Titre de la section Histoire */}
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-black uppercase tracking-widest text-primary block">Titre de la section Histoire (ex: "Our Story")</label>
-                            <input
-                                type="text"
-                                className={inputClass}
-                                value={groupTexts.group_title_history || ''}
-                                onChange={(e) => setGroupTexts({ ...groupTexts, group_title_history: e.target.value })}
-                                onBlur={() => handleUpdateGroupText('group_title_history', groupTexts.group_title_history)}
-                                placeholder="L'histoire du groupe..."
-                            />
-                        </div>
+                                                        {/* VISIBILITÉ (NOUVEAU) */}
+                                                        <div className="flex items-center gap-3 py-2">
+                                                            <span className="text-[8px] uppercase text-white/30">Visibilité:</span>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => setRepetitions(repetitions.map(item => item.id === r.id ? { ...item, status: 'public' } : item))}
+                                                                className={`px-3 py-1 rounded text-[8px] font-black uppercase transition-all ${r.status === 'public' ? 'bg-green-600 text-white' : 'bg-white/10 text-white/40'}`}
+                                                            >
+                                                                Public
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => setRepetitions(repetitions.map(item => item.id === r.id ? { ...item, status: 'private' } : item))}
+                                                                className={`px-3 py-1 rounded text-[8px] font-black uppercase transition-all ${r.status === 'private' ? 'bg-primary text-white' : 'bg-white/10 text-white/40'}`}
+                                                            >
+                                                                Privé
+                                                            </button>
+                                                        </div>
 
-                        {/* Ligne : Histoire (2 colonnes) */}
-                        <div className="grid md:grid-cols-2 gap-6">
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-primary block">Histoire (Colonne Gauche)</label>
-                                <textarea
-                                    className={`${inputClass} min-h-[150px] leading-relaxed`}
-                                    value={groupTexts.group_history_1 || ''}
-                                    onChange={(e) => setGroupTexts({ ...groupTexts, group_history_1: e.target.value })}
-                                    onBlur={() => handleUpdateGroupText('group_history_1', groupTexts.group_history_1)}
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-primary block">Histoire (Colonne Droite)</label>
-                                <textarea
-                                    className={`${inputClass} min-h-[150px] leading-relaxed`}
-                                    value={groupTexts.group_history_2 || ''}
-                                    onChange={(e) => setGroupTexts({ ...groupTexts, group_history_2: e.target.value })}
-                                    onBlur={() => handleUpdateGroupText('group_history_2', groupTexts.group_history_2)}
-                                />
-                            </div>
-                            {/* Ligne : Crédits Photos */}
-                            <div className="space-y-2 pt-4 border-t border-white/5">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-primary block">
-                                    Crédits Photographiques (Footer)
-                                </label>
-                                <input
-                                    type="text"
-                                    className={inputClass}
-                                    value={groupTexts.photo_credits || ''}
-                                    onChange={(e) => setGroupTexts({ ...groupTexts, photo_credits: e.target.value })}
-                                    onBlur={() => handleUpdateGroupText('photo_credits', groupTexts.photo_credits)}
-                                    placeholder="Mika / Reservoir Rock..."
-                                />
-                                <p className="text-[9px] text-gray-500 uppercase tracking-tighter">
-                                    Ce texte s'affiche en bas de toutes les pages du site.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                {/* --- SECTION MUSICIENS --- */}
-                <section className="pt-12 border-t border-white/5">
-                    <SectionTitle subtitle="Band Members">Gestion des Musiciens</SectionTitle>
-
-                    <div className="bg-[#0a0a0a] border border-white/5 p-8 rounded-2xl">
-                        {/* Formulaire d'ajout amélioré */}
-                        <form onSubmit={handleAddMember} className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-10 p-6 bg-white/5 rounded-xl border border-white/5">
-                            <input
-                                type="text" placeholder="Nom du musicien"
-                                className={inputClass}
-                                value={newMember.nom}
-                                onChange={(e) => setNewMember({ ...newMember, nom: e.target.value })}
-                                required
-                            />
-                            <input
-                                type="text" placeholder="Instrument (ex: Guitar)"
-                                className={inputClass}
-                                value={newMember.instrument}
-                                onChange={(e) => setNewMember({ ...newMember, instrument: e.target.value })}
-                                required
-                            />
-                            <input
-                                type="text" placeholder="URL de la photo"
-                                className={inputClass}
-                                value={newMember.photo_url}
-                                onChange={(e) => setNewMember({ ...newMember, photo_url: e.target.value })}
-                            />
-                            <button type="submit" className={btnClass}>Ajouter au groupe</button>
-                        </form>
-
-                        {/* Liste des membres avec Edition complète */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                            {groupMembers.map(m => (
-                                <div key={m.id} className="relative p-5 bg-black border border-white/10 rounded-xl hover:border-primary/30 transition-all group">
-                                    {editingMember === m.id ? (
-                                        <div className="space-y-3">
-                                            <input
-                                                className="w-full bg-white/5 border border-white/10 p-2 text-xs rounded text-white"
-                                                value={m.nom}
-                                                onChange={(e) => setGroupMembers(groupMembers.map(item => item.id === m.id ? { ...item, nom: e.target.value } : item))}
-                                            />
-                                            <input
-                                                className="w-full bg-white/5 border border-white/10 p-2 text-xs rounded text-primary"
-                                                value={m.instrument}
-                                                onChange={(e) => setGroupMembers(groupMembers.map(item => item.id === m.id ? { ...item, instrument: e.target.value } : item))}
-                                            />
-                                            <div className="flex gap-2">
-                                                <button onClick={() => handleUpdateMember(m)} className="bg-primary/20 text-primary px-3 py-1 rounded text-[10px] font-black uppercase hover:bg-primary hover:text-black">Save</button>
-                                                <button onClick={() => setEditingMember(null)} className="text-white/50 text-[10px] font-black uppercase underline">Cancel</button>
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <>
-                                            <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <button onClick={() => setEditingMember(m.id)} className="text-white/40 hover:text-white text-[10px]">Modifier</button>
-                                                <button onClick={() => handleDeleteMember(m.id)} className="text-white/40 hover:text-red-500 text-[10px]">Supprimer</button>
-                                            </div>
-
-                                            {/* Visualisation rapide de la photo si elle existe */}
-                                            <div className="flex items-center gap-4">
-                                                {m.photo_url && (
-                                                    <img src={m.photo_url} alt={m.nom} className="w-10 h-10 rounded-full object-cover border border-white/10" />
-                                                )}
-                                                <div>
-                                                    <p className="text-white font-bold uppercase tracking-tight leading-none">{m.nom}</p>
-                                                    <p className="text-primary text-[10px] font-black uppercase tracking-widest mt-1">{m.instrument}</p>
-                                                </div>
-                                            </div>
-                                        </>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </section>
-
-                {/* --- SECTION LIVRE D'OR --- */}
-                <section className="pt-12 border-t border-white/5">
-                    <SectionTitle subtitle="Fan Messages">Livre d'Or</SectionTitle>
-
-                    <div className="space-y-4">
-                        {Array.isArray(messages) && messages.length > 0 ? (
-                            messages.map((msg) => (
-                                <div
-                                    key={msg.id}
-                                    className={`bg-[#0a0a0a] border ${msg.is_private ? 'border-primary/40 shadow-[0_0_15px_rgba(255,0,0,0.1)]' : 'border-white/5'} p-6 rounded-2xl transition-all`}
-                                >
-                                    <div className="flex justify-between items-start mb-4">
-                                        <div>
-                                            <div className="flex flex-wrap items-center gap-2 mb-1">
-                                                <span className="text-primary text-[10px] font-black uppercase tracking-widest block">
-                                                    Par {msg.firstname || `Utilisateur #${msg.user_id}`} — {msg.created_at ? new Date(msg.created_at).toLocaleDateString() : 'Date inconnue'}
-                                                </span>
-
-                                                {msg.is_private === 1 && (
+                                                        {/* BOUTONS ACTIONS */}
+                                                        <div className="flex gap-2 pt-2">
+                                                            <button onClick={() => handleUpdateRep(r)} className="bg-green-600 text-white text-[10px] font-black p-2 rounded uppercase flex-1">Sauvegarder</button>
+                                                            <button onClick={() => setEditingRep(null)} className="bg-white/10 text-white text-[10px] font-black p-2 rounded uppercase flex-1">Annuler</button>
+                                                        </div>
+                                                    </div>
+                                                ) : (
                                                     <>
-                                                        <span className="bg-primary text-white text-[8px] font-black px-2 py-0.5 rounded flex items-center gap-1">
-                                                            MESSAGE PRIVÉ
-                                                        </span>
-                                                        {/* AFFICHAGE DE L'EMAIL ICI */}
-                                                        <span className="text-white/60 text-[10px] font-mono bg-white/5 px-2 py-0.5 rounded border border-white/10 select-all" title="Cliquez pour copier">
-                                                            {msg.email || 'Email non trouvé'}
-                                                        </span>
+                                                        <div className="flex justify-between items-start mb-2">
+                                                            <div>
+                                                                <div className="flex items-center gap-2">
+                                                                    <span className="text-white font-bold block uppercase tracking-tight text-base leading-none">{r.titre}</span>
+                                                                    {/* Badge de statut */}
+                                                                    <span className={`text-[8px] px-1.5 py-0.5 rounded font-black uppercase ${r.status === 'public' ? 'bg-green-500/20 text-green-500' : 'bg-primary/20 text-primary'}`}>
+                                                                        {r.status === 'public' ? 'Public' : 'Privé'}
+                                                                    </span>
+                                                                </div>
+                                                                <span className="text-[11px] text-primary font-bold uppercase tracking-widest">{r.detail}</span>
+
+                                                                {r.end_time && (
+                                                                    <div className="mt-2 flex items-center gap-2">
+                                                                        <span className="text-[9px] bg-white/5 px-2 py-0.5 rounded text-white/40 uppercase font-black">
+                                                                            Segment: {r.start_time || 0}s ➔ {r.end_time}s
+                                                                        </span>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                            <div className="flex gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                <button onClick={() => setEditingRep(r.id)} className="text-white/30 hover:text-white text-[10px] font-black uppercase">Edit</button>
+                                                                <button onClick={() => handleRepDelete(r.id)} className="text-[#444] hover:text-primary text-[10px] font-black uppercase">Delete</button>
+                                                            </div>
+                                                        </div>
+
+                                                        <audio
+                                                            src={r.url.startsWith('/uploads') ? `http://localhost:5000${r.url}` : r.url}
+                                                            controls
+                                                            className="h-8 w-full opacity-60 hover:opacity-100 transition-all invert mt-2"
+                                                        />
                                                     </>
                                                 )}
                                             </div>
-                                            <p className="text-white text-sm italic">"{msg.content}"</p>
+                                        ))
+                                    ) : (
+                                        <div className="text-center py-20 border border-dashed border-white/5 rounded-2xl opacity-20">
+                                            <p className="text-xs font-black uppercase tracking-widest">Aucun enregistrement disponible</p>
                                         </div>
-                                        <button
-                                            onClick={() => handleDeleteMessage(msg.id)}
-                                            className="text-white/20 hover:text-red-500 transition-colors text-[10px] font-black uppercase"
-                                        >
-                                            Supprimer
-                                        </button>
-                                    </div>
+                                    )}
+                                    <Pagination pages={repPages} onPageChange={fetchRepetitions} />
+                                </div>
+                            </div>
+                        </section>
+                    )}
 
-                                    <div className="mt-4 pt-4 border-t border-white/5">
-                                        <div className="flex flex-col gap-3">
-                                            <label className="text-[10px] font-black uppercase tracking-widest text-primary/60">
-                                                {msg.is_private ? 'Note interne ou brouillon de réponse' : 'Réponse publique sur le site'}
-                                            </label>
 
-                                            <textarea
-                                                className={`${inputClass} min-h-[80px] text-sm`}
-                                                placeholder={msg.is_private ? `L'adresse est ${msg.email}. Notez ici si vous avez répondu...` : "Votre réponse publique..."}
-                                                value={msg.reponse || ''}
-                                                onChange={(e) => {
-                                                    const nouveauTexte = e.target.value;
-                                                    setMessages(messages.map(m => m.id === msg.id ? { ...m, reponse: nouveauTexte } : m));
-                                                }}
+                    {/* SECTION VIDÉOS */}
+                    {activeSection === 'videos' && (
+                        <section id="videos" className="animate-in fade-in duration-500">
+                            <SectionTitle subtitle="Visual Content">Vidéos</SectionTitle>
+                            <div className="grid lg:grid-cols-2 gap-12">
+
+                                {/* Formulaire d'ajout */}
+                                <div className="bg-[#0a0a0a] border border-white/5 p-8 rounded-2xl shadow-2xl">
+                                    <h3 className="text-sm font-black uppercase tracking-widest mb-6 opacity-40">Nouvelle Vidéo</h3>
+                                    <form onSubmit={handleVideoSubmit} className="space-y-4">
+                                        <input
+                                            type="text"
+                                            placeholder="TITRE"
+                                            className={inputClass}
+                                            value={videoFormData.titre}
+                                            onChange={(e) => setVideoFormData({ ...videoFormData, titre: e.target.value })}
+                                            required
+                                        />
+                                        <input
+                                            type="text"
+                                            placeholder="DESCRIPTION / LIEU (ex: LIVE À SIX-FOURS)"
+                                            className={inputClass}
+                                            value={videoFormData.description}
+                                            onChange={(e) => setVideoFormData({ ...videoFormData, description: e.target.value })}
+                                        />
+
+                                        {/* Option 1: URL Youtube */}
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black uppercase tracking-widest opacity-30 ml-1">Lien YouTube</label>
+                                            <input
+                                                type="text"
+                                                placeholder="ID YOUTUBE (ex: UrrtAPj9Nzw)"
+                                                className={inputClass}
+                                                value={videoFormData.url_youtube}
+                                                onChange={(e) => setVideoFormData({ ...videoFormData, url_youtube: e.target.value })}
                                             />
-
-                                            <div className="flex justify-between items-center">
-                                                {/* Petit lien discret pour ceux qui utilisent le webmail */}
-                                                {msg.is_private === 1 && (
-                                                    <span className="text-[9px] text-white/30 uppercase font-bold">
-                                                        Copiez l'email ci-dessus pour répondre
-                                                    </span>
-                                                )}
-                                                <button
-                                                    onClick={() => handleUpdateResponse(msg.id, msg.reponse)}
-                                                    className="bg-white/5 hover:bg-white/10 text-white px-4 py-2 rounded-lg border border-white/5 text-[10px] font-black uppercase transition-all ml-auto"
-                                                >
-                                                    Enregistrer
-                                                </button>
-                                            </div>
                                         </div>
+
+                                        <div className="text-center text-[10px] font-black uppercase opacity-20 py-2">— OU —</div>
+
+                                        {/* Option 2: Upload Fichier Vidéo */}
+                                        <div className="p-4 border-2 border-dashed border-white/5 rounded-lg text-center hover:border-primary/30 transition-all bg-white/5">
+                                            <input
+                                                type="file"
+                                                accept="video/*"
+                                                className="hidden"
+                                                id="video-upload"
+                                                onChange={(e) => setVideoFile(e.target.files[0])}
+                                            />
+                                            <label htmlFor="video-upload" className="cursor-pointer text-[10px] font-black uppercase tracking-[2px] text-[#666] hover:text-white block">
+                                                {videoFile ? (
+                                                    <span className="text-primary">🎬 {videoFile.name}</span>
+                                                ) : (
+                                                    "Uploader un fichier vidéo (MP4...)"
+                                                )}
+                                            </label>
+                                        </div>
+
+                                        <button type="submit" className={btnClass}>Publier la vidéo</button>
+                                    </form>
+                                </div>
+
+                                {/* Liste des vidéos */}
+                                <div className="space-y-4">
+                                    {videos.length > 0 ? (
+                                        videos.map(v => (
+                                            <div key={v.id} className="p-5 bg-[#0a0a0a] border border-white/5 rounded-xl hover:border-white/10 transition-all group">
+                                                {editingVideo === v.id ? (
+                                                    <div className="flex-1 flex flex-col gap-3">
+                                                        <input
+                                                            className={inputClass}
+                                                            value={v.titre}
+                                                            onChange={(e) => setVideos(videos.map(item => item.id === v.id ? { ...item, titre: e.target.value } : item))}
+                                                            placeholder="Titre"
+                                                        />
+                                                        <input
+                                                            className={inputClass}
+                                                            value={v.description || ''}
+                                                            onChange={(e) => setVideos(videos.map(item => item.id === v.id ? { ...item, description: e.target.value } : item))}
+                                                            placeholder="Lieu (ex: SIX-FOURS)"
+                                                        />
+                                                        <input
+                                                            className={inputClass}
+                                                            value={v.url_youtube || ''}
+                                                            onChange={(e) => setVideos(videos.map(item => item.id === v.id ? { ...item, url_youtube: e.target.value } : item))}
+                                                            placeholder="ID Youtube"
+                                                        />
+                                                        <div className="flex gap-2 justify-end pt-2">
+                                                            <button onClick={() => handleUpdateVideo(v)} className="bg-green-600 text-white px-4 py-2 rounded font-black text-[10px] uppercase">Sauvegarder</button>
+                                                            <button onClick={() => setEditingVideo(null)} className="bg-white/10 text-white px-4 py-2 rounded font-black text-[10px] uppercase">Annuler</button>
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <div className="flex justify-between items-center">
+                                                        <div>
+                                                            <span className="text-white font-bold block uppercase tracking-tight text-base">{v.titre}</span>
+                                                            <span className="text-[11px] text-primary font-bold uppercase tracking-widest">
+                                                                {v.description} — {v.url_youtube ? "YOUTUBE" : "FICHIER LOCAL"}
+                                                            </span>
+                                                        </div>
+                                                        <div className="flex gap-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                            <button onClick={() => setEditingVideo(v.id)} className="text-white/30 hover:text-white text-[10px] font-black uppercase">Edit</button>
+                                                            <button onClick={() => handleVideoDelete(v.id)} className="text-[#444] hover:text-primary text-[10px] font-black uppercase">Delete</button>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className="text-center py-20 border border-dashed border-white/5 rounded-2xl opacity-20">
+                                            <p className="text-xs font-black uppercase tracking-widest">Aucune vidéo en ligne</p>
+                                        </div>
+                                    )}
+                                    <Pagination pages={videoPages} onPageChange={fetchVideos} />
+                                </div>
+                            </div>
+                        </section>
+                    )}
+
+                    {/* SECTION LE GROUPE */}
+                    {activeSection === 'groupe' && (
+                        <section id="groupe" className="animate-in fade-in duration-500">
+                            <SectionTitle subtitle="Band Identity">Le Groupe</SectionTitle>
+
+                            <div className="bg-[#0a0a0a] border border-white/5 p-8 rounded-2xl space-y-8 shadow-2xl">
+
+                                {/* Ligne : Annonce et Slogan */}
+                                <div className="grid md:grid-cols-2 gap-6">
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-primary block">Annonce (Tribute...)</label>
+                                        <input
+                                            type="text"
+                                            className={inputClass}
+                                            value={groupTexts.group_announce || ''}
+                                            onChange={(e) => setGroupTexts({ ...groupTexts, group_announce: e.target.value })}
+                                            onBlur={() => handleUpdateGroupText('group_announce', groupTexts.group_announce)}
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-primary block">Slogan de la page</label>
+                                        <input
+                                            type="text"
+                                            className={inputClass}
+                                            value={groupTexts.group_slogan || ''}
+                                            onChange={(e) => setGroupTexts({ ...groupTexts, group_slogan: e.target.value })}
+                                            onBlur={() => handleUpdateGroupText('group_slogan', groupTexts.group_slogan)}
+                                        />
                                     </div>
                                 </div>
-                            ))
-                        ) : (
-                            <p className="text-white/30 text-[10px] uppercase tracking-widest text-center py-8">
-                                Aucun message dans le livre d'or
-                            </p>
-                        )}
-                    </div>
-                </section>
+
+                                {/* Titre de la section Histoire */}
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-primary block">Titre de la section Histoire (ex: "Our Story")</label>
+                                    <input
+                                        type="text"
+                                        className={inputClass}
+                                        value={groupTexts.group_title_history || ''}
+                                        onChange={(e) => setGroupTexts({ ...groupTexts, group_title_history: e.target.value })}
+                                        onBlur={() => handleUpdateGroupText('group_title_history', groupTexts.group_title_history)}
+                                        placeholder="L'histoire du groupe..."
+                                    />
+                                </div>
+
+                                {/* Ligne : Histoire (2 colonnes) */}
+                                <div className="grid md:grid-cols-2 gap-6">
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-primary block">Histoire (Colonne Gauche)</label>
+                                        <textarea
+                                            className={`${inputClass} min-h-[180px] leading-relaxed py-4`}
+                                            value={groupTexts.group_history_1 || ''}
+                                            onChange={(e) => setGroupTexts({ ...groupTexts, group_history_1: e.target.value })}
+                                            onBlur={() => handleUpdateGroupText('group_history_1', groupTexts.group_history_1)}
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-primary block">Histoire (Colonne Droite)</label>
+                                        <textarea
+                                            className={`${inputClass} min-h-[180px] leading-relaxed py-4`}
+                                            value={groupTexts.group_history_2 || ''}
+                                            onChange={(e) => setGroupTexts({ ...groupTexts, group_history_2: e.target.value })}
+                                            onBlur={() => handleUpdateGroupText('group_history_2', groupTexts.group_history_2)}
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Ligne : Crédits Photos */}
+                                <div className="pt-6 border-t border-white/5">
+                                    <div className="max-w-md space-y-2">
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-primary block">
+                                            Crédits Photographiques (Footer)
+                                        </label>
+                                        <input
+                                            type="text"
+                                            className={inputClass}
+                                            value={groupTexts.photo_credits || ''}
+                                            onChange={(e) => setGroupTexts({ ...groupTexts, photo_credits: e.target.value })}
+                                            onBlur={() => handleUpdateGroupText('photo_credits', groupTexts.photo_credits)}
+                                            placeholder="Mika / Reservoir Rock..."
+                                        />
+                                        <p className="text-[9px] text-white/20 uppercase tracking-[2px] mt-2">
+                                            Visible globalement en pied de page.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    )}
+
+                    {/* SECTION MUSICIENS */}
+                    {activeSection === 'membres' && (
+                        <section id="membres" className="animate-in fade-in duration-500">
+                            <SectionTitle subtitle="Band Members">Gestion des Musiciens</SectionTitle>
+
+                            <div className="bg-[#0a0a0a] border border-white/5 p-8 rounded-2xl shadow-2xl">
+                                {/* Formulaire d'ajout amélioré */}
+                                <div className="mb-10 p-6 bg-white/5 rounded-xl border border-white/5">
+                                    <h3 className="text-[10px] font-black uppercase tracking-[3px] mb-4 opacity-30 text-center">Ajouter un membre</h3>
+                                    <form onSubmit={handleAddMember} className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                        <input
+                                            type="text"
+                                            placeholder="Nom du musicien"
+                                            className={inputClass}
+                                            value={newMember.nom}
+                                            onChange={(e) => setNewMember({ ...newMember, nom: e.target.value })}
+                                            required
+                                        />
+                                        <input
+                                            type="text"
+                                            placeholder="Instrument (ex: Guitar)"
+                                            className={inputClass}
+                                            value={newMember.instrument}
+                                            onChange={(e) => setNewMember({ ...newMember, instrument: e.target.value })}
+                                            required
+                                        />
+                                        <input
+                                            type="text"
+                                            placeholder="URL de la photo"
+                                            className={inputClass}
+                                            value={newMember.photo_url}
+                                            onChange={(e) => setNewMember({ ...newMember, photo_url: e.target.value })}
+                                        />
+                                        <button type="submit" className={btnClass}>Ajouter au groupe</button>
+                                    </form>
+                                </div>
+
+                                {/* Liste des membres avec Edition complète */}
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                                    {groupMembers.length > 0 ? (
+                                        groupMembers.map(m => (
+                                            <div key={m.id} className="relative p-5 bg-black border border-white/10 rounded-xl hover:border-primary/30 transition-all group min-h-[100px] flex items-center">
+                                                {editingMember === m.id ? (
+                                                    <div className="w-full space-y-3">
+                                                        <input
+                                                            className="w-full bg-white/5 border border-white/10 p-2 text-xs rounded text-white font-bold"
+                                                            value={m.nom}
+                                                            onChange={(e) => setGroupMembers(groupMembers.map(item => item.id === m.id ? { ...item, nom: e.target.value } : item))}
+                                                        />
+                                                        <input
+                                                            className="w-full bg-white/5 border border-white/10 p-2 text-xs rounded text-primary font-bold"
+                                                            value={m.instrument}
+                                                            onChange={(e) => setGroupMembers(groupMembers.map(item => item.id === m.id ? { ...item, instrument: e.target.value } : item))}
+                                                        />
+                                                        <div className="flex gap-2 pt-1">
+                                                            <button onClick={() => handleUpdateMember(m)} className="bg-primary/20 text-primary px-3 py-1 rounded text-[10px] font-black uppercase hover:bg-primary hover:text-black transition-colors flex-1">Save</button>
+                                                            <button onClick={() => setEditingMember(null)} className="text-white/30 text-[10px] font-black uppercase underline flex-1 hover:text-white">Cancel</button>
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <>
+                                                        <div className="absolute top-2 right-2 flex gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                            <button onClick={() => setEditingMember(m.id)} className="text-white/30 hover:text-white text-[9px] font-black uppercase">Edit</button>
+                                                            <button onClick={() => handleDeleteMember(m.id)} className="text-[#333] hover:text-red-500 text-[9px] font-black uppercase">Delete</button>
+                                                        </div>
+
+                                                        {/* Avatar et Infos */}
+                                                        <div className="flex items-center gap-4">
+                                                            <div className="relative">
+                                                                {m.photo_url ? (
+                                                                    <img src={m.photo_url} alt={m.nom} className="w-12 h-12 rounded-full object-cover border-2 border-white/5" />
+                                                                ) : (
+                                                                    <div className="w-12 h-12 rounded-full bg-white/5 border-2 border-white/5 flex items-center justify-center text-[10px] font-black opacity-20">N/A</div>
+                                                                )}
+                                                            </div>
+                                                            <div>
+                                                                <p className="text-white font-bold uppercase tracking-tight leading-none mb-1">{m.nom}</p>
+                                                                <p className="text-primary text-[10px] font-black uppercase tracking-[2px]">{m.instrument}</p>
+                                                            </div>
+                                                        </div>
+                                                    </>
+                                                )}
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className="col-span-full py-12 text-center opacity-20 border border-dashed border-white/10 rounded-xl">
+                                            <p className="text-[10px] font-black uppercase tracking-widest">Aucun membre enregistré</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </section>
+                    )}
+
+
+                    {/* SECTION LIVRE D'OR */}
+                    {activeSection === 'messages' && (
+                        <section id="messages" className="animate-in fade-in duration-500">
+                            <SectionTitle subtitle="Fan Messages">Livre d'Or</SectionTitle>
+
+                            <div className="space-y-6">
+                                {Array.isArray(messages) && messages.length > 0 ? (
+                                    messages.map((msg) => (
+                                        <div
+                                            key={msg.id}
+                                            className={`bg-[#0a0a0a] border ${msg.is_private ? 'border-primary/40 shadow-[0_0_20px_rgba(var(--primary-rgb),0.05)]' : 'border-white/5'} p-6 rounded-2xl transition-all group`}
+                                        >
+                                            <div className="flex justify-between items-start mb-4">
+                                                <div className="space-y-2">
+                                                    <div className="flex flex-wrap items-center gap-3">
+                                                        <span className="text-primary text-[10px] font-black uppercase tracking-[2px]">
+                                                            Par {msg.firstname || `Utilisateur #${msg.user_id}`}
+                                                            <span className="mx-2 opacity-20">—</span>
+                                                            {msg.created_at ? new Date(msg.created_at).toLocaleDateString('fr-FR') : 'Date inconnue'}
+                                                        </span>
+
+                                                        {msg.is_private === 1 && (
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="bg-primary text-black text-[8px] font-black px-2 py-0.5 rounded uppercase tracking-tighter">
+                                                                    Message Privé
+                                                                </span>
+                                                                <span
+                                                                    className="text-white/60 text-[10px] font-mono bg-white/5 px-2 py-0.5 rounded border border-white/10 select-all cursor-help"
+                                                                    title="Cliquez pour copier l'email"
+                                                                >
+                                                                    {msg.email || 'Email non trouvé'}
+                                                                </span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <p className="text-white text-base italic leading-relaxed">"{msg.content}"</p>
+                                                </div>
+
+                                                <button
+                                                    onClick={() => handleDeleteMessage(msg.id)}
+                                                    className="text-[#333] hover:text-red-500 transition-colors text-[10px] font-black uppercase opacity-0 group-hover:opacity-100"
+                                                >
+                                                    Supprimer
+                                                </button>
+                                            </div>
+
+                                            {/* Zone de Réponse / Note */}
+                                            <div className="mt-6 pt-6 border-t border-white/5 bg-white/[0.02] -mx-6 px-6 -mb-6 rounded-b-2xl">
+                                                <div className="flex flex-col gap-3">
+                                                    <label className="text-[9px] font-black uppercase tracking-[2px] text-white/30">
+                                                        {msg.is_private ? 'Note interne (Suivi de réponse)' : 'Réponse publique (Sera visible sur le site)'}
+                                                    </label>
+
+                                                    <textarea
+                                                        className={`${inputClass} min-h-[100px] text-sm bg-black/40 border-white/5 focus:border-primary/40`}
+                                                        placeholder={msg.is_private ? `L'adresse est ${msg.email}. Notez ici vos échanges...` : "Écrivez votre réponse publique..."}
+                                                        value={msg.reponse || ''}
+                                                        onChange={(e) => {
+                                                            const nouveauTexte = e.target.value;
+                                                            setMessages(messages.map(m => m.id === msg.id ? { ...m, reponse: nouveauTexte } : m));
+                                                        }}
+                                                    />
+
+                                                    <div className="flex justify-between items-center py-2">
+                                                        <span className="text-[9px] text-white/20 uppercase font-bold tracking-widest">
+                                                            {msg.is_private ? "Les messages privés ne sont jamais publiés" : "Attention : La réponse sera publiée sur le site"}
+                                                        </span>
+                                                        <button
+                                                            onClick={() => handleUpdateResponse(msg.id, msg.reponse)}
+                                                            className="bg-primary/10 hover:bg-primary text-primary hover:text-black px-6 py-2 rounded font-black text-[10px] uppercase transition-all border border-primary/20"
+                                                        >
+                                                            Enregistrer
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="text-center py-20 border border-dashed border-white/5 rounded-3xl opacity-20">
+                                        <p className="text-xs font-black uppercase tracking-[3px]">Le livre d'or est vide</p>
+                                    </div>
+                                )}
+                            </div>
+                        </section>
+                    )}
+
+                </main>
             </div>
         </div>
     );
+
 }
 
 export default Dashboard;

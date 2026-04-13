@@ -14,6 +14,8 @@ import Repetitions from './pages/Repetitions.jsx';
 import Videos from './pages/Videos.jsx';
 import Legroupe from './pages/Legroupe.jsx';
 import Livredor from './pages/Livredor.jsx';
+import Backstage from './pages/Backstage';
+
 function App() {
   const { loading } = useAuth();
   if (loading) return <div><p>Chargement...</p></div>;
@@ -25,6 +27,9 @@ function App() {
         <Route path="/legroupe" element={<Legroupe />} />
         <Route path="/repetition" element={<Repetitions />} />
         <Route path="/videos" element={<Videos />} />
+        <Route path="/backstage" element={
+          <PrivateRoute><Backstage /></PrivateRoute>
+        } />
         <Route path="/concerts" element={<Concerts />} />
         <Route path="/livredor" element={<Livredor />} />
         <Route path="/dashboard" element={
