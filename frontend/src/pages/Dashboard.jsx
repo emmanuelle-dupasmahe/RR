@@ -40,6 +40,9 @@ function Dashboard() {
     const handleChangementReponse = (id, texte) => {
         setReponses(prev => ({ ...prev, [id]: texte }));
     };
+
+    const [activeSection, setActiveSection] = useState('concerts');
+    
     // --- LOGIQUE FETCH ---
 
     const fetchRepetitions = async (page = 1) => {
@@ -88,10 +91,17 @@ function Dashboard() {
             .then(setGroupTexts);
 
         // Récupérer les messages
-        fetch('http://localhost:5000/api/guestbook')
-            .then(res => res.json())
-            .then(data => setMessages(data.messages || []))
-            .catch(err => console.error("Erreur livre d'or:", err));
+        fetch('http://localhost:5000/api/guestbook/admin/all', {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+            .then(res => {
+                if (!res.ok) throw new Error('Erreur accès admin');
+                return res.json();
+            })
+            .then(data => setMessages(Array.isArray(data) ? data : []))
+            .catch(err => console.error("Erreur livre d'or admin:", err));
     }, []);
 
     // --- HANDLERS ---
@@ -152,8 +162,8 @@ function Dashboard() {
             });
 
             if (res.ok) {
-                setEditingConcert(null); // On ferme le mode édition
-                fetchConcerts(); // On rafraîchit la liste
+                setEditingConcert(null); // ferme le mode édition
+                fetchConcerts(); // liste raffraichit
                 alert('Concert mis à jour avec succès !');
             } else {
                 const errorData = await res.json();
@@ -931,12 +941,29 @@ function Dashboard() {
                     <div className="space-y-4">
                         {Array.isArray(messages) && messages.length > 0 ? (
                             messages.map((msg) => (
-                                <div key={msg.id} className="bg-[#0a0a0a] border border-white/5 p-6 rounded-2xl">
+                                <div
+                                    key={msg.id}
+                                    className={`bg-[#0a0a0a] border ${msg.is_private ? 'border-primary/40 shadow-[0_0_15px_rgba(255,0,0,0.1)]' : 'border-white/5'} p-6 rounded-2xl transition-all`}
+                                >
                                     <div className="flex justify-between items-start mb-4">
                                         <div>
-                                            <span className="text-primary text-[10px] font-black uppercase tracking-widest block mb-1">
-                                                Par Utilisateur #{msg.user_id} — {msg.created_at ? new Date(msg.created_at).toLocaleDateString() : 'Date inconnue'}
-                                            </span>
+                                            <div className="flex flex-wrap items-center gap-2 mb-1">
+                                                <span className="text-primary text-[10px] font-black uppercase tracking-widest block">
+                                                    Par {msg.firstname || `Utilisateur #${msg.user_id}`} — {msg.created_at ? new Date(msg.created_at).toLocaleDateString() : 'Date inconnue'}
+                                                </span>
+
+                                                {msg.is_private === 1 && (
+                                                    <>
+                                                        <span className="bg-primary text-white text-[8px] font-black px-2 py-0.5 rounded flex items-center gap-1">
+                                                            MESSAGE PRIVÉ
+                                                        </span>
+                                                        {/* AFFICHAGE DE L'EMAIL ICI */}
+                                                        <span className="text-white/60 text-[10px] font-mono bg-white/5 px-2 py-0.5 rounded border border-white/10 select-all" title="Cliquez pour copier">
+                                                            {msg.email || 'Email non trouvé'}
+                                                        </span>
+                                                    </>
+                                                )}
+                                            </div>
                                             <p className="text-white text-sm italic">"{msg.content}"</p>
                                         </div>
                                         <button
@@ -948,29 +975,40 @@ function Dashboard() {
                                     </div>
 
                                     <div className="mt-4 pt-4 border-t border-white/5">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-primary/60 block mb-2">Réponse du groupe</label>
                                         <div className="flex flex-col gap-3">
+                                            <label className="text-[10px] font-black uppercase tracking-widest text-primary/60">
+                                                {msg.is_private ? 'Note interne ou brouillon de réponse' : 'Réponse publique sur le site'}
+                                            </label>
+
                                             <textarea
                                                 className={`${inputClass} min-h-[80px] text-sm`}
-                                                placeholder="Votre réponse..."
+                                                placeholder={msg.is_private ? `L'adresse est ${msg.email}. Notez ici si vous avez répondu...` : "Votre réponse publique..."}
                                                 value={msg.reponse || ''}
                                                 onChange={(e) => {
                                                     const nouveauTexte = e.target.value;
                                                     setMessages(messages.map(m => m.id === msg.id ? { ...m, reponse: nouveauTexte } : m));
                                                 }}
                                             />
-                                            <button
-                                                onClick={() => handleUpdateResponse(msg.id, msg.reponse)}
-                                                className="self-end bg-white/5 hover:bg-white/10 text-white px-4 py-2 rounded-lg border border-white/5 text-[10px] font-black uppercase transition-all"
-                                            >
-                                                Enregistrer la réponse
-                                            </button>
+
+                                            <div className="flex justify-between items-center">
+                                                {/* Petit lien discret pour ceux qui utilisent le webmail */}
+                                                {msg.is_private === 1 && (
+                                                    <span className="text-[9px] text-white/30 uppercase font-bold">
+                                                        Copiez l'email ci-dessus pour répondre
+                                                    </span>
+                                                )}
+                                                <button
+                                                    onClick={() => handleUpdateResponse(msg.id, msg.reponse)}
+                                                    className="bg-white/5 hover:bg-white/10 text-white px-4 py-2 rounded-lg border border-white/5 text-[10px] font-black uppercase transition-all ml-auto"
+                                                >
+                                                    Enregistrer
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             ))
                         ) : (
-                            /* C'est ce bloc ":" qui manquait et causait l'erreur Babel */
                             <p className="text-white/30 text-[10px] uppercase tracking-widest text-center py-8">
                                 Aucun message dans le livre d'or
                             </p>

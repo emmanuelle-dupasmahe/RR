@@ -8,6 +8,7 @@ function Livredor() {
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
+    const [isPrivate, setIsPrivate] = useState(false);
 
     const fetchMessages = async () => {
         try {
@@ -35,11 +36,12 @@ function Livredor() {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ content })
+                body: JSON.stringify({ content, is_private: isPrivate })
             });
 
             if (res.ok) {
                 setContent('');
+                setIsPrivate(false);
                 setPage(1);
                 fetchMessages();
             } else {
@@ -90,6 +92,28 @@ function Livredor() {
                                 onChange={(e) => setContent(e.target.value)}
                                 required
                             />
+                            <div className="flex items-center gap-3 mb-4 mt-2 px-1">
+                                {/* On met le curseur ET le texte dans le même label pour que TOUTE la zone soit cliquable */}
+                                <label htmlFor="private-toggle" className="flex items-center gap-3 cursor-pointer group">
+                                    <div className="relative inline-flex items-center">
+                                        <input
+                                            type="checkbox"
+                                            className="sr-only peer"
+                                            checked={isPrivate}
+                                            onChange={(e) => setIsPrivate(e.target.checked)}
+                                            id="private-toggle"
+                                        />
+                                        {/* La div qui dessine le switch */}
+                                        <div className="w-8 h-4 bg-white/10 rounded-full peer peer-checked:bg-primary/50 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-gray-400 after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:after:translate-x-4 peer-checked:after:bg-primary transition-colors"></div>
+                                    </div>
+
+                                    {/* Le texte */}
+                                    <span className="text-[10px] uppercase font-black tracking-widest text-[#555] group-hover:text-primary transition-colors">
+                                        {isPrivate ? "Message Privé (Contact direct)" : "Message Public"}
+                                    </span>
+                                </label>
+                            </div>
+
                             <div className="flex justify-end mt-3">
                                 <button type="submit" className="bg-primary text-white px-6 py-2 font-black uppercase tracking-widest hover:bg-white hover:text-black transition-all duration-300 rounded-sm text-[10px]">
                                     Publier
@@ -114,6 +138,11 @@ function Livredor() {
                                         <div>
                                             <span className="block font-[800] text-primary uppercase tracking-[0.1em] text-xl transform scale-x-[0.85] origin-left">
                                                 {msg.firstname}
+                                                {msg.is_private === 1 && (
+                                                    <span className="text-[9px] bg-primary/20 text-primary px-2 py-0.5 rounded-full ml-3 tracking-widest font-black border border-primary/30">
+                                                        PRIVÉ
+                                                    </span>
+                                                )}
                                             </span>
                                             <span className="text-[#444] text-[0.7rem] font-bold uppercase tracking-[2px]">
                                                 {new Date(msg.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })}
@@ -128,7 +157,7 @@ function Livredor() {
                                         {msg.content}
                                     </p>
 
-                                    {/* BLOC RÉPONSE DÉPLACÉ ICI (À L'INTÉRIEUR DU MAP) */}
+                                    {/* BLOC RÉPONSE (À L'INTÉRIEUR DU MAP) */}
                                     {msg.reponse && (
                                         <div className="mt-4 ml-4 p-4 bg-primary/5 border-l-2 border-primary rounded-r-lg">
                                             <span className="text-primary text-[10px] font-black uppercase tracking-[2px] block mb-1">
