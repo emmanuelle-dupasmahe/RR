@@ -3,7 +3,7 @@ import express from 'express';
 import { query } from '../config/db.js';
 import authMiddleware from '../middlewares/auth.middleware.js';
 import { upload } from '../middlewares/upload.middleware.js';
-import jwt from 'jsonwebtoken'; // Ajout pour décoder le token optionnel sur le GET
+import jwt from 'jsonwebtoken';
 
 const router = express.Router();
 
@@ -14,8 +14,6 @@ router.get('/', async (req, res) => {
         const limit = parseInt(req.query.limit) || 10;
         const offset = (page - 1) * limit;
 
-        // --- LOGIQUE DE FILTRAGE ---
-        // On vérifie si un token est présent pour identifier un membre du groupe
         let userRole = 'guest';
         const authHeader = req.headers.authorization;
         if (authHeader) {
@@ -24,7 +22,7 @@ router.get('/', async (req, res) => {
                 const decoded = jwt.verify(token, process.env.JWT_SECRET);
                 userRole = decoded.role;
             } catch (err) {
-                // Token invalide ou expiré, on reste en 'guest'
+                // Token invalide
             }
         }
 
@@ -32,11 +30,10 @@ router.get('/', async (req, res) => {
         let params = [limit, offset];
 
         if (userRole === 'admin' || userRole === 'member') {
-            // Le groupe voit TOUT
             countSql = 'SELECT COUNT(*) as total FROM repetitions';
+            // Le SELECT * inclura automatiquement la nouvelle colonne markers
             sql = 'SELECT * FROM repetitions ORDER BY id DESC LIMIT ? OFFSET ?';
         } else {
-            // Le public ne voit QUE les morceaux 'public'
             countSql = 'SELECT COUNT(*) as total FROM repetitions WHERE status = "public"';
             sql = 'SELECT * FROM repetitions WHERE status = "public" ORDER BY id DESC LIMIT ? OFFSET ?';
         }
@@ -58,8 +55,8 @@ router.get('/', async (req, res) => {
 
 // Ajouter un morceau
 router.post('/', authMiddleware, upload.single('audio'), async (req, res) => {
-    // Ajout de 'status' ici
-    const { titre, detail, url, start_time, end_time, status } = req.body;
+    // Ajout de markers ici
+    const { titre, detail, url, start_time, end_time, status, markers } = req.body;
 
     if (!titre) {
         return res.status(400).json({ error: "Le titre est obligatoire" });
@@ -76,11 +73,11 @@ router.post('/', authMiddleware, upload.single('audio'), async (req, res) => {
     }
 
     try {
-        // MAJ SQL : Ajout de 'status'
+        // MAJ SQL : Ajout de 'markers'
         const sql = `
             INSERT INTO repetitions 
-            (titre, detail, url, file_name, file_size, mime_type, start_time, end_time, status) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            (titre, detail, url, file_name, file_size, mime_type, start_time, end_time, status, markers) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
 
         await query(sql, [
@@ -92,7 +89,8 @@ router.post('/', authMiddleware, upload.single('audio'), async (req, res) => {
             mimeType,
             start_time || 0,
             end_time || null,
-            status || 'private' // Par défaut en privé si non précisé
+            status || 'private',
+            markers || null // On stocke la chaîne JSON ici
         ]);
 
         res.status(201).json({ message: 'Morceau ajouté avec succès !' });
@@ -105,12 +103,13 @@ router.post('/', authMiddleware, upload.single('audio'), async (req, res) => {
 // Modifier un morceau
 router.put('/:id', authMiddleware, async (req, res) => {
     const { id } = req.params;
-    const { titre, detail, url, start_time, end_time, status } = req.body;
+    // Ajout de markers ici
+    const { titre, detail, url, start_time, end_time, status, markers } = req.body;
 
     try {
         const sql = `
             UPDATE repetitions 
-            SET titre = ?, detail = ?, url = ?, start_time = ?, end_time = ?, status = ?
+            SET titre = ?, detail = ?, url = ?, start_time = ?, end_time = ?, status = ?, markers = ?
             WHERE id = ?
         `;
         await query(sql, [
@@ -120,6 +119,7 @@ router.put('/:id', authMiddleware, async (req, res) => {
             start_time || 0,
             end_time || null,
             status || 'private',
+            markers || null, // Mise à jour des markers
             id
         ]);
         res.json({ message: 'Morceau mis à jour' });

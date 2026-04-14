@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth.js';
+import WavePlayer from '../components/WavePlayer';
+
 
 function Dashboard() {
     const { user, token } = useAuth();
@@ -42,6 +44,9 @@ function Dashboard() {
     };
 
     const [activeSection, setActiveSection] = useState('tournee');
+
+    const [markers, setMarkers] = useState([]);
+    const [newMarker, setNewMarker] = useState({ time: '', label: '' });
 
     // --- LOGIQUE FETCH ---
 
@@ -122,6 +127,27 @@ function Dashboard() {
             .catch(err => console.error("Erreur livre d'or admin:", err));
     }, []);
 
+
+    const addMarker = () => {
+        if (newMarker.time !== '' && newMarker.label !== '') {
+            const updated = [...markers, { ...newMarker, time: Number(newMarker.time) }]
+                .sort((a, b) => a.time - b.time); // Trie par temps
+            setMarkers(updated);
+            setNewMarker({ time: '', label: '' }); // Reset le petit formulaire
+        }
+    };
+
+    const removeMarker = (index) => {
+        setMarkers(markers.filter((_, i) => i !== index));
+    };
+
+    const jumpToTime = (repId, time) => {
+
+        const eventName = `jump-to-${String(repId).replace('wave-', '')}`;
+        const event = new CustomEvent(eventName, { detail: time });
+        window.dispatchEvent(event);
+    };
+
     // --- HANDLERS ---
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -193,27 +219,45 @@ function Dashboard() {
         }
     };
 
-    const handleUpdateRep = async (rep) => {
+    //MODIFICATION REPETES
+    const handleRepUpdate = async (rep) => {
         try {
+
+            const markersData = typeof markers === 'string' ? markers : JSON.stringify(markers);
+
             const res = await fetch(`http://localhost:5000/api/repetitions/${rep.id}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
                 body: JSON.stringify({
-                    titre: rep.titre, detail: rep.detail, url: rep.url, start_time: rep.start_time,
-                    end_time: rep.end_time, status: rep.status
+                    titre: rep.titre,
+                    detail: rep.detail,
+                    url: rep.url,
+                    start_time: rep.start_time,
+                    end_time: rep.end_time,
+                    status: rep.status,
+                    markers: markersData // On envoie les markers du state
                 })
             });
+
             if (res.ok) {
                 setEditingRep(null);
+                setMarkers([]);
                 fetchRepetitions();
                 alert('Morceau mis à jour');
             } else {
                 const errorData = await res.json();
                 alert(`Erreur: ${errorData.error || 'Impossible de mettre à jour'}`);
             }
-        } catch (err) { console.error(err); }
+        } catch (err) {
+            console.error("Erreur update:", err);
+        }
     };
 
+
+    //modification vidéos
     const handleUpdateVideo = async (video) => {
         try {
             const res = await fetch(`http://localhost:5000/api/videos/${video.id}`, {
@@ -232,6 +276,7 @@ function Dashboard() {
         } catch (err) { console.error(err); }
     };
 
+    //modification membres
     const handleUpdateMember = async (member) => {
         try {
             const res = await fetch(`http://localhost:5000/api/membres/${member.id}`, {
@@ -256,6 +301,7 @@ function Dashboard() {
         } catch (err) { console.error(err); }
     };
 
+    //REPETITIONS
     const handleRepSubmit = async (e) => {
         e.preventDefault();
         const data = new FormData();
@@ -264,6 +310,8 @@ function Dashboard() {
         data.append('url', repFormData.url);
         data.append('start_time', repFormData.start_time);
         data.append('end_time', repFormData.end_time);
+        data.append('status', repFormData.status || 'private');
+        data.append('markers', JSON.stringify(markers));
 
         if (repFile) data.append('audio', repFile);
 
@@ -275,6 +323,7 @@ function Dashboard() {
         if (response.ok) {
             setRepFormData({ titre: '', detail: '', url: '' });
             setRepFile(null);
+            setMarkers([]);
             e.target.reset();
             fetchRepetitions();
             alert('Morceau ajouté au studio !');
@@ -378,6 +427,7 @@ function Dashboard() {
         }
     };
 
+    //suppression repetes
     const handleRepDelete = async (id) => {
         if (!window.confirm("Supprimer ce morceau ?")) return;
         const res = await fetch(`http://localhost:5000/api/repetitions/${id}`, {
@@ -392,6 +442,7 @@ function Dashboard() {
         }
     };
 
+    //modification tournée
     const handleUpdateTitle = async (e) => {
         e.preventDefault();
         const res = await fetch('http://localhost:5000/api/settings/tour_title', {
@@ -478,6 +529,7 @@ function Dashboard() {
 
     const inputClass = "w-full p-4 bg-[#0a0a0a] border border-white/5 text-white focus:outline-none focus:border-primary/50 placeholder:text-white/20 transition-all rounded-lg text-sm font-medium";
     const btnClass = "bg-primary text-white border-none p-4 font-black uppercase tracking-widest cursor-pointer w-full transition-all hover:bg-white hover:text-black rounded-lg shadow-lg active:scale-[0.98]";
+
 
     return (
         <div className="mt-[80px] min-h-screen bg-black text-white pb-20">
@@ -644,14 +696,51 @@ function Dashboard() {
                                             onChange={(e) => setRepFormData({ ...repFormData, detail: e.target.value })}
                                         />
 
-                                        {/* --- GESTION DU TEMPS & STATUT --- */}
+                                        {/* --- GESTION DES MARKERS (POINTS D'INTÉRÊT) --- */}
+                                        <div className="bg-white/5 p-4 rounded-lg border border-white/10 space-y-3">
+                                            <label className="block text-[10px] font-black uppercase text-primary/60 ml-1">Markers (Points d'intérêt)</label>
+                                            <div className="flex gap-2">
+                                                <input
+                                                    type="number"
+                                                    placeholder="Sec"
+                                                    value={newMarker.time}
+                                                    onChange={(e) => setNewMarker({ ...newMarker, time: e.target.value })}
+                                                    className="w-20 bg-black border border-white/20 p-2 rounded text-sm text-white"
+                                                />
+                                                <input
+                                                    type="text"
+                                                    placeholder="Label (ex: Solo)"
+                                                    value={newMarker.label}
+                                                    onChange={(e) => setNewMarker({ ...newMarker, label: e.target.value })}
+                                                    className="flex-1 bg-black border border-white/20 p-2 rounded text-sm text-white"
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={addMarker}
+                                                    className="bg-primary hover:bg-primary/80 px-4 rounded font-bold text-[10px] text-white transition-colors"
+                                                >
+                                                    AJOUTER
+                                                </button>
+                                            </div>
+                                            <div className="flex flex-wrap gap-2 pt-2">
+                                                {markers.map((m, i) => (
+                                                    <div key={i} className="flex items-center gap-2 bg-black px-2 py-1 rounded border border-primary/30 text-[10px]">
+                                                        <span className="text-primary font-bold">{m.time}s</span>
+                                                        <span className="text-gray-400">{m.label}</span>
+                                                        <button type="button" onClick={() => removeMarker(i)} className="text-white/40 hover:text-primary">✕</button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        {/* --- TEMPS & STATUT --- */}
                                         <div className="grid grid-cols-3 gap-4">
                                             <div className="space-y-1">
                                                 <label className="text-[9px] font-black text-primary/60 uppercase ml-1">Début (sec)</label>
                                                 <input
                                                     type="number"
                                                     className={inputClass}
-                                                    value={repFormData.start_time || 0}
+                                                    value={repFormData.start_time}
                                                     onChange={(e) => setRepFormData({ ...repFormData, start_time: e.target.value })}
                                                 />
                                             </div>
@@ -660,7 +749,7 @@ function Dashboard() {
                                                 <input
                                                     type="number"
                                                     className={inputClass}
-                                                    value={repFormData.end_time || ''}
+                                                    value={repFormData.end_time}
                                                     onChange={(e) => setRepFormData({ ...repFormData, end_time: e.target.value })}
                                                 />
                                             </div>
@@ -668,7 +757,7 @@ function Dashboard() {
                                                 <label className="text-[9px] font-black text-primary/60 uppercase ml-1">Visibilité</label>
                                                 <select
                                                     className={inputClass}
-                                                    value={repFormData.status || 'private'}
+                                                    value={repFormData.status}
                                                     onChange={(e) => setRepFormData({ ...repFormData, status: e.target.value })}
                                                 >
                                                     <option value="private">Privé</option>
@@ -718,58 +807,116 @@ function Dashboard() {
                                     {repetitions.length > 0 ? (
                                         repetitions.map(r => (
                                             <div key={r.id} className="p-5 bg-[#0a0a0a] border border-white/5 rounded-xl hover:border-white/10 transition-all group">
+
                                                 {editingRep === r.id ? (
-                                                    <div className="space-y-3 p-4 bg-white/5 rounded-lg border border-primary/20">
+                                                    <div className="space-y-4">
+                                                        {/* TITRE */}
                                                         <input
                                                             className={inputClass}
                                                             value={r.titre}
                                                             onChange={(e) => setRepetitions(repetitions.map(item => item.id === r.id ? { ...item, titre: e.target.value } : item))}
-                                                            placeholder="Titre"
                                                         />
 
+                                                        {/* MARKERS */}
+                                                        <div className="bg-white/5 p-3 rounded border border-white/10">
+                                                            <label className="block text-[9px] font-black uppercase text-primary/60 mb-2">Modifier les Markers</label>
+                                                            <div className="flex gap-2 mb-2">
+                                                                <input
+                                                                    type="number"
+                                                                    placeholder="Sec"
+                                                                    value={newMarker.time}
+                                                                    onChange={(e) => setNewMarker({ ...newMarker, time: e.target.value })}
+                                                                    className="w-16 bg-black border border-white/20 p-1 text-xs text-white"
+                                                                />
+                                                                <input
+                                                                    type="text"
+                                                                    placeholder="Label"
+                                                                    value={newMarker.label}
+                                                                    onChange={(e) => setNewMarker({ ...newMarker, label: e.target.value })}
+                                                                    className="flex-1 bg-black border border-white/20 p-1 text-xs text-white"
+                                                                />
+                                                                <button type="button" onClick={addMarker} className="bg-primary px-2 rounded text-[9px] font-bold">OK</button>
+                                                            </div>
+                                                            <div className="flex flex-wrap gap-1">
+                                                                {markers.map((m, i) => (
+                                                                    <div key={i} className="flex items-center gap-1 bg-black px-2 py-0.5 rounded text-[9px] border border-white/10">
+                                                                        <span className="text-primary font-bold">{m.time}s</span>
+                                                                        <span>{m.label}</span>
+                                                                        <button type="button" onClick={() => removeMarker(i)} className="hover:text-red-500 ml-1">✕</button>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+
+                                                        {/* --- CHAMPS TEMPS DÉBUT ET FIN --- */}
+                                                        <div className="grid grid-cols-2 gap-4">
+                                                            <div className="space-y-1">
+                                                                <label className="text-[9px] font-black text-primary/60 uppercase ml-1">Début (sec)</label>
+                                                                <input
+                                                                    type="number"
+                                                                    className={inputClass}
+                                                                    value={r.start_time || 0}
+                                                                    onChange={(e) => setRepetitions(repetitions.map(item =>
+                                                                        item.id === r.id ? { ...item, start_time: parseFloat(e.target.value) } : item
+                                                                    ))}
+                                                                />
+                                                            </div>
+                                                            <div className="space-y-1">
+                                                                <label className="text-[9px] font-black text-primary/60 uppercase ml-1">Fin (sec)</label>
+                                                                <input
+                                                                    type="number"
+                                                                    className={inputClass}
+                                                                    value={r.end_time || 0}
+                                                                    onChange={(e) => setRepetitions(repetitions.map(item =>
+                                                                        item.id === r.id ? { ...item, end_time: parseFloat(e.target.value) } : item
+                                                                    ))}
+                                                                />
+                                                            </div>
+                                                        </div>
+
+                                                        {/* --- AJOUT : SÉLECTEUR DE VISIBILITÉ EN MODE ÉDITION --- */}
+                                                        <div className="space-y-1">
+                                                            <label className="text-[9px] font-black text-primary/60 uppercase ml-1">Visibilité</label>
+                                                            <select
+                                                                className={inputClass}
+                                                                value={r.status}
+                                                                onChange={(e) => setRepetitions(repetitions.map(item =>
+                                                                    item.id === r.id ? { ...item, status: e.target.value } : item
+                                                                ))}
+                                                            >
+                                                                <option value="private">Privé</option>
+                                                                <option value="public">Public</option>
+                                                            </select>
+                                                        </div>
+
+                                                        {/* DÉTAIL / TEXTAREA */}
                                                         <textarea
                                                             className={`${inputClass} h-20 resize-none`}
                                                             value={r.detail}
                                                             onChange={(e) => setRepetitions(repetitions.map(item => item.id === r.id ? { ...item, detail: e.target.value } : item))}
-                                                            placeholder="Notes techniques"
                                                         />
 
-                                                        <div className="grid grid-cols-2 gap-2">
-                                                            <div className="space-y-1">
-                                                                <label className="text-[8px] uppercase text-white/30">Début (sec)</label>
-                                                                <input type="number" className={inputClass} value={r.start_time || 0} onChange={(e) => setRepetitions(repetitions.map(item => item.id === r.id ? { ...item, start_time: e.target.value } : item))} />
-                                                            </div>
-                                                            <div className="space-y-1">
-                                                                <label className="text-[8px] uppercase text-white/30">Fin (sec)</label>
-                                                                <input type="number" className={inputClass} value={r.end_time || ''} onChange={(e) => setRepetitions(repetitions.map(item => item.id === r.id ? { ...item, end_time: e.target.value } : item))} />
-                                                            </div>
-                                                        </div>
+                                                        {/* BOUTONS ACTIONS */}
+                                                        <div className="flex gap-2">
+                                                            <button
+                                                                onClick={() => handleRepUpdate(r)}
+                                                                className="flex-1 bg-primary text-white text-[10px] font-black py-2 rounded hover:bg-primary/80 transition-colors"
+                                                            >
+                                                                SAUVEGARDER
+                                                            </button>
 
-                                                        <div className="flex items-center gap-3 py-2">
-                                                            <span className="text-[8px] uppercase text-white/30">Visibilité:</span>
-                                                            <div className="flex bg-black rounded p-1 gap-1">
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() => setRepetitions(repetitions.map(item => item.id === r.id ? { ...item, status: 'public' } : item))}
-                                                                    className={`px-3 py-1 rounded text-[8px] font-black uppercase transition-all ${r.status === 'public' ? 'bg-green-600 text-white' : 'text-white/40'}`}
-                                                                >
-                                                                    Public
-                                                                </button>
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() => setRepetitions(repetitions.map(item => item.id === r.id ? { ...item, status: 'private' } : item))}
-                                                                    className={`px-3 py-1 rounded text-[8px] font-black uppercase transition-all ${r.status === 'private' ? 'bg-primary text-white' : 'text-white/40'}`}
-                                                                >
-                                                                    Privé
-                                                                </button>
-                                                            </div>
-                                                        </div>
-
-                                                        <div className="flex gap-2 pt-2">
-                                                            <button onClick={() => handleUpdateRep(r)} className="bg-green-600 text-white text-[10px] font-black p-2 rounded uppercase flex-1">Sauvegarder</button>
-                                                            <button onClick={() => setEditingRep(null)} className="bg-white/10 text-white text-[10px] font-black p-2 rounded uppercase flex-1">Annuler</button>
+                                                            <button
+                                                                onClick={() => {
+                                                                    setEditingRep(null);
+                                                                    setMarkers([]);
+                                                                }}
+                                                                className="flex-1 bg-white/10 text-white text-[10px] font-black py-2 rounded hover:bg-white/20 transition-colors"
+                                                            >
+                                                                ANNULER
+                                                            </button>
                                                         </div>
                                                     </div>
+
                                                 ) : (
                                                     <>
                                                         <div className="flex justify-between items-start mb-2">
@@ -782,25 +929,38 @@ function Dashboard() {
                                                                 </div>
                                                                 <p className="text-[11px] text-primary font-bold uppercase tracking-widest leading-tight">{r.detail}</p>
 
-                                                                {(r.start_time || r.end_time) && (
-                                                                    <div className="mt-2 flex items-center gap-2">
-                                                                        <span className="text-[9px] bg-white/5 px-2 py-0.5 rounded text-white/40 uppercase font-black">
-                                                                            Segment: {r.start_time || 0}s ➔ {r.end_time || 'fin'}s
-                                                                        </span>
+                                                                {/* Affichage des markers */}
+                                                                {r.markers && (
+                                                                    <div className="mt-3 flex flex-wrap gap-1">
+                                                                        {(typeof r.markers === 'string' ? JSON.parse(r.markers) : r.markers).map((m, idx) => (
+                                                                            <button
+                                                                                key={idx}
+                                                                                onClick={() => jumpToTime(r.id, m.time)}
+                                                                                className="text-[8px] border border-primary/30 bg-primary/5 hover:bg-primary/20 px-2 py-0.5 rounded text-white/80 transition-all active:scale-95"
+                                                                            >
+                                                                                <strong className="text-primary">{m.time}s</strong> : {m.label} ⚡
+                                                                            </button>
+                                                                        ))}
                                                                     </div>
                                                                 )}
                                                             </div>
                                                             <div className="flex gap-3 opacity-0 group-hover:opacity-100 transition-opacity ml-4">
-                                                                <button onClick={() => setEditingRep(r.id)} className="text-white/30 hover:text-white text-[10px] font-black uppercase">Edit</button>
+                                                                <button onClick={() => {
+                                                                    setEditingRep(r.id);
+                                                                    setMarkers(typeof r.markers === 'string' ? JSON.parse(r.markers || '[]') : (r.markers || []));
+                                                                }} className="text-white/30 hover:text-white text-[10px] font-black uppercase">Edit</button>
                                                                 <button onClick={() => handleRepDelete(r.id)} className="text-[#444] hover:text-primary text-[10px] font-black uppercase">Delete</button>
                                                             </div>
                                                         </div>
 
-                                                        <audio
-                                                            src={r.url.startsWith('/uploads') ? `http://localhost:5000${r.url}` : r.url}
-                                                            controls
-                                                            className="h-8 w-full opacity-60 hover:opacity-100 transition-all invert mt-2"
-                                                        />
+                                                        <div className="mt-4">
+                                                            <WavePlayer
+                                                                id={`wave-${r.id}`}
+                                                                url={r.url.startsWith('/uploads') ? `http://localhost:5000${r.url}` : r.url}
+                                                                startTime={r.start_time}
+                                                                endTime={r.end_time}
+                                                            />
+                                                        </div>
                                                     </>
                                                 )}
                                             </div>
@@ -815,7 +975,6 @@ function Dashboard() {
                             </div>
                         </section>
                     )}
-
 
                     {/* SECTION VIDÉOS */}
                     {activeSection === 'videos' && (

@@ -30,64 +30,85 @@ const Backstage = () => {
 
     return (
         <div className="min-h-screen bg-black text-white">
-            {/* HEADER DE LA PAGE (Identique aux autres pages) */}
+            {/* HEADER DE LA PAGE */}
             <div className="text-center pt-[100px] pb-[40px] bg-gradient-to-b from-[#111] to-black px-4 mb-8">
                 <h1 className="text-[3rem] md:text-[3.5rem] font-[300] uppercase m-0 leading-[1.2] tracking-[0.1em] text-white inline-block">
                     Backstage
                 </h1>
-
                 <p className="text-primary font-black tracking-[5px] uppercase text-[0.7rem] md:text-xs mb-4">
                     Espace Privé // Accès réservé aux membres
                 </p>
             </div>
 
             {/* CONTENU DES MORCEAUX */}
-        <div className="max-w-7xl mx-auto px-6 pb-12">
-            <div className="grid grid-cols-1 gap-6">
-                {morceaux && morceaux.length > 0 ? (
-                    morceaux
-                        .filter(m => m.status === 'private')
-                        .map(m => (
-                            <div key={m.id} className="bg-[#111] border border-white/5 p-6 rounded-2xl flex flex-col md:flex-row gap-6 items-center hover:border-red-600/30 transition-colors">
+            <div className="max-w-7xl mx-auto px-6 pb-12">
+                <div className="grid grid-cols-1 gap-6">
+                    {morceaux && morceaux.length > 0 ? (
+                        morceaux
+                            .filter(m => m.status === 'private')
+                            .map(m => {
+                                // On parse les markers s'ils existent, sinon tableau vide
+                                const markers = m.markers ? JSON.parse(m.markers) : [];
+                                
+                                return (
+                                    <div key={m.id} className="bg-[#111] border border-white/5 p-6 rounded-2xl flex flex-col md:flex-row gap-6 items-start hover:border-red-600/30 transition-colors">
 
-                                {/* Infos Morceau */}
-                                <div className="flex-1">
-                                    <div className="flex items-center gap-3 mb-1">
-                                        <h3 className="text-xl font-bold uppercase tracking-tighter">{m.titre}</h3>
-                                        <span className={`text-[10px] px-2 py-0.5 rounded font-black ${m.status === 'private' ? 'bg-red-600/20 text-red-600' : 'bg-green-500/20 text-green-500'}`}>
-                                            {m.status === 'private' ? 'WORK IN PROGRESS' : 'PUBLIC'}
-                                        </span>
+                                        {/* Infos Morceau + Lecteur */}
+                                        <div className="flex-1 w-full">
+                                            <div className="flex items-center gap-3 mb-1">
+                                                <h3 className="text-xl font-bold uppercase tracking-tighter">{m.titre}</h3>
+                                                <span className="text-[10px] px-2 py-0.5 rounded font-black bg-red-600/20 text-red-600">
+                                                    WORK IN PROGRESS
+                                                </span>
+                                            </div>
+                                            <p className="text-gray-500 text-sm mb-4">{m.detail || "Aucune note technique"}</p>
+
+                                            <div className="mt-4">
+                                                <WavePlayer
+                                                    url={m.url.startsWith('/uploads') ? `http://localhost:5000${m.url}` : m.url}
+                                                    startTime={m.start_time}
+                                                    endTime={m.end_time}
+                                                    id={`wave-${m.id}`} // On ajoute un ID unique
+                                                />
+                                            </div>
+                                        </div>
+
+                                        {/* Section "Markers" Interactive */}
+                                        <div className="w-full md:w-80 bg-white/5 p-4 rounded-xl border border-white/5 self-stretch">
+                                            <h4 className="text-[10px] font-black uppercase text-red-600 mb-3 tracking-widest">Markers</h4>
+                                            
+                                            <div className="space-y-2">
+                                                {markers.length > 0 ? markers.map((marker, idx) => (
+                                                    <button
+                                                        key={idx}
+                                                        onClick={() => {
+                                                            
+                                                            window.dispatchEvent(new CustomEvent(`jump-to-${m.id}`, { detail: marker.time }));
+                                                        }}
+                                                        className="w-full text-left bg-black/40 hover:bg-red-600/10 border border-white/5 hover:border-red-600/30 p-3 rounded-lg transition-all group flex gap-3 items-center"
+                                                    >
+                                                        <span className="text-red-600 font-black text-[10px] bg-red-600/10 px-2 py-1 rounded">
+                                                            {Math.floor(marker.time / 60)}:{(marker.time % 60).toString().padStart(2, '0')}
+                                                        </span>
+                                                        <span className="text-gray-300 text-[11px] leading-tight group-hover:text-white flex-1">
+                                                            {marker.label}
+                                                        </span>
+                                                    </button>
+                                                )) : (
+                                                    <div className="text-[11px] text-white/20 italic p-2 border border-dashed border-white/10 rounded">
+                                                        Utilise le début : {m.start_time}s pour bosser.
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
                                     </div>
-                                    <p className="text-gray-500 text-sm mb-4">{m.detail || "Aucune note technique"}</p>
-
-                                    {/* Lecteur Audio WaveSurfer */}
-                                    <div className="mt-4">
-                                        <WavePlayer
-                                            url={m.url.startsWith('/uploads') ? `http://localhost:5000${m.url}` : m.url}
-                                            startTime={m.start_time}
-                                            endTime={m.end_time}
-                                        />
-                                    </div>
-                                </div>
-
-                                {/* Section "À bosser" */}
-                                <div className="w-full md:w-64 bg-white/5 p-4 rounded-xl border border-white/5">
-                                    <h4 className="text-[10px] font-black uppercase text-red-600 mb-2">Notes de répétition</h4>
-                                    <ul className="text-[11px] space-y-2 text-gray-400">
-                                        <li>• Début : {m.start_time || 0}s</li>
-                                        <li>• Fin : {m.end_time || 'Non définie'}</li>
-                                        <li className="text-white/40 italic mt-2 text-pretty">
-                                            Focus : {m.detail || "Pas de note particulière"}
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        ))
-                ) : (
-                    <p className="text-center opacity-30 py-10">Aucun morceau enregistré dans le studio.</p>
-                )}
+                                );
+                            })
+                    ) : (
+                        <p className="text-center opacity-30 py-10">Aucun morceau enregistré dans le studio.</p>
+                    )}
+                </div>
             </div>
-        </div>
         </div>
     );
 };
