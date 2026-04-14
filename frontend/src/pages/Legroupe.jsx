@@ -15,7 +15,7 @@ export default function Groupe() {
 
     // 2. Récupération des données au chargement
     useEffect(() => {
-        
+
         Promise.all([
             fetch('http://localhost:5000/api/membres').then(res => res.json()),
             fetch('http://localhost:5000/api/groupesettings').then(res => res.json())
@@ -96,7 +96,7 @@ export default function Groupe() {
             </div>
 
             {/* HISTOIRE DYNAMIQUE */}
-            <div className="max-w-[900px] mx-auto px-6 py-16 border-t border-white/5">
+            <div className="max-w-[1000px] mx-auto px-6 py-16 border-t border-white/5">
                 <div className="text-center">
                     <h2 className="text-white text-2xl md:text-4xl font-[300] uppercase mb-12 tracking-[0.1em] inline-block transform scale-x-[0.90] origin-center">
                         {groupTexts.group_title_history && groupTexts.group_title_history.includes(',') ? (
@@ -111,21 +111,27 @@ export default function Groupe() {
                         )}
                     </h2>
 
-                    <div className="grid md:grid-cols-2 gap-12 text-left">
-                        <div>
-                            <p className="text-[#9ca3af] leading-relaxed text-lg font-medium">
+                    {/* REMPLACEMENT DE LA GRID PAR UN FLEX POUR PLUS DE CONTRÔLE */}
+                    <div className="flex flex-col md:flex-row items-stretch justify-center gap-0 text-left">
+
+                        {/* BLOC GAUCHE : flex-1 pour qu'ils partagent l'espace équitablement */}
+                        <div className="flex-1 md:pr-10">
+                            <p className="text-[#9ca3af] leading-relaxed text-lg font-medium text-justify">
                                 {groupTexts.group_history_1}
                             </p>
                         </div>
-                        <div>
-                            <p className="text-[#9ca3af] leading-relaxed text-lg font-medium border-l-2 border-primary/30 pl-6">
+
+                        {/* BLOC DROITE : La bordure rouge sert de séparation centrale */}
+                        <div className="flex-1 md:pl-10 border-t md:border-t-0 md:border-l-2 border-primary/30 mt-8 md:mt-0">
+                            <p className="text-[#9ca3af] leading-relaxed text-lg font-medium text-justify">
                                 {groupTexts.group_history_2}
                             </p>
                         </div>
+
                     </div>
                 </div>
             </div>
-
+            
             {/* RÉPERTOIRE  */}
             <div className="bg-[#0a0a0a] py-16 px-6">
                 <div className="max-w-[1100px] mx-auto text-center">
