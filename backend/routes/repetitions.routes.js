@@ -101,11 +101,20 @@ router.post('/', authMiddleware, upload.single('audio'), async (req, res) => {
 });
 
 // Modifier un morceau
-router.put('/:id', authMiddleware, async (req, res) => {
+router.put('/:id', authMiddleware, upload.single('audio'), async (req, res) => {
     const { id } = req.params;
-    // Ajout de markers ici
     const { titre, detail, url, start_time, end_time, status, markers } = req.body;
 
+    let finalUrl = url; // Par défaut, on garde l'ancienne URL transmise
+
+    // Si un nouveau fichier est téléchargé (correction d'extension ou nouveau fichier)
+    if (req.file) {
+        finalUrl = `/uploads/${req.file.filename}`;
+    }
+
+    const validatedStartTime = isNaN(parseInt(start_time)) ? 0 : parseInt(start_time);
+    const validatedEndTime = (end_time === 'null' || end_time === '' || isNaN(parseInt(end_time))) ? null : parseInt(end_time);
+    
     try {
         const sql = `
             UPDATE repetitions 
@@ -115,14 +124,14 @@ router.put('/:id', authMiddleware, async (req, res) => {
         await query(sql, [
             titre,
             detail,
-            url,
-            start_time || 0,
-            end_time || null,
+            finalUrl, // Utilise la nouvelle URL si un fichier a été posté
+            validatedStartTime,
+            validatedEndTime,
             status || 'private',
-            markers || null, // Mise à jour des markers
+            markers || null,
             id
         ]);
-        res.json({ message: 'Morceau mis à jour' });
+        res.json({ message: 'Morceau mis à jour', newUrl: finalUrl });
     } catch (error) {
         console.error('Erreur SQL:', error);
         res.status(500).json({ error: 'Erreur lors de la modification' });

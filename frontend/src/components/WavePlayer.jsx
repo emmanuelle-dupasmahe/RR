@@ -6,12 +6,13 @@ const WavePlayer = ({ url, startTime, endTime, id }) => {
     const wavesurferRef = useRef(null);
     const [isPlaying, setIsPlaying] = useState(false);
     
-    // États pour le temps
+    // États pour le temps et le zoom
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
+    const [zoomLevel, setZoomLevel] = useState(10); // Niveau de zoom initial
 
-    // Fonction utilitaire pour formater les secondes en MM:SS
     const formatTime = (seconds) => {
+        if (!seconds || isNaN(seconds)) return "00:00";
         const mins = Math.floor(seconds / 60);
         const secs = Math.floor(seconds % 60);
         return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
@@ -28,68 +29,95 @@ const WavePlayer = ({ url, startTime, endTime, id }) => {
             responsive: true,
             height: 60,
             normalize: true, 
-            partialRender: true
+            partialRender: true,
+            minPxPerSec: zoomLevel // On lie le zoom à l'initialisation
         });
 
-        wavesurferRef.current.load(url);
+        const ws = wavesurferRef.current;
+        ws.load(url);
 
-        wavesurferRef.current.on('ready', () => {
-            setDuration(wavesurferRef.current.getDuration());
-            if (startTime) wavesurferRef.current.setTime(Number(startTime));
+        ws.on('ready', () => {
+            setDuration(ws.getDuration());
+            if (startTime) ws.setTime(Number(startTime));
         });
 
-        // Mise à jour du temps pendant la lecture
-        wavesurferRef.current.on('audioprocess', () => {
-            const current = wavesurferRef.current.getCurrentTime();
+        ws.on('audioprocess', () => {
+            const current = ws.getCurrentTime();
             setCurrentTime(current);
-
             if (endTime && current >= Number(endTime)) {
-                wavesurferRef.current.pause();
-                wavesurferRef.current.setTime(Number(startTime || 0));
+                ws.pause();
+                ws.setTime(Number(startTime || 0));
             }
         });
 
-        // Mise à jour du temps si on clique sur la waveform
-        wavesurferRef.current.on('interaction', () => {
-            setCurrentTime(wavesurferRef.current.getCurrentTime());
+        ws.on('interaction', () => {
+            setCurrentTime(ws.getCurrentTime());
         });
 
+        ws.on('play', () => setIsPlaying(true));
+        ws.on('pause', () => setIsPlaying(false));
+
         const handleJump = (e) => {
-            if (wavesurferRef.current) {
-                wavesurferRef.current.setTime(Number(e.detail));
-                wavesurferRef.current.play();
+            if (ws) {
+                ws.setTime(Number(e.detail));
+                ws.play();
             }
         };
         
-        window.addEventListener(`jump-to-${id.replace('wave-', '')}`, handleJump);
-
-        wavesurferRef.current.on('play', () => setIsPlaying(true));
-        wavesurferRef.current.on('pause', () => setIsPlaying(false));
+        const eventName = `jump-to-${id.replace('wave-', '')}`;
+        window.addEventListener(eventName, handleJump);
 
         return () => {
-            window.removeEventListener(`jump-to-${id.replace('wave-', '')}`, handleJump);
-            wavesurferRef.current.destroy();
+            window.removeEventListener(eventName, handleJump);
+            if (ws) {
+                ws.unAll();
+                ws.destroy();
+            }
         }
     }, [url, startTime, endTime, id]);
 
+    // Fonction pour gérer le changement de zoom
+    const handleZoom = (e) => {
+        const level = Number(e.target.value);
+        setZoomLevel(level);
+        if (wavesurferRef.current) {
+            wavesurferRef.current.zoom(level);
+        }
+    };
+
     const handlePlayPause = () => {
-        wavesurferRef.current.playPause();
+        if (wavesurferRef.current) wavesurferRef.current.playPause();
     };
 
     return (
         <div className="w-full bg-white/5 p-3 rounded-lg border border-white/5 space-y-2">
-            {/* Barre d'infos temps */}
-            <div className="flex justify-between px-1">
-                <span className="text-[10px] font-mono text-red-500 font-bold">
-                    {formatTime(currentTime)}
-                </span>
-                <span className="text-[10px] font-mono text-white/40">
-                    {formatTime(duration)}
-                </span>
+            <div className="flex justify-between items-center px-1">
+                <div className="flex gap-4 items-center">
+                    <span className="text-[10px] font-mono text-red-500 font-bold">
+                        {formatTime(currentTime)}
+                    </span>
+                    <span className="text-[10px] font-mono text-white/40">
+                        {formatTime(duration)}
+                    </span>
+                </div>
+
+                {/* Contrôle de Zoom */}
+                <div className="flex items-center gap-2">
+                    <span className="text-[9px] text-white/30 font-bold uppercase">Zoom</span>
+                    <input 
+                        type="range" 
+                        min="10" 
+                        max="200" 
+                        value={zoomLevel}
+                        onChange={handleZoom}
+                        className="w-20 h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-red-600"
+                    />
+                </div>
             </div>
 
             <div className="flex items-center gap-4">
                 <button 
+                    type="button"
                     onClick={handlePlayPause}
                     className="w-12 h-12 flex items-center justify-center bg-red-600 rounded-full hover:scale-105 transition-transform shrink-0"
                 >
@@ -99,7 +127,8 @@ const WavePlayer = ({ url, startTime, endTime, id }) => {
                         <span className="text-white text-[10px] font-black ml-1">PLAY</span>
                     )}
                 </button>
-                <div ref={containerRef} className="flex-1" />
+                {/* Conteneur de la waveform avec scrollbar automatique si zoomé */}
+                <div ref={containerRef} className="flex-1 overflow-x-auto overflow-y-hidden" />
             </div>
         </div>
     );

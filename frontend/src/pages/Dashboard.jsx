@@ -48,6 +48,8 @@ function Dashboard() {
     const [markers, setMarkers] = useState([]);
     const [newMarker, setNewMarker] = useState({ time: '', label: '' });
 
+    const [updateFile, setUpdateFile] = useState(null);
+
     // --- LOGIQUE FETCH ---
 
     const fetchRepetitions = async (page = 1) => {
@@ -220,30 +222,36 @@ function Dashboard() {
     };
 
     //MODIFICATION REPETES
-    const handleRepUpdate = async (rep) => {
+    const handleRepUpdate = async (rep, selectedFile) => { // Ajoute selectedFile en argument
         try {
+            const formData = new FormData();
+            formData.append('titre', rep.titre);
+            formData.append('detail', rep.detail);
+            formData.append('url', rep.url); // On garde l'ancienne au cas où pas de nouveau fichier
+            formData.append('start_time', rep.start_time);
+            formData.append('end_time', rep.end_time);
+            formData.append('status', rep.status);
 
             const markersData = typeof markers === 'string' ? markers : JSON.stringify(markers);
+            formData.append('markers', markersData);
+
+            // SI l'utilisateur a sélectionné un nouveau fichier dans l'input
+            if (selectedFile) {
+                formData.append('audio', selectedFile);
+            }
 
             const res = await fetch(`http://localhost:5000/api/repetitions/${rep.id}`, {
                 method: 'PUT',
                 headers: {
-                    'Content-Type': 'application/json',
+
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({
-                    titre: rep.titre,
-                    detail: rep.detail,
-                    url: rep.url,
-                    start_time: rep.start_time,
-                    end_time: rep.end_time,
-                    status: rep.status,
-                    markers: markersData // On envoie les markers du state
-                })
+                body: formData
             });
 
             if (res.ok) {
                 setEditingRep(null);
+                setUpdateFile(null);
                 setMarkers([]);
                 fetchRepetitions();
                 alert('Morceau mis à jour');
@@ -889,6 +897,17 @@ function Dashboard() {
                                                             </select>
                                                         </div>
 
+                                                        {/* Champ pour changer le fichier audio */}
+                                                        <div className="space-y-1 mt-2">
+                                                            <label className="text-[9px] font-black text-primary/60 uppercase ml-1">Changer le fichier audio (Optionnel)</label>
+                                                            <input
+                                                                type="file"
+                                                                accept="audio/*"
+                                                                onChange={(e) => setUpdateFile(e.target.files[0])}
+                                                                className="block w-full text-xs text-gray-400 file:mr-4 file:py-1 file:px-2 file:rounded-full file:border-0 file:text-[10px] file:font-bold file:bg-red-600 file:text-white hover:file:bg-red-700"
+                                                            />
+                                                        </div>
+
                                                         {/* DÉTAIL / TEXTAREA */}
                                                         <textarea
                                                             className={`${inputClass} h-20 resize-none`}
@@ -899,7 +918,7 @@ function Dashboard() {
                                                         {/* BOUTONS ACTIONS */}
                                                         <div className="flex gap-2">
                                                             <button
-                                                                onClick={() => handleRepUpdate(r)}
+                                                                onClick={() => handleRepUpdate(r, updateFile)}
                                                                 className="flex-1 bg-primary text-white text-[10px] font-black py-2 rounded hover:bg-primary/80 transition-colors"
                                                             >
                                                                 SAUVEGARDER

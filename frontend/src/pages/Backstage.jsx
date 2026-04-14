@@ -47,42 +47,42 @@ const Backstage = () => {
                         morceaux
                             .filter(m => m.status === 'private')
                             .map(m => {
-                                // On parse les markers s'ils existent, sinon tableau vide
                                 const markers = m.markers ? JSON.parse(m.markers) : [];
                                 
                                 return (
-                                    <div key={m.id} className="bg-[#111] border border-white/5 p-6 rounded-2xl flex flex-col md:flex-row gap-6 items-start hover:border-red-600/30 transition-colors">
+                                    <div key={m.id} className="bg-[#111] border border-white/5 p-6 rounded-2xl flex flex-col lg:flex-row gap-6 items-start hover:border-red-600/30 transition-colors overflow-hidden">
 
-                                        {/* Infos Morceau + Lecteur */}
-                                        <div className="flex-1 w-full">
+                                        {/* COLONNE GAUCHE : INFOS + LECTEUR 
+                                            L'ajout de 'min-w-0' est CRUCIAL pour que le zoom ne casse pas le layout
+                                        */}
+                                        <div className="flex-1 w-full min-w-0"> 
                                             <div className="flex items-center gap-3 mb-1">
-                                                <h3 className="text-xl font-bold uppercase tracking-tighter">{m.titre}</h3>
-                                                <span className="text-[10px] px-2 py-0.5 rounded font-black bg-red-600/20 text-red-600">
+                                                <h3 className="text-xl font-bold uppercase tracking-tighter truncate">{m.titre}</h3>
+                                                <span className="text-[10px] px-2 py-0.5 rounded font-black bg-red-600/20 text-red-600 shrink-0">
                                                     WORK IN PROGRESS
                                                 </span>
                                             </div>
-                                            <p className="text-gray-500 text-sm mb-4">{m.detail || "Aucune note technique"}</p>
+                                            <p className="text-gray-500 text-sm mb-4 truncate">{m.detail || "Aucune note technique"}</p>
 
-                                            <div className="mt-4">
+                                            <div className="mt-4 bg-black/20 rounded-xl overflow-hidden">
                                                 <WavePlayer
                                                     url={m.url.startsWith('/uploads') ? `http://localhost:5000${m.url}` : m.url}
                                                     startTime={m.start_time}
                                                     endTime={m.end_time}
-                                                    id={`wave-${m.id}`} // On ajoute un ID unique
+                                                    id={`wave-${m.id}`}
                                                 />
                                             </div>
                                         </div>
 
-                                        {/* Section "Markers" Interactive */}
-                                        <div className="w-full md:w-80 bg-white/5 p-4 rounded-xl border border-white/5 self-stretch">
+                                        {/* COLONNE DROITE : MARKERS */}
+                                        <div className="w-full lg:w-80 bg-white/5 p-4 rounded-xl border border-white/5 self-stretch shrink-0">
                                             <h4 className="text-[10px] font-black uppercase text-red-600 mb-3 tracking-widest">Markers</h4>
                                             
-                                            <div className="space-y-2">
+                                            <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar">
                                                 {markers.length > 0 ? markers.map((marker, idx) => (
                                                     <button
                                                         key={idx}
                                                         onClick={() => {
-                                                            
                                                             window.dispatchEvent(new CustomEvent(`jump-to-${m.id}`, { detail: marker.time }));
                                                         }}
                                                         className="w-full text-left bg-black/40 hover:bg-red-600/10 border border-white/5 hover:border-red-600/30 p-3 rounded-lg transition-all group flex gap-3 items-center"
@@ -90,13 +90,13 @@ const Backstage = () => {
                                                         <span className="text-red-600 font-black text-[10px] bg-red-600/10 px-2 py-1 rounded">
                                                             {Math.floor(marker.time / 60)}:{(marker.time % 60).toString().padStart(2, '0')}
                                                         </span>
-                                                        <span className="text-gray-300 text-[11px] leading-tight group-hover:text-white flex-1">
+                                                        <span className="text-gray-300 text-[11px] leading-tight group-hover:text-white flex-1 truncate">
                                                             {marker.label}
                                                         </span>
                                                     </button>
                                                 )) : (
                                                     <div className="text-[11px] text-white/20 italic p-2 border border-dashed border-white/10 rounded">
-                                                        Utilise le début : {m.start_time}s pour bosser.
+                                                        Aucun marqueur.
                                                     </div>
                                                 )}
                                             </div>
