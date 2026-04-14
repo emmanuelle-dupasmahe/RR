@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Apr 10, 2026 at 08:28 AM
+-- Generation Time: Apr 14, 2026 at 10:03 AM
 -- Server version: 8.0.30
 -- PHP Version: 8.1.10
 
@@ -68,7 +68,8 @@ INSERT INTO `group_settings` (`key_name`, `value_text`) VALUES
 ('group_history_1', 'Composé de Jean-Marc, Martial, Romain et Éric, le groupe a forgé son identité sur une obsession : la précision sonore. Ils allient le pur plaisir du jeu à des prestations de qualité professionnelle.'),
 ('group_history_2', 'Une importance capitale est accordée à la technique et au matériel de pointe, transformant chaque scène en un spectacle soigné et immersif.'),
 ('group_slogan', 'Plus qu\'un simple groupe de reprises, Réservoir Rock puise son énergie dans un répertoire éclectique et puissant.'),
-('group_title_history', 'L\'ÉMOTION PURE, L\'EXIGENCE DU SON');
+('group_title_history', 'L\'ÉMOTION PURE, L\'EXIGENCE DU SON'),
+('photo_credits', 'MIKA');
 
 -- --------------------------------------------------------
 
@@ -81,15 +82,16 @@ CREATE TABLE `guestbook` (
   `user_id` int UNSIGNED NOT NULL,
   `content` text COLLATE utf8mb4_general_ci NOT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `reponse` text COLLATE utf8mb4_general_ci
+  `reponse` text COLLATE utf8mb4_general_ci,
+  `is_private` tinyint(1) DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `guestbook`
 --
 
-INSERT INTO `guestbook` (`id`, `user_id`, `content`, `created_at`, `reponse`) VALUES
-(8, 2, 'J\'adore votre groupe !', '2026-04-08 13:28:24', 'Merci ! Au plaisir de vous rencontrer lors d\'un prochain concert !');
+INSERT INTO `guestbook` (`id`, `user_id`, `content`, `created_at`, `reponse`, `is_private`) VALUES
+(8, 2, 'J\'adore votre groupe !', '2026-04-08 13:28:24', 'Merci ! Au plaisir de vous rencontrer lors d\'un prochain concert !', 0);
 
 -- --------------------------------------------------------
 
@@ -130,20 +132,26 @@ CREATE TABLE `repetitions` (
   `file_size` int UNSIGNED DEFAULT NULL,
   `mime_type` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `start_time` int DEFAULT '0',
+  `end_time` int DEFAULT NULL,
+  `status` enum('public','private') COLLATE utf8mb4_general_ci DEFAULT 'private',
+  `markers` text COLLATE utf8mb4_general_ci
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `repetitions`
 --
 
-INSERT INTO `repetitions` (`id`, `titre`, `detail`, `url`, `file_name`, `file_size`, `mime_type`, `created_at`, `updated_at`) VALUES
-(1, 'With Or Without You - U2', 'Répète du 12 février 2026', 'audio/With_or.mp3', NULL, NULL, NULL, '2026-04-07 09:05:34', '2026-04-07 09:05:34'),
-(3, 'NEW YEARS DAY - U2', 'Répète du 2 avril 2026', '/uploads/1775568459033-694492503.mp3', 'New years day.mp3', 6881052, 'audio/mpeg', '2026-04-07 13:27:39', '2026-04-07 13:27:39'),
-(4, 'UNDISCLOSED DESIRES - MUSE', 'Répète du 20 janvier 2026', 'audio/Undisclosed_desire.mp3', NULL, NULL, NULL, '2026-04-07 13:30:01', '2026-04-08 12:32:35'),
-(10, 'locked out of heaven - Bruno Mars', 'répète du 8 avril 2025', 'audio/Locked_out.mp3', NULL, NULL, NULL, '2026-04-08 08:38:52', '2026-04-08 08:38:52'),
-(11, 'Atomic City - U2', 'répète du 3 avril 2026', 'audio/Atomic_city.mp3', NULL, NULL, NULL, '2026-04-09 11:13:55', '2026-04-09 11:14:57'),
-(12, 'Cake by the ocean - DNCE', 'répète du 8 avril 2025', 'audio/Cake_ocean.mp3', NULL, NULL, NULL, '2026-04-09 11:16:46', '2026-04-09 11:16:46');
+INSERT INTO `repetitions` (`id`, `titre`, `detail`, `url`, `file_name`, `file_size`, `mime_type`, `created_at`, `updated_at`, `start_time`, `end_time`, `status`, `markers`) VALUES
+(1, 'With Or Without You - U2', 'Répète du 12 février 2026', 'audio/With_or.mp3', NULL, NULL, NULL, '2026-04-07 09:05:34', '2026-04-13 12:56:52', 0, NULL, 'public', NULL),
+(4, 'UNDISCLOSED DESIRES - MUSE', 'Répète du 20 janvier 2026', 'audio/Undisclosed_desire.mp3', NULL, NULL, NULL, '2026-04-07 13:30:01', '2026-04-13 12:56:38', 0, NULL, 'public', NULL),
+(10, 'locked out of heaven - Bruno Mars', 'répète du 8 avril 2025', 'audio/Locked_out.mp3', NULL, NULL, NULL, '2026-04-08 08:38:52', '2026-04-13 12:56:25', 0, NULL, 'public', NULL),
+(11, 'Atomic City - U2', 'répète du 3 avril 2026', 'audio/Atomic_city.mp3', NULL, NULL, NULL, '2026-04-09 11:13:55', '2026-04-13 12:56:15', 0, NULL, 'public', NULL),
+(14, 'CAKE BY THE OCEAN - DNCE', 'répète 2025', 'audio/Cake_ocean.mp3', NULL, NULL, NULL, '2026-04-13 11:45:42', '2026-04-14 09:44:06', 0, NULL, 'public', '[]'),
+(17, 'new years day', 'morceau à revoir', '/uploads/1776152187946-825842868.mp3', 'New years day.mp3', 6881052, 'audio/mpeg', '2026-04-14 07:36:27', '2026-04-14 09:07:13', 3, 60, 'private', '[{\"time\":15,\"label\":\"voir ici\"},{\"time\":18,\"label\":\"ici\"},{\"time\":30,\"label\":\"ici\"}]'),
+(19, 'new years day - U2', 'repete 2026', '/uploads/1776158300289-252935965.mp3', 'New years day.mp3', 6881052, 'audio/mpeg', '2026-04-14 09:18:20', '2026-04-14 09:43:19', 2, 320, 'public', '[]'),
+(22, 'Atomic city', '', 'audio/Atomic_city.mp3', NULL, NULL, NULL, '2026-04-14 09:59:31', '2026-04-14 09:59:31', 2, NULL, 'private', '[{\"time\":15,\"label\":\"ici\"}]');
 
 -- --------------------------------------------------------
 
@@ -177,7 +185,7 @@ CREATE TABLE `users` (
   `lastname` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `email` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
   `password` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
-  `role` varchar(20) COLLATE utf8mb4_general_ci DEFAULT 'user',
+  `role` enum('admin','member','user') COLLATE utf8mb4_general_ci DEFAULT 'user',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -187,7 +195,11 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`id`, `firstname`, `lastname`, `email`, `password`, `role`, `created_at`) VALUES
 (1, 'Manux', 'Manux', 'manux@gmail.com', '$2b$10$vlCJmQl4LIpm7xugLytHleLymIgj0EkDvUbZJ/gctAtbO53Iyj7h.', 'admin', '2026-04-03 14:30:44'),
-(2, 'Patoche', 'Patoche', 'patoche@gmail.com', '$2b$10$7S1MXOYZrcmg2XLDgdfA/.97cvgHjb0om1I5lWBv.lmLYUT2xHUT6', 'user', '2026-04-08 13:27:06');
+(2, 'Patoche', 'Patoche', 'patoche@gmail.com', '$2b$10$7S1MXOYZrcmg2XLDgdfA/.97cvgHjb0om1I5lWBv.lmLYUT2xHUT6', 'user', '2026-04-08 13:27:06'),
+(4, 'Eric', 'Eric', 'eric@gmail.com', '$2b$10$PGdbWbi68Oc1n13MjQa.geNKYLkXgikmcjAqcj56Ja7TWvco9Usgy', 'member', '2026-04-14 09:47:34'),
+(5, 'Martial', 'Martial', 'martial@gmail.com', '$2b$10$YYv1Xgf1FbJ.zZIngLw1.e/yzMZfXDqAABPoJVqGtGHqKh37QM/x.', 'member', '2026-04-14 09:54:39'),
+(6, 'Romain', 'Romain', 'romain@gmail.com', '$2b$10$KP.bm0g6FTOpA5qKmbajaeS8QzSl4FPZskTwnjrASXQFrIZAmgU.6', 'member', '2026-04-14 09:55:11'),
+(7, 'Jm', 'Jm', 'jm@gmail.com', '$2b$10$0xEoUZnqToh3ATer1KTUf.OvJoJFXHBXt3vz6QrGFuouj09F7dNfa', 'admin', '2026-04-14 09:55:54');
 
 -- --------------------------------------------------------
 
@@ -281,13 +293,13 @@ ALTER TABLE `videos`
 -- AUTO_INCREMENT for table `concerts`
 --
 ALTER TABLE `concerts`
-  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `guestbook`
 --
 ALTER TABLE `guestbook`
-  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT for table `membres`
@@ -299,7 +311,7 @@ ALTER TABLE `membres`
 -- AUTO_INCREMENT for table `repetitions`
 --
 ALTER TABLE `repetitions`
-  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- AUTO_INCREMENT for table `settings`
@@ -311,13 +323,13 @@ ALTER TABLE `settings`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `videos`
 --
 ALTER TABLE `videos`
-  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- Constraints for dumped tables
