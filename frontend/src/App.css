@@ -4,16 +4,17 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --color-primary: #e31b23;
+  /* --color-primary: #e31b23; */
+  --color-primary: #ff0000;
   --color-dark-bg: #121212;
   --font-sans: "Onest", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 /* ============================================================
-   STYLE DES LECTEURS AUDIO (FORCÉ)
+   STYLE DES LECTEURS AUDIO 
    ============================================================ */
 
-/* --- FORCE LE LOOK SOMBRE SUR LE PANEL --- */
+/* --- LOOK SOMBRE  --- */
 .dark audio {
   background-color: transparent !important;
   border-radius: 9999px;
@@ -32,7 +33,7 @@
   filter: invert(1) brightness(2) !important;
 }
 
-/* --- MODE CLAIR : ON RESET TOUT --- */
+/* --- MODE CLAIR  --- */
 html:not(.dark) audio::-webkit-media-controls-panel {
   background-image: none !important;
   background-color: #e5e7eb !important;
@@ -52,7 +53,7 @@ html:not(.dark) audio::-webkit-media-controls-panel {
   -webkit-text-fill-color: transparent;
   animation: shimmer 8s infinite linear;
   
-  /* Par défaut (Mode Clair) : Shimmer Noir avec balayage Rouge */
+  /* Shimmer Noir avec balayage Rouge */
   background-image: linear-gradient(90deg, 
     #000000 0%, 
     #000000 40%, 

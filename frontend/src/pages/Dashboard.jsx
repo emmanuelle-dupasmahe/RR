@@ -645,7 +645,7 @@ function Dashboard() {
                                             <input type="date" className={inputClass} value={formData.date_concert} onChange={(e) => setFormData({ ...formData, date_concert: e.target.value })} required />
                                             <input type="time" className={inputClass} value={formData.heure} onChange={(e) => setFormData({ ...formData, heure: e.target.value })} required />
                                         </div>
-                                        <input type="text" placeholder="LIEU (NOM DE LA SALLE)" className={inputClass} value={formData.lieu} onChange={(e) => setFormData({ ...formData, lieu: e.target.value })} required />
+                                        <input type="text" placeholder="LIEU (NOM DE LA SALLE)" className={inputClass} value={formData.lieu} onChange={(e) => setFormData({ ...formData, lieu: e.target.value.toUpperCase() })} required />
                                         <button type="submit" className={btnClass}>Publier la date</button>
                                     </form>
                                 </div>
@@ -700,7 +700,7 @@ function Dashboard() {
                                             )}
                                         </div>
                                     ))}
-                                    {/* Attention : S'assurer que le composant Pagination gère aussi le mode clair */}
+                                    
                                     <Pagination pages={concertPages} onPageChange={fetchConcerts} />
                                 </div>
                             </div>
