@@ -1,14 +1,14 @@
 // pages/Home.jsx
 import { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth.js';
+import { concertService } from '../services/api';
 
 function Home() {
     const { isAuthenticated } = useAuth();
     const [nextConcert, setNextConcert] = useState(null);
 
     useEffect(() => {
-        fetch('http://localhost:5000/api/concerts')
-            .then(res => res.json())
+        concertService.getAll()
             .then(data => {
                 if (Array.isArray(data.concerts) && data.concerts.length > 0) {
                     setNextConcert(data.concerts[0]);

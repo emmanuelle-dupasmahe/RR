@@ -1,7 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth.js';
 import WavePlayer from '../components/WavePlayer';
-
+import {
+    concertService,
+    repetitionService,
+    videoService,
+    memberService,
+    settingsService,
+    guestbookService
+} from '../services/api';
 
 function Dashboard() {
     const { user, token } = useAuth();
@@ -54,35 +61,17 @@ function Dashboard() {
 
     const fetchRepetitions = async (page = 1) => {
         try {
-
-            const token = localStorage.getItem('token');
-
-            const res = await fetch(`http://localhost:5000/api/repetitions?page=${page}&limit=5`, {
-                method: 'GET',
-
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            const data = await res.json();
-
-            if (res.ok) {
-                setRepetitions(data.repetitions || []);
-                setRepPages({ current: data.currentPage, total: data.totalPages });
-            } else {
-                console.error("Erreur serveur:", data.error);
-            }
+            const data = await repetitionService.getAll(page, 5);
+            setRepetitions(data.repetitions || []);
+            setRepPages({ current: data.currentPage, total: data.totalPages });
         } catch (err) {
-            console.error("Erreur réseau:", err);
+            console.error("Erreur lors du chargement des répétitions :", err);
         }
     };
 
     const fetchConcerts = async (page = 1) => {
         try {
-            const res = await fetch(`http://localhost:5000/api/concerts?page=${page}&limit=5`);
-            const data = await res.json();
+            const data = await concertService.getAll(page, 5);
             setConcerts(data.concerts || []);
             setConcertPages({ current: data.currentPage, total: data.totalPages });
         } catch (err) { console.error(err); }
@@ -90,8 +79,7 @@ function Dashboard() {
 
     const fetchVideos = async (page = 1) => {
         try {
-            const res = await fetch(`http://localhost:5000/api/videos?page=${page}&limit=5`);
-            const data = await res.json();
+            const data = await videoService.getAll(page, 5);
             setVideos(data.videos || []);
             setVideoPages({ current: data.currentPage, total: data.totalPages });
         } catch (err) { console.error(err); }
@@ -101,30 +89,12 @@ function Dashboard() {
         fetchConcerts();
         fetchRepetitions();
         fetchVideos();
-        fetch('http://localhost:5000/api/settings/tour_title')
-            .then(res => res.json())
+        settingsService.getTourTitle()
             .then(data => setTourTitle(data.value || ''));
 
-        // Récupérer les membres
-        fetch('http://localhost:5000/api/membres')
-            .then(res => res.json())
-            .then(setGroupMembers);
-
-        // Récupérer les textes de Legroupe
-        fetch('http://localhost:5000/api/groupesettings')
-            .then(res => res.json())
-            .then(setGroupTexts);
-
-        // Récupérer les messages
-        fetch('http://localhost:5000/api/guestbook/admin/all', {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        })
-            .then(res => {
-                if (!res.ok) throw new Error('Erreur accès admin');
-                return res.json();
-            })
+        memberService.getAll().then(setGroupMembers);
+        settingsService.getGroupSettings().then(setGroupTexts);
+        guestbookService.getAdminAll()
             .then(data => setMessages(Array.isArray(data) ? data : []))
             .catch(err => console.error("Erreur livre d'or admin:", err));
     }, []);
@@ -153,34 +123,23 @@ function Dashboard() {
     // --- HANDLERS ---
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const response = await fetch('http://localhost:5000/api/concerts', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify(formData)
-        });
-        if (response.ok) {
+        try {
+            await concertService.create(formData);
             setFormData({ titre: '', date_concert: '', heure: '', lieu: '' });
             fetchConcerts();
             alert('Concert publié !');
-        } else {
-            const errorData = await response.json();
+        } catch (errorData) {
             alert(`Erreur: ${errorData.error || "Échec de la publication"}`);
         }
     };
 
     const handleDelete = async (id) => {
         if (!window.confirm("Supprimer cette date ?")) return;
-        const res = await fetch(`http://localhost:5000/api/concerts/${id}`, {
-            method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (res.ok) {
+        try {
+            await concertService.delete(id);
             fetchConcerts();
             alert('Date supprimée');
-        } else {
+        } catch (err) {
             alert('Erreur lors de la suppression');
         }
     };
@@ -198,26 +157,13 @@ function Dashboard() {
 
         console.log("Données envoyées :", payload);
         try {
-            const res = await fetch(`http://localhost:5000/api/concerts/${concert.id}`, {
-                method: 'PUT', // On utilise PUT pour la mise à jour
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(payload)
-            });
-
-            if (res.ok) {
-                setEditingConcert(null); // ferme le mode édition
-                fetchConcerts(); // liste raffraichit
-                alert('Concert mis à jour avec succès !');
-            } else {
-                const errorData = await res.json();
-                alert(`Erreur: ${errorData.error || 'Impossible de mettre à jour'}`);
-            }
+            await concertService.update(concert.id, payload);
+            setEditingConcert(null);
+            fetchConcerts();
+            alert('Concert mis à jour avec succès !');
         } catch (err) {
             console.error("Erreur update concert", err);
-            alert("Erreur réseau lors de la mise à jour");
+            alert(`Erreur: ${err.message || 'Impossible de mettre à jour'}`);
         }
     };
 
@@ -240,27 +186,14 @@ function Dashboard() {
                 formData.append('audio', selectedFile);
             }
 
-            const res = await fetch(`http://localhost:5000/api/repetitions/${rep.id}`, {
-                method: 'PUT',
-                headers: {
-
-                    'Authorization': `Bearer ${token}`
-                },
-                body: formData
-            });
-
-            if (res.ok) {
-                setEditingRep(null);
-                setUpdateFile(null);
-                setMarkers([]);
-                fetchRepetitions();
-                alert('Morceau mis à jour');
-            } else {
-                const errorData = await res.json();
-                alert(`Erreur: ${errorData.error || 'Impossible de mettre à jour'}`);
-            }
+            await repetitionService.update(rep.id, formData);
+            setEditingRep(null);
+            setUpdateFile(null);
+            setMarkers([]);
+            fetchRepetitions();
+            alert('Morceau mis à jour');
         } catch (err) {
-            console.error("Erreur update:", err);
+            alert(`Erreur: ${err.message || 'Impossible de mettre à jour'}`);
         }
     };
 
@@ -268,45 +201,34 @@ function Dashboard() {
     //modification vidéos
     const handleUpdateVideo = async (video) => {
         try {
-            const res = await fetch(`http://localhost:5000/api/videos/${video.id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify({ titre: video.titre, description: video.description, url_youtube: video.url_youtube })
+            await videoService.update(video.id, {
+                titre: video.titre,
+                description: video.description,
+                url_youtube: video.url_youtube
             });
-            if (res.ok) {
-                setEditingVideo(null);
-                fetchVideos();
-                alert('Vidéo mise à jour');
-            } else {
-                const errorData = await res.json();
-                alert(`Erreur: ${errorData.error || 'Impossible de mettre à jour'}`);
-            }
-        } catch (err) { console.error(err); }
+            setEditingVideo(null);
+            fetchVideos();
+            alert('Vidéo mise à jour');
+        } catch (err) {
+            alert(`Erreur: ${err.message || 'Impossible de mettre à jour'}`);
+        }
     };
 
     //modification membres
     const handleUpdateMember = async (member) => {
         try {
-            const res = await fetch(`http://localhost:5000/api/membres/${member.id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify({
-                    nom: member.nom,
-                    instrument: member.instrument,
-                    photo_url: member.photo_url,
-                    ordre_affichage: member.ordre_affichage
-                })
+            await memberService.update(member.id, {
+                nom: member.nom,
+                instrument: member.instrument,
+                photo_url: member.photo_url,
+                ordre_affichage: member.ordre_affichage
             });
-            if (res.ok) {
-                setEditingMember(null);
-                const updated = await fetch('http://localhost:5000/api/membres').then(r => r.json());
-                setGroupMembers(updated);
-                alert('Musicien mis à jour');
-            } else {
-                const errorData = await res.json();
-                alert(`Erreur: ${errorData.error || 'Impossible de mettre à jour'}`);
-            }
-        } catch (err) { console.error(err); }
+            setEditingMember(null);
+            memberService.getAll().then(setGroupMembers);
+            alert('Musicien mis à jour');
+        } catch (err) {
+            alert(`Erreur: ${err.message || 'Impossible de mettre à jour'}`);
+        }
     };
 
     //REPETITIONS
@@ -323,35 +245,23 @@ function Dashboard() {
 
         if (repFile) data.append('audio', repFile);
 
-        const response = await fetch('http://localhost:5000/api/repetitions', {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${token}` },
-            body: data
-        });
-        if (response.ok) {
+        try {
+            await repetitionService.create(data);
             setRepFormData({ titre: '', detail: '', url: '' });
             setRepFile(null);
             setMarkers([]);
             e.target.reset();
             fetchRepetitions();
             alert('Morceau ajouté au studio !');
-        } else {
-            const errorData = await response.json();
-            alert(`Erreur: ${errorData.error || "Échec de l'ajout"}`);
+        } catch (err) {
+            alert(`Erreur: ${err.message || "Échec de l'ajout"}`);
         }
     };
 
     // Mettre à jour un texte (Slogan, etc.)
     const handleUpdateGroupText = async (key, value) => {
         try {
-            await fetch('http://localhost:5000/api/groupesettings', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ key_name: key, value_text: value })
-            });
+            await settingsService.updateGroupSetting(key, value);
         } catch (err) {
             console.error("Erreur de mise à jour du texte");
         }
@@ -360,23 +270,13 @@ function Dashboard() {
     // Ajouter un nouveau membre
     const handleAddMember = async (e) => {
         e.preventDefault();
-        const res = await fetch('http://localhost:5000/api/membres', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify(newMember)
-        });
-        if (res.ok) {
-            // Rafraîchir la liste et vider le formulaire
-            const updated = await fetch('http://localhost:5000/api/membres').then(r => r.json());
-            setGroupMembers(updated);
+        try {
+            await memberService.create(newMember);
+            memberService.getAll().then(setGroupMembers);
             setNewMember({ nom: '', instrument: '', photo_url: '', ordre_affichage: 0 });
             alert('Musicien ajouté !');
-        } else {
-            const errorData = await res.json();
-            alert(`Erreur: ${errorData.error || "Échec de l'ajout"}`);
+        } catch (err) {
+            alert(`Erreur: ${err.message || "Échec de l'ajout"}`);
         }
     };
 
@@ -384,15 +284,11 @@ function Dashboard() {
     const handleDeleteMember = async (id) => {
         if (!window.confirm("Supprimer ce membre du groupe ?")) return;
 
-        const res = await fetch(`http://localhost:5000/api/membres/${id}`, {
-            method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-        // Rafraîchir la liste
-        if (res.ok) {
+        try {
+            await memberService.delete(id);
             setGroupMembers(groupMembers.filter(m => m.id !== id));
             alert('Membre supprimé');
-        } else {
+        } catch (err) {
             alert('Erreur lors de la suppression');
         }
     };
@@ -400,22 +296,10 @@ function Dashboard() {
     // Sauvegarder la réponse 
     const handleUpdateResponse = async (id, texte) => {
         try {
-            const res = await fetch(`http://localhost:5000/api/guestbook/${id}/reponse`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ reponse: texte })
-            });
-
-            if (res.ok) {
-                alert("Réponse enregistrée avec succès !");
-            } else {
-                alert("Erreur lors de la sauvegarde sur le serveur.");
-            }
+            await guestbookService.updateResponse(id, texte);
+            alert("Réponse enregistrée avec succès !");
         } catch (err) {
-            console.error("Erreur login réponse:", err);
+            alert(`Erreur: ${err.message || "Erreur lors de la sauvegarde"}`);
         }
     };
 
@@ -423,13 +307,8 @@ function Dashboard() {
     const handleDeleteMessage = async (id) => {
         if (!window.confirm("Supprimer ce message ?")) return;
         try {
-            const res = await fetch(`http://localhost:5000/api/guestbook/${id}`, {
-                method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) {
-                setMessages(messages.filter(m => m.id !== id));
-            }
+            await guestbookService.deleteMessage(id);
+            setMessages(messages.filter(m => m.id !== id));
         } catch (err) {
             console.error(err);
         }
@@ -438,30 +317,24 @@ function Dashboard() {
     //suppression repetes
     const handleRepDelete = async (id) => {
         if (!window.confirm("Supprimer ce morceau ?")) return;
-        const res = await fetch(`http://localhost:5000/api/repetitions/${id}`, {
-            method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (res.ok) {
+        try {
+            await repetitionService.delete(id);
             fetchRepetitions();
             alert('Morceau supprimé');
-        } else {
-            alert('Erreur lors de la suppression');
+        } catch (err) {
+            alert(`Erreur lors de la suppression : ${err.message || 'Erreur inconnue'}`);
         }
     };
 
     //modification tournée
     const handleUpdateTitle = async (e) => {
         e.preventDefault();
-        const res = await fetch('http://localhost:5000/api/settings/tour_title', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({ value: tourTitle })
-        });
-        if (res.ok) alert('Titre de la tournée mis à jour !');
+        try {
+            await settingsService.updateTourTitle(tourTitle);
+            alert('Titre de la tournée mis à jour !');
+        } catch (err) {
+            alert('Erreur lors de la mise à jour');
+        }
     };
 
     const handleVideoSubmit = async (e) => {
@@ -472,33 +345,25 @@ function Dashboard() {
         data.append('url_youtube', videoFormData.url_youtube);
         if (videoFile) data.append('video', videoFile);
 
-        const response = await fetch('http://localhost:5000/api/videos', {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${token}` },
-            body: data
-        });
-        if (response.ok) {
+        try {
+            await videoService.create(data);
             setVideoFormData({ titre: '', description: '', url_youtube: '' });
             setVideoFile(null);
             e.target.reset();
             fetchVideos();
             alert('Vidéo publiée !');
-        } else {
-            const errorData = await response.json();
-            alert(`Erreur: ${errorData.error || "Échec de la publication"}`);
+        } catch (err) {
+            alert(`Erreur: ${err.message || "Échec de la publication"}`);
         }
     };
 
     const handleVideoDelete = async (id) => {
         if (!window.confirm("Supprimer cette vidéo ?")) return;
-        const res = await fetch(`http://localhost:5000/api/videos/${id}`, {
-            method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (res.ok) {
+        try {
+            await videoService.delete(id);
             fetchVideos();
             alert('Vidéo supprimée');
-        } else {
+        } catch (err) {
             alert('Erreur lors de la suppression');
         }
     };
@@ -700,7 +565,7 @@ function Dashboard() {
                                             )}
                                         </div>
                                     ))}
-                                    
+
                                     <Pagination pages={concertPages} onPageChange={fetchConcerts} />
                                 </div>
                             </div>
@@ -723,7 +588,7 @@ function Dashboard() {
                                             placeholder="TITRE (ex: ATOMIC CITY)"
                                             className={`${inputClass} bg-gray-50 dark:bg-black border-black/10 dark:border-white/20`}
                                             value={repFormData.titre}
-                                            onChange={(e) => setRepFormData({ ...repFormData, titre: e.target.value })}
+                                            onChange={(e) => setRepFormData({ ...repFormData, titre: e.target.value.toUpperCase() })}
                                             required
                                         />
 
@@ -888,7 +753,7 @@ function Dashboard() {
                                                             </div>
                                                         </div>
 
-                                                        <div className="grid grid-cols-2 gap-4">
+                                                        <div className="grid grid-cols-3 gap-4">
                                                             <div className="space-y-1">
                                                                 <label className="text-[9px] font-black text-primary/60 uppercase ml-1">Début (sec)</label>
                                                                 <input
@@ -911,6 +776,33 @@ function Dashboard() {
                                                                     ))}
                                                                 />
                                                             </div>
+                                                            <div className="space-y-1">
+                                                                <label className="text-[9px] font-black text-primary/60 uppercase ml-1">Visibilité</label>
+                                                                <select
+                                                                    className={`${inputClass} bg-gray-50 dark:bg-black`}
+                                                                    value={r.status || 'private'}
+                                                                    onChange={(e) => setRepetitions(repetitions.map(item =>
+                                                                        item.id === r.id ? { ...item, status: e.target.value } : item
+                                                                    ))}
+                                                                >
+                                                                    <option value="private">Privé</option>
+                                                                    <option value="public">Public</option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Remplacer le fichier audio si erreur */}
+                                                        <div className="p-4 border-2 border-dashed border-black/10 dark:border-white/5 rounded-lg text-center hover:border-primary/30 transition-all bg-black/5 dark:bg-white/5">
+                                                            <input
+                                                                type="file"
+                                                                accept="audio/*"
+                                                                className="hidden"
+                                                                id={`audio-update-${r.id}`}
+                                                                onChange={(e) => setUpdateFile(e.target.files[0])}
+                                                            />
+                                                            <label htmlFor={`audio-update-${r.id}`} className="cursor-pointer text-[10px] font-black uppercase tracking-[2px] text-gray-500 dark:text-[#666] hover:text-primary dark:hover:text-white block">
+                                                                {updateFile ? <span className="text-primary animate-pulse">🎵 {updateFile.name}</span> : "Changer le fichier audio (MP3)"}
+                                                            </label>
                                                         </div>
 
                                                         <div className="flex gap-2">
@@ -964,6 +856,7 @@ function Dashboard() {
                                                                 <button onClick={() => {
                                                                     setEditingRep(r.id);
                                                                     setMarkers(typeof r.markers === 'string' ? JSON.parse(r.markers || '[]') : (r.markers || []));
+                                                                    setUpdateFile(null);
                                                                 }} className="text-black/30 dark:text-white/30 hover:text-primary dark:hover:text-white text-[10px] font-black uppercase">Edit</button>
                                                                 <button onClick={() => handleRepDelete(r.id)} className="text-gray-400 dark:text-[#444] hover:text-red-500 dark:hover:text-primary text-[10px] font-black uppercase">Delete</button>
                                                             </div>
@@ -972,7 +865,7 @@ function Dashboard() {
                                                         <div className="mt-4">
                                                             <WavePlayer
                                                                 id={`wave-${r.id}`}
-                                                                url={r.url.startsWith('/uploads') ? `http://localhost:5000${r.url}` : r.url}
+                                                                url={r.url.startsWith('/uploads') ? `http://192.168.10.108:5000${r.url}` : r.url}
                                                                 startTime={r.start_time}
                                                                 endTime={r.end_time}
                                                             />
@@ -988,7 +881,7 @@ function Dashboard() {
                                     )}
 
                                     {/* Pagination */}
-                                    {repPages > 1 && (
+                                    {repPages.total > 1 && (
                                         <Pagination pages={repPages} onPageChange={fetchRepetitions} />
                                     )}
                                 </div>

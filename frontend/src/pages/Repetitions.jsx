@@ -1,5 +1,6 @@
 // pages/Repetitions.jsx
 import { useState, useEffect, useRef } from 'react';
+import { repetitionService } from '../services/api';
 import RepetitionsSkeleton from '../components/RepetitionsSkeleton';
 
 function AudioPlayer({ src, startTime, endTime }) {
@@ -40,8 +41,7 @@ function Repetitions() {
 
     const fetchMorceaux = async () => {
         try {
-            const res = await fetch('http://localhost:5000/api/repetitions');
-            const data = await res.json();
+            const data = await repetitionService.getAll();
             setMorceaux(Array.isArray(data) ? data : data.repetitions || []);
             setLoading(false);
         } catch (err) {
@@ -56,7 +56,7 @@ function Repetitions() {
 
     return (
         <div className="mt-[80px] min-h-[calc(100vh-82px)] bg-white dark:bg-black transition-colors duration-300">
-            
+
             {/* EN-TÊTE */}
             <div className="text-center py-[48px] bg-gray-50 dark:bg-gradient-to-b dark:from-[#111] dark:to-black border-b border-gray-100 dark:border-none">
                 <h1 className="text-[3rem] md:text-[3.5rem] font-[300] uppercase m-0 leading-[1.2] tracking-[0.1em] text-black dark:text-white inline-block">
@@ -75,13 +75,20 @@ function Repetitions() {
                     morceaux.map((m, index) => (
                         <div
                             key={m.id || index}
-                            className="flex flex-col md:flex-row items-center gap-[24px] p-[20px] rounded-[1rem] border transition-all duration-300 shadow-xl 
-                                /* Mode Clair */
-                                bg-gray-50 border-gray-200 
-                                /* Mode Sombre : Fond uni sombre pour faire ressortir le lecteur */
-                                dark:bg-[#111] dark:border-white/5 dark:hover:border-primary/30"
+                            /* AJOUT DE 'relative overflow-hidden' pour le halo */
+                            className="relative overflow-hidden flex flex-col md:flex-row items-center gap-[24px] p-[20px] rounded-[1rem] border transition-all duration-300 shadow-xl 
+                    
+                    /* --- LE HALO ROUGE ORIGINAL (Mode Sombre uniquement) --- */
+                    dark:before:content-[''] dark:before:absolute dark:before:top-[-50%] dark:before:left-[-20%] dark:before:w-[80%] dark:before:h-[200%] 
+                    dark:before:bg-[radial-gradient(circle_at_center,rgba(227,24,31,0.15)_0%,rgba(0,0,0,0)_60%)] dark:before:pointer-events-none
+
+                    /* Mode Clair */
+                    bg-gray-50 border-gray-200 
+                    /* Mode Sombre */
+                    dark:bg-[#111] dark:border-white/5 dark:hover:border-primary/30"
                         >
-                            <div className="flex items-center gap-[16px] flex-1 w-full">
+                            {/* Contenu principal (texte) */}
+                            <div className="relative z-10 flex items-center gap-[16px] flex-1 w-full">
                                 <span className="text-[1.5rem] font-[900] text-primary min-w-[40px] drop-shadow-[0_0_8px_rgba(227,24,31,0.4)]">
                                     {(index + 1).toString().padStart(2, '0')}
                                 </span>
@@ -102,10 +109,15 @@ function Repetitions() {
                                 </div>
                             </div>
 
-                            {/* Conteneur Lecteur Audio : On a enlevé les dégradés ici car ils sont gérés par le CSS */}
-                            <div className="w-full max-w-[350px] p-[2px] rounded-full overflow-hidden border border-transparent dark:border-white/10 shadow-lg">
-                                <AudioPlayer 
-                                    src={m.url.startsWith('/uploads') ? `http://localhost:5000${m.url}` : m.url}
+                            {/* Conteneur Lecteur Audio */}
+                            <div className="relative z-10 w-full max-w-[350px] p-[3px] rounded-full overflow-hidden shadow-lg
+                    /* Mode Clair : dégradé discret rouge/gris */
+                    bg-gradient-to-r from-primary/20 via-gray-200 to-gray-300
+                    /* Mode Sombre : dégradé rouge vif vers sombre (ton effet original) */
+                    dark:bg-gradient-to-r dark:from-primary/80 dark:via-[#222] dark:to-[#111] dark:border dark:border-white/10"
+                            >
+                                <AudioPlayer
+                                    src={m.url.startsWith('/uploads') ? `http://192.168.10.108:5000${m.url}` : m.url}
                                     startTime={m.start_time}
                                     endTime={m.end_time}
                                 />

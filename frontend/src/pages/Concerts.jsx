@@ -2,19 +2,18 @@
 import { useState, useEffect } from 'react';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import { concertService, settingsService } from '../services/api';
 
 function Concerts() {
     const [tourDates, setTourDates] = useState([]);
     const [tourTitle, setTourTitle] = useState('Chargement...');
 
     useEffect(() => {
-        fetch('http://localhost:5000/api/settings/tour_title')
-            .then(res => res.json())
+        settingsService.getTourTitle()
             .then(data => setTourTitle(data.value || 'Tournée'))
             .catch(() => setTourTitle('Tournée'));
 
-        fetch('http://localhost:5000/api/concerts')
-            .then(res => res.json())
+        concertService.getAll()
             .then(data => setTourDates(data.concerts || []))
             .catch(err => console.error("Erreur chargement concerts:", err));
     }, []);
@@ -29,7 +28,7 @@ function Concerts() {
 
     return (
         <div className="mt-[80px] min-h-[calc(100vh-82px)] bg-white dark:bg-black transition-colors duration-300">
-            
+
             {/* EN-TÊTE ADAPTATIF */}
             <div className="text-center py-[48px] bg-gray-50 dark:bg-gradient-to-b dark:from-[#111] dark:to-black border-b border-gray-100 dark:border-none">
                 <h1 className="text-[3rem] md:text-[3.5rem] font-[300] uppercase m-0 leading-[1.2] tracking-[0.1em] text-black dark:text-white inline-block">

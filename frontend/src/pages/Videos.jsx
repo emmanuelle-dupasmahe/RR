@@ -1,5 +1,6 @@
 // pages/Videos.jsx
 import { useState, useEffect } from 'react';
+import { videoService } from '../services/api';
 import VideosSkeleton from '../components/VideosSkeleton';
 
 function Videos() {
@@ -11,8 +12,7 @@ function Videos() {
     const fetchVideos = async () => {
         setLoading(true);
         try {
-            const res = await fetch(`http://localhost:5000/api/videos?page=${page}&limit=6`);
-            const data = await res.json();
+            const data = await videoService.getAll(page, 6);
             setVideos(data.videos || []);
             setTotalPages(data.totalPages || 1);
             setLoading(false);
@@ -28,7 +28,7 @@ function Videos() {
 
     return (
         <div className="mt-[80px] min-h-[calc(100vh-82px)] bg-white dark:bg-black transition-colors duration-300 font-sans">
-            
+
             {/* EN-TÊTE ADAPTATIF */}
             <div className="text-center py-[48px] bg-gray-50 dark:bg-gradient-to-b dark:from-[#111] dark:to-black border-b border-gray-100 dark:border-none">
                 <h1 className="text-[3rem] md:text-[3.5rem] font-[300] uppercase m-0 leading-[1.2] tracking-[0.1em] text-black dark:text-white inline-block">
@@ -63,7 +63,7 @@ function Videos() {
                                 >
                                     Précédent
                                 </button>
-                                
+
                                 <div className="flex flex-col items-center">
                                     <span className="text-[0.6rem] text-gray-400 dark:text-[#444] font-bold uppercase tracking-tighter">Navigation</span>
                                     <span className="font-black text-primary uppercase text-lg leading-none">{page} / {totalPages}</span>
@@ -97,19 +97,18 @@ function Videos() {
 
 function VideoCard({ video }) {
     const isYoutube = !!video.url_youtube;
+    
+    // Ajout de playsinline=1 pour forcer la lecture dans le site sur mobile
     const url = isYoutube
-        ? `https://www.youtube.com/embed/${video.url_youtube}`
-        : `http://localhost:5000${video.file_path}`;
+        ? `https://www.youtube.com/embed/${video.url_youtube}?playsinline=1&rel=0`
+        : `http://192.168.10.108:5000${video.file_path}`;
 
     return (
-        /* CHANGÉ ICI : dark:hover:border-primary et shadow utilisant primary/30 */
         <div className="group relative rounded-[1.2rem] transition-all duration-500 shadow-2xl
             bg-gray-50 border border-gray-200
             dark:bg-[#0a0a0a] dark:border-white/5 dark:hover:border-primary dark:hover:shadow-[0_0_30px_rgba(185,28,28,0.3)]"
         >
             <div className="overflow-hidden rounded-[1.1rem]">
-
-                {/* CONTENEUR VIDEO : DÉGRADÉ VERS PRIMARY */}
                 <div className="p-[3px] transition-all duration-500
                     bg-gray-200 group-hover:bg-black
                     dark:bg-gradient-to-r dark:from-primary dark:to-black"
@@ -120,18 +119,24 @@ function VideoCard({ video }) {
                                 src={url}
                                 title={video.titre}
                                 className="w-full h-full block"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                allowFullScreen>
-                            </iframe>
+                                // allow="presentation" aide parfois sur certains navigateurs mobiles
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                allowFullScreen
+                                // sandbox peut aider à restreindre les redirections automatiques
+                                sandbox="allow-forms allow-scripts allow-pointer-lock allow-same-origin allow-top-navigation-by-user-activation allow-presentation"
+                            ></iframe>
                         ) : (
-                            <video src={url} controls className="w-full h-full block object-cover" />
+                            <video 
+                                src={url} 
+                                controls 
+                                playsInline // IMPORTANT pour les fichiers locaux également
+                                className="w-full h-full block object-cover" 
+                            />
                         )}
                     </div>
                 </div>
 
-                {/* INFOS TEXTUELLES */}
                 <div className="p-[20px] transition-colors duration-500">
-                    {/* CHANGÉ ICI : text-primary au hover */}
                     <h3 className="font-black mb-[6px] uppercase tracking-wider text-lg transition-colors
                         text-black group-hover:text-primary
                         dark:text-white dark:group-hover:text-primary"

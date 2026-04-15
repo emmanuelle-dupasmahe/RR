@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import WavePlayer from '../components/WavePlayer';
+import { repetitionService } from '../services/api';
 
 const Backstage = () => {
     const [morceaux, setMorceaux] = useState([]);
     const [loading, setLoading] = useState(true);
-    const token = localStorage.getItem('token');
 
     useEffect(() => {
         fetchBackstageData();
@@ -12,13 +12,8 @@ const Backstage = () => {
 
     const fetchBackstageData = async () => {
         try {
-            const res = await fetch('http://localhost:5000/api/repetitions?limit=50', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            const data = await res.json();
-            if (res.ok) {
-                setMorceaux(data.repetitions);
-            }
+            const data = await repetitionService.getAll(1, 50);
+            setMorceaux(data.repetitions);
         } catch (err) {
             console.error("Erreur Backstage:", err);
         } finally {
@@ -29,7 +24,7 @@ const Backstage = () => {
     if (loading) return (
         <div className="min-h-screen bg-black flex items-center justify-center">
             <div className="text-center">
-                
+
                 <div className="w-12 h-12 border-2 border-primary border-t-transparent rounded-full animate-spin mb-4 mx-auto"></div>
                 <p className="text-primary font-black uppercase tracking-[0.3em] text-xs">Initialisation Studio...</p>
             </div>
@@ -44,7 +39,7 @@ const Backstage = () => {
                     Backstage
                 </h1>
                 <div className="mt-4">
-                    
+
                     <p className="text-primary font-black tracking-[5px] uppercase text-[0.7rem] md:text-xs">
                         Espace Privé // Membres Uniquement
                     </p>
@@ -59,31 +54,31 @@ const Backstage = () => {
                             .filter(m => m.status === 'private')
                             .map(m => {
                                 const markers = m.markers ? JSON.parse(m.markers) : [];
-                                
+
                                 return (
-                                   
+
                                     <div key={m.id} className="group relative bg-gray-50 dark:bg-[#0a0a0a] border border-gray-200 dark:border-white/5 p-6 rounded-2xl flex flex-col lg:flex-row gap-8 items-start hover:border-primary/40 transition-all duration-500 shadow-sm hover:shadow-2xl">
-                                        
+
                                         {/* COLONNE GAUCHE : INFOS + LECTEUR */}
-                                        <div className="flex-1 w-full min-w-0 text-black dark:text-white"> 
+                                        <div className="flex-1 w-full min-w-0 text-black dark:text-white">
                                             <div className="flex flex-wrap items-center gap-3 mb-2">
-                                                
+
                                                 <h3 className="text-2xl font-black uppercase tracking-tighter group-hover:text-primary transition-colors">
                                                     {m.titre}
                                                 </h3>
-                                                
+
                                                 <span className="text-[9px] px-2 py-1 rounded-sm font-black bg-primary text-white tracking-widest uppercase">
                                                     WIP
                                                 </span>
                                             </div>
-                                            
+
                                             <p className="text-gray-500 dark:text-[#666] text-sm mb-6 font-medium italic border-l-2 border-gray-200 dark:border-primary/20 pl-4">
                                                 {m.detail || "Aucune note technique pour cette session."}
                                             </p>
 
                                             <div className="mt-4 p-2 bg-gray-200 dark:bg-black rounded-xl overflow-hidden shadow-inner [&_.text-white]:text-black dark:[&_.text-white]:text-white">
                                                 <WavePlayer
-                                                    url={m.url.startsWith('/uploads') ? `http://localhost:5000${m.url}` : m.url}
+                                                    url={m.url.startsWith('/uploads') ? `http://192.168.10.108:5000${m.url}` : m.url}
                                                     startTime={m.start_time}
                                                     endTime={m.end_time}
                                                     id={`wave-${m.id}`}
@@ -94,11 +89,11 @@ const Backstage = () => {
                                         {/* COLONNE DROITE : MARKERS */}
                                         <div className="w-full lg:w-80 bg-white dark:bg-white/5 p-5 rounded-xl border border-gray-200 dark:border-white/5 self-stretch shrink-0 shadow-sm">
                                             <div className="flex items-center justify-between mb-4 border-b border-gray-100 dark:border-white/5 pb-2">
-                                                
-                                                <h4 className="text-[10px] font-black uppercase text-primary tracking-widest">Marker</h4>
+
+                                                <h4 className="text-[10px] font-black uppercase text-primary tracking-widest">Markers</h4>
                                                 <span className="text-[9px] text-gray-400 font-bold uppercase">{markers.length} points</span>
                                             </div>
-                                            
+
                                             <div className="space-y-2 max-h-[280px] overflow-y-auto pr-1 custom-scrollbar">
                                                 {markers.length > 0 ? markers.map((marker, idx) => (
                                                     <button
@@ -106,10 +101,10 @@ const Backstage = () => {
                                                         onClick={() => {
                                                             window.dispatchEvent(new CustomEvent(`jump-to-${m.id}`, { detail: marker.time }));
                                                         }}
-                                                        
+
                                                         className="w-full text-left bg-gray-50 dark:bg-black/40 hover:bg-primary dark:hover:bg-primary/10 border border-gray-200 dark:border-white/5 hover:border-primary p-3 rounded-lg transition-all group/item flex gap-3 items-center"
                                                     >
-                                                        
+
                                                         <span className="text-white dark:text-primary font-black text-[10px] bg-primary dark:bg-primary/10 px-2 py-1 rounded group-hover/item:bg-white group-hover/item:text-primary transition-colors">
                                                             {Math.floor(marker.time / 60)}:{(marker.time % 60).toString().padStart(2, '0')}
                                                         </span>

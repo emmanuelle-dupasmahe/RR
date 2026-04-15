@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import LegroupeSkeleton from '../components/LegroupeSkeleton';
+import { memberService, settingsService } from '../services/api';
 
 export default function Groupe() {
     const [membres, setMembres] = useState([]);
@@ -14,8 +15,8 @@ export default function Groupe() {
 
     useEffect(() => {
         Promise.all([
-            fetch('http://localhost:5000/api/membres').then(res => res.json()),
-            fetch('http://localhost:5000/api/groupesettings').then(res => res.json())
+            memberService.getAll(),
+            settingsService.getGroupSettings()
         ])
             .then(([membresData, textsData]) => {
                 setMembres(membresData);
