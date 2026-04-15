@@ -1,43 +1,74 @@
 @import url('https://fonts.googleapis.com/css2?family=Onest:wght@300;400;700;900&display=swap');
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --color-primary: #e31b23;
   --color-dark-bg: #121212;
-
-
   --font-sans: "Onest", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
-/* Style personnalisé pour les lecteurs audio */
-.custom-audio::-webkit-media-controls-panel {
+/* ============================================================
+   STYLE DES LECTEURS AUDIO (FORCÉ)
+   ============================================================ */
+
+/* --- FORCE LE LOOK SOMBRE SUR LE PANEL --- */
+.dark audio {
+  background-color: transparent !important;
+  border-radius: 9999px;
+}
+
+.dark audio::-webkit-media-controls-panel {
   background-image: linear-gradient(to right, #e31b23, #000000) !important;
+  background-color: #000000 !important;
 }
 
-.custom-audio::-webkit-media-controls-play-button,
-.custom-audio::-webkit-media-controls-mute-button {
-  filter: invert(1) brightness(2);
+/* Inversion des boutons pour qu'ils soient blancs sur le rouge/noir */
+.dark audio::-webkit-media-controls-play-button,
+.dark audio::-webkit-media-controls-mute-button,
+.dark audio::-webkit-media-controls-current-time-display,
+.dark audio::-webkit-media-controls-time-remaining-display {
+  filter: invert(1) brightness(2) !important;
 }
 
+/* --- MODE CLAIR : ON RESET TOUT --- */
+html:not(.dark) audio::-webkit-media-controls-panel {
+  background-image: none !important;
+  background-color: #e5e7eb !important;
+}
+
+/* ============================================================
+   ANIMATIONS & SHIMMER
+   ============================================================ */
 @keyframes shimmer {
-  0% {
-    background-position: 200% center;
-  }
-
-  100% {
-    background-position: -200% center;
-  }
+  0% { background-position: 200% center; }
+  100% { background-position: -200% center; }
 }
 
 .animate-shimmer {
-  background: linear-gradient(90deg,
-      #ffffff 0%,
-      #ffffff 40%,
-      #e31b23 50%,
-      #ffffff 60%,
-      #ffffff 100%);
   background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   animation: shimmer 8s infinite linear;
+  
+  /* Par défaut (Mode Clair) : Shimmer Noir avec balayage Rouge */
+  background-image: linear-gradient(90deg, 
+    #000000 0%, 
+    #000000 40%, 
+    #e31b23 50%, 
+    #000000 60%, 
+    #000000 100%
+  );
+}
+
+/* En Mode Sombre : Shimmer Blanc avec balayage Rouge */
+.dark .animate-shimmer {
+  background-image: linear-gradient(90deg, 
+    #ffffff 0%, 
+    #ffffff 40%, 
+    #e31b23 50%, 
+    #ffffff 60%, 
+    #ffffff 100%
+  );
 }

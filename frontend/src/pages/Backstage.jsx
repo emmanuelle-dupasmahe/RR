@@ -26,23 +26,34 @@ const Backstage = () => {
         }
     };
 
-    if (loading) return <div className="text-center py-20 text-red-600 font-bold uppercase tracking-widest">Chargement du studio...</div>;
+    if (loading) return (
+        <div className="min-h-screen bg-black flex items-center justify-center">
+            <div className="text-center">
+                {/* CHANGÉ ICI : border-primary et text-primary */}
+                <div className="w-12 h-12 border-2 border-primary border-t-transparent rounded-full animate-spin mb-4 mx-auto"></div>
+                <p className="text-primary font-black uppercase tracking-[0.3em] text-xs">Initialisation Studio...</p>
+            </div>
+        </div>
+    );
 
     return (
-        <div className="min-h-screen bg-black text-white">
+        <div className="min-h-screen bg-white dark:bg-black text-black dark:text-white transition-colors duration-300">
             {/* HEADER DE LA PAGE */}
-            <div className="text-center pt-[100px] pb-[40px] bg-gradient-to-b from-[#111] to-black px-4 mb-8">
-                <h1 className="text-[3rem] md:text-[3.5rem] font-[300] uppercase m-0 leading-[1.2] tracking-[0.1em] text-white inline-block">
+            <div className="text-center pt-[120px] pb-[60px] bg-gray-50 dark:bg-gradient-to-b dark:from-[#111] dark:to-black px-4 border-b border-gray-100 dark:border-none">
+                <h1 className="text-[3rem] md:text-[4rem] font-[300] uppercase m-0 leading-[1] tracking-[0.1em] text-black dark:text-white inline-block">
                     Backstage
                 </h1>
-                <p className="text-primary font-black tracking-[5px] uppercase text-[0.7rem] md:text-xs mb-4">
-                    Espace Privé // Accès réservé aux membres
-                </p>
+                <div className="mt-4">
+                    {/* CHANGÉ ICI : text-primary */}
+                    <p className="text-primary font-black tracking-[5px] uppercase text-[0.7rem] md:text-xs">
+                        Espace Privé // Membres Uniquement
+                    </p>
+                </div>
             </div>
 
             {/* CONTENU DES MORCEAUX */}
-            <div className="max-w-7xl mx-auto px-6 pb-12">
-                <div className="grid grid-cols-1 gap-6">
+            <div className="max-w-7xl mx-auto px-6 pb-24">
+                <div className="grid grid-cols-1 gap-8">
                     {morceaux && morceaux.length > 0 ? (
                         morceaux
                             .filter(m => m.status === 'private')
@@ -50,21 +61,27 @@ const Backstage = () => {
                                 const markers = m.markers ? JSON.parse(m.markers) : [];
                                 
                                 return (
-                                    <div key={m.id} className="bg-[#111] border border-white/5 p-6 rounded-2xl flex flex-col lg:flex-row gap-6 items-start hover:border-red-600/30 transition-colors overflow-hidden">
-
-                                        {/* COLONNE GAUCHE : INFOS + LECTEUR 
-                                            L'ajout de 'min-w-0' est CRUCIAL pour que le zoom ne casse pas le layout
-                                        */}
-                                        <div className="flex-1 w-full min-w-0"> 
-                                            <div className="flex items-center gap-3 mb-1">
-                                                <h3 className="text-xl font-bold uppercase tracking-tighter truncate">{m.titre}</h3>
-                                                <span className="text-[10px] px-2 py-0.5 rounded font-black bg-red-600/20 text-red-600 shrink-0">
-                                                    WORK IN PROGRESS
+                                   
+                                    <div key={m.id} className="group relative bg-gray-50 dark:bg-[#0a0a0a] border border-gray-200 dark:border-white/5 p-6 rounded-2xl flex flex-col lg:flex-row gap-8 items-start hover:border-primary/40 transition-all duration-500 shadow-sm hover:shadow-2xl">
+                                        
+                                        {/* COLONNE GAUCHE : INFOS + LECTEUR */}
+                                        <div className="flex-1 w-full min-w-0 text-black dark:text-white"> 
+                                            <div className="flex flex-wrap items-center gap-3 mb-2">
+                                                
+                                                <h3 className="text-2xl font-black uppercase tracking-tighter group-hover:text-primary transition-colors">
+                                                    {m.titre}
+                                                </h3>
+                                                
+                                                <span className="text-[9px] px-2 py-1 rounded-sm font-black bg-primary text-white tracking-widest uppercase">
+                                                    WIP
                                                 </span>
                                             </div>
-                                            <p className="text-gray-500 text-sm mb-4 truncate">{m.detail || "Aucune note technique"}</p>
+                                            
+                                            <p className="text-gray-500 dark:text-[#666] text-sm mb-6 font-medium italic border-l-2 border-gray-200 dark:border-primary/20 pl-4">
+                                                {m.detail || "Aucune note technique pour cette session."}
+                                            </p>
 
-                                            <div className="mt-4 bg-black/20 rounded-xl overflow-hidden">
+                                            <div className="mt-4 p-2 bg-gray-200 dark:bg-black rounded-xl overflow-hidden shadow-inner [&_.text-white]:text-black dark:[&_.text-white]:text-white">
                                                 <WavePlayer
                                                     url={m.url.startsWith('/uploads') ? `http://localhost:5000${m.url}` : m.url}
                                                     startTime={m.start_time}
@@ -75,28 +92,34 @@ const Backstage = () => {
                                         </div>
 
                                         {/* COLONNE DROITE : MARKERS */}
-                                        <div className="w-full lg:w-80 bg-white/5 p-4 rounded-xl border border-white/5 self-stretch shrink-0">
-                                            <h4 className="text-[10px] font-black uppercase text-red-600 mb-3 tracking-widest">Markers</h4>
+                                        <div className="w-full lg:w-80 bg-white dark:bg-white/5 p-5 rounded-xl border border-gray-200 dark:border-white/5 self-stretch shrink-0 shadow-sm">
+                                            <div className="flex items-center justify-between mb-4 border-b border-gray-100 dark:border-white/5 pb-2">
+                                                
+                                                <h4 className="text-[10px] font-black uppercase text-primary tracking-widest">Index temporel</h4>
+                                                <span className="text-[9px] text-gray-400 font-bold uppercase">{markers.length} points</span>
+                                            </div>
                                             
-                                            <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar">
+                                            <div className="space-y-2 max-h-[280px] overflow-y-auto pr-1 custom-scrollbar">
                                                 {markers.length > 0 ? markers.map((marker, idx) => (
                                                     <button
                                                         key={idx}
                                                         onClick={() => {
                                                             window.dispatchEvent(new CustomEvent(`jump-to-${m.id}`, { detail: marker.time }));
                                                         }}
-                                                        className="w-full text-left bg-black/40 hover:bg-red-600/10 border border-white/5 hover:border-red-600/30 p-3 rounded-lg transition-all group flex gap-3 items-center"
+                                                        
+                                                        className="w-full text-left bg-gray-50 dark:bg-black/40 hover:bg-primary dark:hover:bg-primary/10 border border-gray-200 dark:border-white/5 hover:border-primary p-3 rounded-lg transition-all group/item flex gap-3 items-center"
                                                     >
-                                                        <span className="text-red-600 font-black text-[10px] bg-red-600/10 px-2 py-1 rounded">
+                                                        
+                                                        <span className="text-white dark:text-primary font-black text-[10px] bg-primary dark:bg-primary/10 px-2 py-1 rounded group-hover/item:bg-white group-hover/item:text-primary transition-colors">
                                                             {Math.floor(marker.time / 60)}:{(marker.time % 60).toString().padStart(2, '0')}
                                                         </span>
-                                                        <span className="text-gray-300 text-[11px] leading-tight group-hover:text-white flex-1 truncate">
+                                                        <span className="text-gray-600 dark:text-gray-300 text-[11px] font-bold leading-tight group-hover/item:text-white flex-1 truncate uppercase tracking-tight">
                                                             {marker.label}
                                                         </span>
                                                     </button>
                                                 )) : (
-                                                    <div className="text-[11px] text-white/20 italic p-2 border border-dashed border-white/10 rounded">
-                                                        Aucun marqueur.
+                                                    <div className="text-[11px] text-gray-400 dark:text-white/20 italic p-4 border border-dashed border-gray-200 dark:border-white/10 rounded text-center">
+                                                        Aucun marqueur défini.
                                                     </div>
                                                 )}
                                             </div>
@@ -105,7 +128,9 @@ const Backstage = () => {
                                 );
                             })
                     ) : (
-                        <p className="text-center opacity-30 py-10">Aucun morceau enregistré dans le studio.</p>
+                        <div className="py-32 text-center border border-dashed border-gray-200 dark:border-white/10 rounded-3xl">
+                            <p className="text-gray-400 dark:text-[#222] uppercase font-black tracking-[10px] text-xl">Studio vide.</p>
+                        </div>
                     )}
                 </div>
             </div>

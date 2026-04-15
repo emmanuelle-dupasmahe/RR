@@ -9,7 +9,6 @@ function Videos() {
     const [totalPages, setTotalPages] = useState(1);
 
     const fetchVideos = async () => {
-        // skeleton au début de chaque chargement 
         setLoading(true);
         try {
             const res = await fetch(`http://localhost:5000/api/videos?page=${page}&limit=6`);
@@ -28,10 +27,11 @@ function Videos() {
     }, [page]);
 
     return (
-        <div className="mt-[80px] min-h-[calc(100vh-82px)] bg-black font-sans">
-            {/* EN-TÊTE */}
-            <div className="text-center py-[48px] bg-gradient-to-b from-[#111] to-black">
-                <h1 className="text-[3rem] md:text-[3.5rem] font-[300] uppercase m-0 leading-[1.2] tracking-[0.1em] text-white inline-block">
+        <div className="mt-[80px] min-h-[calc(100vh-82px)] bg-white dark:bg-black transition-colors duration-300 font-sans">
+            
+            {/* EN-TÊTE ADAPTATIF */}
+            <div className="text-center py-[48px] bg-gray-50 dark:bg-gradient-to-b dark:from-[#111] dark:to-black border-b border-gray-100 dark:border-none">
+                <h1 className="text-[3rem] md:text-[3.5rem] font-[300] uppercase m-0 leading-[1.2] tracking-[0.1em] text-black dark:text-white inline-block">
                     Vidéos Live
                 </h1>
                 <p className="text-primary font-black tracking-[5px] uppercase text-sm">
@@ -40,9 +40,8 @@ function Videos() {
             </div>
 
             <div className="mt-[60px] max-w-[80rem] mx-auto px-[20px] pb-[40px]">
-                {/* LOGIQUE D'AFFICHAGE CONDITIONNEL */}
                 {loading ? (
-                    <VideosSkeleton /> // skeleton 
+                    <VideosSkeleton />
                 ) : videos.length > 0 ? (
                     <>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-[32px]">
@@ -53,25 +52,30 @@ function Videos() {
 
                         {/* PAGINATION */}
                         {totalPages > 1 && (
-                            <div className="mt-16 flex justify-center items-center gap-4 text-white">
+                            <div className="mt-20 flex justify-center items-center gap-6">
                                 <button
                                     disabled={page === 1}
                                     onClick={() => {
                                         setPage(prev => prev - 1);
                                         window.scrollTo(0, 300);
                                     }}
-                                    className="px-6 py-2 bg-[#111] border border-[#333] hover:border-primary text-white disabled:opacity-30 transition-all uppercase font-bold text-sm cursor-pointer"
+                                    className="px-8 py-3 bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-white/10 text-black dark:text-white hover:border-primary dark:hover:border-primary disabled:opacity-20 transition-all uppercase font-black text-xs tracking-widest cursor-pointer shadow-lg"
                                 >
                                     Précédent
                                 </button>
-                                <span className="font-black text-primary uppercase">PAGE {page} / {totalPages}</span>
+                                
+                                <div className="flex flex-col items-center">
+                                    <span className="text-[0.6rem] text-gray-400 dark:text-[#444] font-bold uppercase tracking-tighter">Navigation</span>
+                                    <span className="font-black text-primary uppercase text-lg leading-none">{page} / {totalPages}</span>
+                                </div>
+
                                 <button
                                     disabled={page === totalPages}
                                     onClick={() => {
                                         setPage(prev => prev + 1);
                                         window.scrollTo(0, 300);
                                     }}
-                                    className="px-6 py-2 bg-[#111] border border-[#333] hover:border-primary text-white disabled:opacity-30 transition-all uppercase font-bold text-sm cursor-pointer"
+                                    className="px-8 py-3 bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-white/10 text-black dark:text-white hover:border-primary dark:hover:border-primary disabled:opacity-20 transition-all uppercase font-black text-xs tracking-widest cursor-pointer shadow-lg"
                                 >
                                     Suivant
                                 </button>
@@ -79,9 +83,11 @@ function Videos() {
                         )}
                     </>
                 ) : (
-                    <p className="text-center text-[#9ca3af] font-bold uppercase tracking-widest">
-                        Aucune vidéo disponible pour le moment.
-                    </p>
+                    <div className="text-center py-20 border border-dashed border-gray-200 dark:border-white/10 rounded-2xl">
+                        <p className="text-gray-400 dark:text-[#666] font-bold uppercase tracking-[3px]">
+                            Aucune vidéo disponible pour le moment.
+                        </p>
+                    </div>
                 )}
             </div>
         </div>
@@ -96,13 +102,19 @@ function VideoCard({ video }) {
         : `http://localhost:5000${video.file_path}`;
 
     return (
-        /* 1. Bloc entier avec dégradé subtil */
-        <div className="p-[2px] rounded-[1.2rem] bg-gradient-to-br from-primary/20 via-black to-black border border-white/5 transition-all duration-500 hover:from-primary/40 shadow-2xl group">
-            <div className="bg-[#0a0a0a] rounded-[1.1rem] overflow-hidden">
+        /* CHANGÉ ICI : dark:hover:border-primary et shadow utilisant primary/30 */
+        <div className="group relative rounded-[1.2rem] transition-all duration-500 shadow-2xl
+            bg-gray-50 border border-gray-200
+            dark:bg-[#0a0a0a] dark:border-white/5 dark:hover:border-primary dark:hover:shadow-[0_0_30px_rgba(185,28,28,0.3)]"
+        >
+            <div className="overflow-hidden rounded-[1.1rem]">
 
-                {/* 2. Le "Halo" rouge autour du lecteur vidéo */}
-                <div className="p-[6px] bg-gradient-to-r from-primary/60 via-black/80 to-black">
-                    <div className="w-full aspect-video overflow-hidden rounded-[0.8rem] relative z-[1] bg-black">
+                {/* CONTENEUR VIDEO : DÉGRADÉ VERS PRIMARY */}
+                <div className="p-[3px] transition-all duration-500
+                    bg-gray-200 group-hover:bg-black
+                    dark:bg-gradient-to-r dark:from-primary dark:to-black"
+                >
+                    <div className="w-full aspect-video overflow-hidden rounded-[0.8rem] relative z-[1] bg-black shadow-inner">
                         {isYoutube ? (
                             <iframe
                                 src={url}
@@ -117,12 +129,19 @@ function VideoCard({ video }) {
                     </div>
                 </div>
 
-                {/* Infos textuelles */}
-                <div className="p-[20px]">
-                    <h3 className="text-white font-black mb-[6px] uppercase tracking-wider text-lg group-hover:text-primary transition-colors">
+                {/* INFOS TEXTUELLES */}
+                <div className="p-[20px] transition-colors duration-500">
+                    {/* CHANGÉ ICI : text-primary au hover */}
+                    <h3 className="font-black mb-[6px] uppercase tracking-wider text-lg transition-colors
+                        text-black group-hover:text-primary
+                        dark:text-white dark:group-hover:text-primary"
+                    >
                         {video.titre}
                     </h3>
-                    <p className="text-[#888] text-[0.9rem] font-medium leading-relaxed">
+                    <p className="text-[0.9rem] font-medium leading-relaxed transition-colors
+                        text-gray-600
+                        dark:text-[#888] dark:group-hover:text-gray-200"
+                    >
                         {video.description}
                     </p>
                 </div>

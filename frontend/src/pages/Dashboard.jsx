@@ -528,28 +528,36 @@ function Dashboard() {
 
     const SectionTitle = ({ children, subtitle }) => (
         <div className="mb-10">
-            <h2 className="text-white text-2xl md:text-3xl font-[600] uppercase tracking-tightergit">
-                {children} <span className="text-primary">.</span>
+            <h2 className="text-black dark:text-white text-2xl md:text-3xl font-[600] uppercase tracking-tighter">
+                {children} <span className="text-[#e3181f]">.</span>
             </h2>
-            {subtitle && <p className="text-primary font-black tracking-[4px] uppercase text-[0.65rem] mt-1 opacity-80">{subtitle}</p>}
+            {subtitle && (
+                <p className="text-[#e3181f] font-black tracking-[4px] uppercase text-[0.65rem] mt-1 opacity-80">
+                    {subtitle}
+                </p>
+            )}
         </div>
     );
 
-    const inputClass = "w-full p-4 bg-[#0a0a0a] border border-white/5 text-white focus:outline-none focus:border-primary/50 placeholder:text-white/20 transition-all rounded-lg text-sm font-medium";
-    const btnClass = "bg-primary text-white border-none p-4 font-black uppercase tracking-widest cursor-pointer w-full transition-all hover:bg-white hover:text-black rounded-lg shadow-lg active:scale-[0.98]";
+    const inputClass = "w-full p-4 bg-white dark:bg-[#0a0a0a] border border-gray-300 dark:border-white/5 text-black dark:text-white focus:outline-none focus:border-[#e3181f]/50 placeholder:text-gray-400 dark:placeholder:text-white/20 transition-all rounded-lg text-sm font-medium";
+    const btnClass = "bg-[#e3181f] text-white border-none p-4 font-black uppercase tracking-widest cursor-pointer w-full transition-all hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black rounded-lg shadow-lg active:scale-[0.98]";
 
 
     return (
-        <div className="mt-[80px] min-h-screen bg-black text-white pb-20">
+        <div className="mt-[80px] min-h-screen bg-white dark:bg-black text-black dark:text-white transition-colors duration-300 pb-20">
+
             {/* HEADER DASHBOARD */}
-            <div className="text-center py-16 bg-gradient-to-b from-[#111] to-black px-4 mb-12 border-b border-white/5">
-                <h1 className="text-[3rem] md:text-[3.5rem] font-[300] uppercase m-0 leading-[1.2] tracking-[0.1em] text-white inline-block">
+            <div className="text-center py-16 bg-gray-50 dark:bg-gradient-to-b dark:from-[#111] dark:to-black px-4 mb-12 border-b border-gray-200 dark:border-white/5">
+                <h1 className="text-[3rem] md:text-[3.5rem] font-[300] uppercase m-0 leading-[1.2] tracking-[0.1em] text-black dark:text-white inline-block">
                     Dashboard
                 </h1>
-                <p className="text-primary font-black tracking-[5px] uppercase text-sm">Control Panel // Admin Only</p>
+                <p className="text-[#e3181f] font-black tracking-[5px] uppercase text-sm mt-2">
+                    Control Panel // Admin Only
+                </p>
             </div>
 
             <div className="max-w-[1200px] mx-auto px-6 flex flex-col md:flex-row gap-12">
+
                 {/* SIDEBAR NAVIGATION */}
                 <aside className="md:w-64 flex-shrink-0">
                     <nav className="flex flex-col gap-3 sticky top-[100px]">
@@ -561,19 +569,26 @@ function Dashboard() {
                             { id: 'groupe', label: 'Le Groupe' },
                             { id: 'membres', label: 'Musiciens' },
                             { id: 'messages', label: "Livre d'Or" },
-                        ].map((item) => (
-                            <button
-                                key={item.id}
-                                onClick={() => setActiveSection(item.id)}
-                                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-bold uppercase text-[11px] tracking-widest border ${activeSection === item.id
-                                    ? 'bg-primary text-black border-primary shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)]'
-                                    : 'text-white/40 border-transparent hover:text-white hover:bg-white/5'
-                                    }`}
-                            >
-                                <span className="text-base">{item.icon}</span>
-                                {item.label}
-                            </button>
-                        ))}
+                        ].map((item) => {
+                            const isActive = activeSection === item.id;
+                            return (
+                                <button
+                                    key={item.id}
+                                    onClick={() => setActiveSection(item.id)}
+                                    className={`
+                                    flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-bold uppercase text-[11px] tracking-widest border
+                                    ${isActive
+                                            ? 'bg-[#e3181f] !text-white border-[#e3181f] shadow-lg shadow-red-500/20'
+                                            : 'bg-transparent text-gray-600 dark:text-gray-400 border-transparent hover:bg-gray-100 dark:hover:bg-white/5 hover:text-black dark:hover:text-white'
+                                        }
+                                `}
+                                    // Style inline pour être certain de prendre le dessus si Tailwind est ignoré
+                                    style={{ color: isActive ? 'white' : undefined }}
+                                >
+                                    {item.label}
+                                </button>
+                            );
+                        })}
                     </nav>
                 </aside>
 
@@ -582,21 +597,32 @@ function Dashboard() {
 
                     {/* RÉGLAGES GÉNÉRAUX */}
                     {activeSection === 'tournee' && (
-                        <section id="tournee">
+                        <section id="tournee" className="animate-fadeIn">
                             <SectionTitle subtitle="Global Settings">Tournée en cours</SectionTitle>
-                            <div className="bg-[#0a0a0a] border border-white/5 p-8 rounded-2xl shadow-2xl">
+
+                            <div className="bg-gray-100 dark:bg-[#0a0a0a] border border-gray-300 dark:border-white/5 p-8 rounded-2xl shadow-inner dark:shadow-2xl">
                                 <form onSubmit={handleUpdateTitle} className="flex flex-col md:flex-row gap-4">
-                                    <input
-                                        type="text"
-                                        className={inputClass}
-                                        value={tourTitle}
-                                        onChange={(e) => setTourTitle(e.target.value)}
-                                        placeholder="ex: TOURNÉE 2026"
-                                        required
-                                    />
-                                    <button type="submit" className="md:w-auto bg-white text-black px-8 py-4 font-black uppercase text-xs tracking-widest hover:bg-primary hover:text-white transition-all rounded-lg">
-                                        Update
-                                    </button>
+                                    <div className="flex-1">
+                                        <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-2 ml-1">
+                                            Nom de la tournée
+                                        </label>
+                                        <input
+                                            type="text"
+                                            className={inputClass} // Utilise la constante globale réparée
+                                            value={tourTitle}
+                                            onChange={(e) => setTourTitle(e.target.value)}
+                                            placeholder="ex: TOURNÉE 2026"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="flex items-end">
+                                        <button
+                                            type="submit"
+                                            className={btnClass} // Utilise la constante globale pour avoir le ROUGE direct
+                                        >
+                                            Mettre à jour
+                                        </button>
+                                    </div>
                                 </form>
                             </div>
                         </section>
@@ -604,12 +630,15 @@ function Dashboard() {
 
                     {/* SECTION CONCERTS */}
                     {activeSection === 'concerts' && (
-                        <section id="concerts">
+                        <section id="concerts" className="animate-fadeIn">
                             <SectionTitle subtitle="Live Dates Management">Calendrier Concerts</SectionTitle>
                             <div className="grid lg:grid-cols-2 gap-12">
+
                                 {/* Formulaire d'ajout */}
-                                <div className="bg-[#0a0a0a] border border-white/5 p-8 rounded-2xl">
-                                    <h3 className="text-sm font-black uppercase tracking-widest mb-6 opacity-40">Ajouter une date</h3>
+                                <div className="bg-gray-100 dark:bg-[#0a0a0a] border border-gray-300 dark:border-white/5 p-8 rounded-2xl shadow-inner">
+                                    <h3 className="text-sm font-black uppercase tracking-widest mb-6 text-gray-400 dark:text-white/40">
+                                        Ajouter une date
+                                    </h3>
                                     <form onSubmit={handleSubmit} className="space-y-4">
                                         <input type="text" placeholder="VILLE" className={inputClass} value={formData.titre} onChange={(e) => setFormData({ ...formData, titre: e.target.value.toUpperCase() })} required />
                                         <div className="grid grid-cols-2 gap-4">
@@ -624,7 +653,7 @@ function Dashboard() {
                                 {/* Liste des concerts */}
                                 <div className="space-y-4">
                                     {concerts.map(c => (
-                                        <div key={c.id} className="p-5 bg-[#0a0a0a] border border-white/5 rounded-xl">
+                                        <div key={c.id} className="p-5 bg-gray-50 dark:bg-[#0a0a0a] border border-gray-200 dark:border-white/5 rounded-xl transition-colors shadow-sm">
                                             {editingConcert === c.id ? (
                                                 <div className="space-y-3">
                                                     <input
@@ -649,49 +678,50 @@ function Dashboard() {
                                                         value={c.lieu}
                                                         onChange={(e) => setConcerts(concerts.map(con => con.id === c.id ? { ...con, lieu: e.target.value } : con))}
                                                     />
-                                                    <div className="flex gap-2">
-                                                        <button onClick={() => handleUpdateConcert(c)} className="bg-green-600 text-white text-[10px] font-black p-2 rounded uppercase flex-1">Sauvegarder</button>
-                                                        <button onClick={() => setEditingConcert(null)} className="bg-white/10 text-white text-[10px] font-black p-2 rounded uppercase flex-1">Annuler</button>
+                                                    <div className="flex gap-2 pt-2">
+                                                        <button onClick={() => handleUpdateConcert(c)} className="bg-green-600 hover:bg-green-700 text-white text-[10px] font-black p-3 rounded uppercase flex-1 transition-colors">Sauvegarder</button>
+                                                        <button onClick={() => setEditingConcert(null)} className="bg-gray-200 dark:bg-white/10 text-black dark:text-white text-[10px] font-black p-3 rounded uppercase flex-1 transition-colors">Annuler</button>
                                                     </div>
                                                 </div>
                                             ) : (
                                                 <div className="group flex justify-between items-center">
                                                     <div>
-                                                        <span className="text-primary font-black text-xs tracking-tighter uppercase block mb-1">
+                                                        <span className="text-[#e3181f] font-black text-xs tracking-tighter uppercase block mb-1">
                                                             {new Date(c.date_concert).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}
                                                         </span>
-                                                        <span className="text-lg font-bold uppercase tracking-tight">{c.titre}</span>
-                                                        <p className="text-[11px] text-[#666] uppercase font-bold tracking-widest mt-1">{c.lieu}</p>
+                                                        <span className="text-lg font-bold uppercase tracking-tight text-black dark:text-white">{c.titre}</span>
+                                                        <p className="text-[11px] text-gray-500 dark:text-gray-400 uppercase font-bold tracking-widest mt-1">{c.lieu}</p>
                                                     </div>
                                                     <div className="flex gap-4">
-                                                        <button onClick={() => setEditingConcert(c.id)} className="text-white/50 hover:text-white transition-all text-[10px] font-black uppercase">Edit</button>
-                                                        <button onClick={() => handleDelete(c.id)} className="text-[#444] hover:text-primary transition-all text-[10px] font-black uppercase">Delete</button>
+                                                        <button onClick={() => setEditingConcert(c.id)} className="text-gray-400 hover:text-black dark:hover:text-white transition-all text-[10px] font-black uppercase">Edit</button>
+                                                        <button onClick={() => handleDelete(c.id)} className="text-gray-300 hover:text-[#e3181f] transition-all text-[10px] font-black uppercase">Delete</button>
                                                     </div>
                                                 </div>
                                             )}
                                         </div>
                                     ))}
+                                    {/* Attention : S'assurer que le composant Pagination gère aussi le mode clair */}
                                     <Pagination pages={concertPages} onPageChange={fetchConcerts} />
                                 </div>
                             </div>
                         </section>
                     )}
 
-
                     {/* SECTION RÉPÉTITIONS */}
                     {activeSection === 'repetitions' && (
                         <section id="repetitions" className="animate-in fade-in duration-500">
                             <SectionTitle subtitle="Audio Archives">Studio & Backstage</SectionTitle>
+
                             <div className="grid lg:grid-cols-2 gap-12">
 
                                 {/* Formulaire d'ajout */}
-                                <div className="bg-[#0a0a0a] border border-white/5 p-8 rounded-2xl shadow-2xl">
-                                    <h3 className="text-sm font-black uppercase tracking-widest mb-6 opacity-40">Nouveau morceau</h3>
+                                <div className="bg-white dark:bg-[#0a0a0a] border border-black/5 dark:border-white/5 p-8 rounded-2xl shadow-xl dark:shadow-2xl h-fit sticky top-8">
+                                    <h3 className="text-sm font-black uppercase tracking-widest mb-6 opacity-40 text-black dark:text-white">Nouveau morceau</h3>
                                     <form onSubmit={handleRepSubmit} className="space-y-4">
                                         <input
                                             type="text"
                                             placeholder="TITRE (ex: ATOMIC CITY)"
-                                            className={inputClass}
+                                            className={`${inputClass} bg-gray-50 dark:bg-black border-black/10 dark:border-white/20`}
                                             value={repFormData.titre}
                                             onChange={(e) => setRepFormData({ ...repFormData, titre: e.target.value })}
                                             required
@@ -699,13 +729,13 @@ function Dashboard() {
 
                                         <textarea
                                             placeholder="NOTES TECHNIQUES (ex: Attention à la transition bridge/refrain)"
-                                            className={`${inputClass} h-24 resize-none py-3`}
+                                            className={`${inputClass} h-24 resize-none py-3 bg-gray-50 dark:bg-black border-black/10 dark:border-white/20`}
                                             value={repFormData.detail}
                                             onChange={(e) => setRepFormData({ ...repFormData, detail: e.target.value })}
                                         />
 
-                                        {/* --- GESTION DES MARKERS (POINTS D'INTÉRÊT) --- */}
-                                        <div className="bg-white/5 p-4 rounded-lg border border-white/10 space-y-3">
+                                        {/* --- GESTION DES MARKERS --- */}
+                                        <div className="bg-black/5 dark:bg-white/5 p-4 rounded-lg border border-black/5 dark:border-white/10 space-y-3">
                                             <label className="block text-[10px] font-black uppercase text-primary/60 ml-1">Markers (Points d'intérêt)</label>
                                             <div className="flex gap-2">
                                                 <input
@@ -713,14 +743,14 @@ function Dashboard() {
                                                     placeholder="Sec"
                                                     value={newMarker.time}
                                                     onChange={(e) => setNewMarker({ ...newMarker, time: e.target.value })}
-                                                    className="w-20 bg-black border border-white/20 p-2 rounded text-sm text-white"
+                                                    className="w-20 bg-white dark:bg-black border border-black/10 dark:border-white/20 p-2 rounded text-sm text-black dark:text-white focus:border-primary/50 outline-none"
                                                 />
                                                 <input
                                                     type="text"
                                                     placeholder="Label (ex: Solo)"
                                                     value={newMarker.label}
                                                     onChange={(e) => setNewMarker({ ...newMarker, label: e.target.value })}
-                                                    className="flex-1 bg-black border border-white/20 p-2 rounded text-sm text-white"
+                                                    className="flex-1 bg-white dark:bg-black border border-black/10 dark:border-white/20 p-2 rounded text-sm text-black dark:text-white focus:border-primary/50 outline-none"
                                                 />
                                                 <button
                                                     type="button"
@@ -730,12 +760,14 @@ function Dashboard() {
                                                     AJOUTER
                                                 </button>
                                             </div>
+
+                                            {/* Liste des markers ajoutés */}
                                             <div className="flex flex-wrap gap-2 pt-2">
                                                 {markers.map((m, i) => (
-                                                    <div key={i} className="flex items-center gap-2 bg-black px-2 py-1 rounded border border-primary/30 text-[10px]">
+                                                    <div key={i} className="flex items-center gap-2 bg-white dark:bg-black px-2 py-1 rounded border border-primary/30 text-[10px] animate-in zoom-in duration-200">
                                                         <span className="text-primary font-bold">{m.time}s</span>
-                                                        <span className="text-gray-400">{m.label}</span>
-                                                        <button type="button" onClick={() => removeMarker(i)} className="text-white/40 hover:text-primary">✕</button>
+                                                        <span className="text-gray-500 dark:text-gray-400">{m.label}</span>
+                                                        <button type="button" onClick={() => removeMarker(i)} className="text-black/40 dark:text-white/40 hover:text-primary transition-colors">✕</button>
                                                     </div>
                                                 ))}
                                             </div>
@@ -747,7 +779,7 @@ function Dashboard() {
                                                 <label className="text-[9px] font-black text-primary/60 uppercase ml-1">Début (sec)</label>
                                                 <input
                                                     type="number"
-                                                    className={inputClass}
+                                                    className={`${inputClass} bg-gray-50 dark:bg-black`}
                                                     value={repFormData.start_time}
                                                     onChange={(e) => setRepFormData({ ...repFormData, start_time: e.target.value })}
                                                 />
@@ -756,7 +788,7 @@ function Dashboard() {
                                                 <label className="text-[9px] font-black text-primary/60 uppercase ml-1">Fin (sec)</label>
                                                 <input
                                                     type="number"
-                                                    className={inputClass}
+                                                    className={`${inputClass} bg-gray-50 dark:bg-black`}
                                                     value={repFormData.end_time}
                                                     onChange={(e) => setRepFormData({ ...repFormData, end_time: e.target.value })}
                                                 />
@@ -764,7 +796,7 @@ function Dashboard() {
                                             <div className="space-y-1">
                                                 <label className="text-[9px] font-black text-primary/60 uppercase ml-1">Visibilité</label>
                                                 <select
-                                                    className={inputClass}
+                                                    className={`${inputClass} bg-gray-50 dark:bg-black`}
                                                     value={repFormData.status}
                                                     onChange={(e) => setRepFormData({ ...repFormData, status: e.target.value })}
                                                 >
@@ -777,14 +809,15 @@ function Dashboard() {
                                         <input
                                             type="text"
                                             placeholder="URL AUDIO DIRECTE (Optionnel)"
-                                            className={inputClass}
+                                            className={`${inputClass} bg-gray-50 dark:bg-black`}
                                             value={repFormData.url}
                                             onChange={(e) => setRepFormData({ ...repFormData, url: e.target.value })}
                                         />
 
-                                        <div className="text-center text-[10px] font-black uppercase opacity-20 py-2">— OU —</div>
+                                        <div className="text-center text-[10px] font-black uppercase opacity-20 py-2 text-black dark:text-white">— OU —</div>
 
-                                        <div className="p-4 border-2 border-dashed border-white/5 rounded-lg text-center hover:border-primary/30 transition-all bg-white/5">
+                                        {/* Upload de fichier */}
+                                        <div className="p-4 border-2 border-dashed border-black/10 dark:border-white/5 rounded-lg text-center hover:border-primary/30 transition-all bg-black/5 dark:bg-white/5">
                                             <input
                                                 type="file"
                                                 accept="audio/*"
@@ -801,8 +834,8 @@ function Dashboard() {
                                                     }
                                                 }}
                                             />
-                                            <label htmlFor="audio-upload" className="cursor-pointer text-[10px] font-black uppercase tracking-[2px] text-[#666] hover:text-white block">
-                                                {repFile ? <span className="text-primary">🎵 {repFile.name}</span> : "Cliquez pour uploader un MP3"}
+                                            <label htmlFor="audio-upload" className="cursor-pointer text-[10px] font-black uppercase tracking-[2px] text-gray-500 dark:text-[#666] hover:text-primary dark:hover:text-white block">
+                                                {repFile ? <span className="text-primary animate-pulse">🎵 {repFile.name}</span> : "Cliquez pour uploader un MP3"}
                                             </label>
                                         </div>
 
@@ -814,19 +847,18 @@ function Dashboard() {
                                 <div className="space-y-4">
                                     {repetitions.length > 0 ? (
                                         repetitions.map(r => (
-                                            <div key={r.id} className="p-5 bg-[#0a0a0a] border border-white/5 rounded-xl hover:border-white/10 transition-all group">
+                                            <div key={r.id} className="p-5 bg-white dark:bg-[#0a0a0a] border border-black/5 dark:border-white/5 rounded-xl hover:border-black/10 dark:hover:border-white/10 shadow-sm dark:shadow-none transition-all group">
 
                                                 {editingRep === r.id ? (
+                                                    /* --- MODE ÉDITION --- */
                                                     <div className="space-y-4">
-                                                        {/* TITRE */}
                                                         <input
-                                                            className={inputClass}
+                                                            className={`${inputClass} bg-gray-50 dark:bg-black`}
                                                             value={r.titre}
                                                             onChange={(e) => setRepetitions(repetitions.map(item => item.id === r.id ? { ...item, titre: e.target.value } : item))}
                                                         />
 
-                                                        {/* MARKERS */}
-                                                        <div className="bg-white/5 p-3 rounded border border-white/10">
+                                                        <div className="bg-black/5 dark:bg-white/5 p-3 rounded border border-black/10 dark:border-white/10">
                                                             <label className="block text-[9px] font-black uppercase text-primary/60 mb-2">Modifier les Markers</label>
                                                             <div className="flex gap-2 mb-2">
                                                                 <input
@@ -834,35 +866,34 @@ function Dashboard() {
                                                                     placeholder="Sec"
                                                                     value={newMarker.time}
                                                                     onChange={(e) => setNewMarker({ ...newMarker, time: e.target.value })}
-                                                                    className="w-16 bg-black border border-white/20 p-1 text-xs text-white"
+                                                                    className="w-16 bg-white dark:bg-black border border-black/10 dark:border-white/20 p-1 text-xs text-black dark:text-white"
                                                                 />
                                                                 <input
                                                                     type="text"
                                                                     placeholder="Label"
                                                                     value={newMarker.label}
                                                                     onChange={(e) => setNewMarker({ ...newMarker, label: e.target.value })}
-                                                                    className="flex-1 bg-black border border-white/20 p-1 text-xs text-white"
+                                                                    className="flex-1 bg-white dark:bg-black border border-black/10 dark:border-white/20 p-1 text-xs text-black dark:text-white"
                                                                 />
-                                                                <button type="button" onClick={addMarker} className="bg-primary px-2 rounded text-[9px] font-bold">OK</button>
+                                                                <button type="button" onClick={addMarker} className="bg-primary px-2 rounded text-[9px] font-bold text-white">OK</button>
                                                             </div>
                                                             <div className="flex flex-wrap gap-1">
                                                                 {markers.map((m, i) => (
-                                                                    <div key={i} className="flex items-center gap-1 bg-black px-2 py-0.5 rounded text-[9px] border border-white/10">
+                                                                    <div key={i} className="flex items-center gap-1 bg-white dark:bg-black px-2 py-0.5 rounded text-[9px] border border-black/10 dark:border-white/10">
                                                                         <span className="text-primary font-bold">{m.time}s</span>
-                                                                        <span>{m.label}</span>
+                                                                        <span className="text-black dark:text-white">{m.label}</span>
                                                                         <button type="button" onClick={() => removeMarker(i)} className="hover:text-red-500 ml-1">✕</button>
                                                                     </div>
                                                                 ))}
                                                             </div>
                                                         </div>
 
-                                                        {/* --- CHAMPS TEMPS DÉBUT ET FIN --- */}
                                                         <div className="grid grid-cols-2 gap-4">
                                                             <div className="space-y-1">
                                                                 <label className="text-[9px] font-black text-primary/60 uppercase ml-1">Début (sec)</label>
                                                                 <input
                                                                     type="number"
-                                                                    className={inputClass}
+                                                                    className={`${inputClass} bg-gray-50 dark:bg-black`}
                                                                     value={r.start_time || 0}
                                                                     onChange={(e) => setRepetitions(repetitions.map(item =>
                                                                         item.id === r.id ? { ...item, start_time: parseFloat(e.target.value) } : item
@@ -873,7 +904,7 @@ function Dashboard() {
                                                                 <label className="text-[9px] font-black text-primary/60 uppercase ml-1">Fin (sec)</label>
                                                                 <input
                                                                     type="number"
-                                                                    className={inputClass}
+                                                                    className={`${inputClass} bg-gray-50 dark:bg-black`}
                                                                     value={r.end_time || 0}
                                                                     onChange={(e) => setRepetitions(repetitions.map(item =>
                                                                         item.id === r.id ? { ...item, end_time: parseFloat(e.target.value) } : item
@@ -882,40 +913,6 @@ function Dashboard() {
                                                             </div>
                                                         </div>
 
-                                                        {/* --- AJOUT : SÉLECTEUR DE VISIBILITÉ EN MODE ÉDITION --- */}
-                                                        <div className="space-y-1">
-                                                            <label className="text-[9px] font-black text-primary/60 uppercase ml-1">Visibilité</label>
-                                                            <select
-                                                                className={inputClass}
-                                                                value={r.status}
-                                                                onChange={(e) => setRepetitions(repetitions.map(item =>
-                                                                    item.id === r.id ? { ...item, status: e.target.value } : item
-                                                                ))}
-                                                            >
-                                                                <option value="private">Privé</option>
-                                                                <option value="public">Public</option>
-                                                            </select>
-                                                        </div>
-
-                                                        {/* Champ pour changer le fichier audio */}
-                                                        <div className="space-y-1 mt-2">
-                                                            <label className="text-[9px] font-black text-primary/60 uppercase ml-1">Changer le fichier audio (Optionnel)</label>
-                                                            <input
-                                                                type="file"
-                                                                accept="audio/*"
-                                                                onChange={(e) => setUpdateFile(e.target.files[0])}
-                                                                className="block w-full text-xs text-gray-400 file:mr-4 file:py-1 file:px-2 file:rounded-full file:border-0 file:text-[10px] file:font-bold file:bg-red-600 file:text-white hover:file:bg-red-700"
-                                                            />
-                                                        </div>
-
-                                                        {/* DÉTAIL / TEXTAREA */}
-                                                        <textarea
-                                                            className={`${inputClass} h-20 resize-none`}
-                                                            value={r.detail}
-                                                            onChange={(e) => setRepetitions(repetitions.map(item => item.id === r.id ? { ...item, detail: e.target.value } : item))}
-                                                        />
-
-                                                        {/* BOUTONS ACTIONS */}
                                                         <div className="flex gap-2">
                                                             <button
                                                                 onClick={() => handleRepUpdate(r, updateFile)}
@@ -923,52 +920,52 @@ function Dashboard() {
                                                             >
                                                                 SAUVEGARDER
                                                             </button>
-
                                                             <button
                                                                 onClick={() => {
                                                                     setEditingRep(null);
                                                                     setMarkers([]);
+                                                                    setUpdateFile(null);
                                                                 }}
-                                                                className="flex-1 bg-white/10 text-white text-[10px] font-black py-2 rounded hover:bg-white/20 transition-colors"
+                                                                className="flex-1 bg-black/10 dark:bg-white/10 text-black dark:text-white text-[10px] font-black py-2 rounded hover:bg-black/20 dark:hover:bg-white/20 transition-colors"
                                                             >
                                                                 ANNULER
                                                             </button>
                                                         </div>
                                                     </div>
-
                                                 ) : (
+                                                    /* --- MODE AFFICHAGE --- */
                                                     <>
                                                         <div className="flex justify-between items-start mb-2">
                                                             <div className="flex-1">
                                                                 <div className="flex items-center gap-2 mb-1">
-                                                                    <span className="text-white font-bold block uppercase tracking-tight text-base leading-none">{r.titre}</span>
+                                                                    <span className="text-black dark:text-white font-bold block uppercase tracking-tight text-base leading-none">{r.titre}</span>
                                                                     <span className={`text-[8px] px-1.5 py-0.5 rounded font-black uppercase ${r.status === 'public' ? 'bg-green-500/20 text-green-500' : 'bg-primary/20 text-primary'}`}>
                                                                         {r.status === 'public' ? 'Public' : 'Privé'}
                                                                     </span>
                                                                 </div>
                                                                 <p className="text-[11px] text-primary font-bold uppercase tracking-widest leading-tight">{r.detail}</p>
 
-                                                                {/* Affichage des markers */}
                                                                 {r.markers && (
                                                                     <div className="mt-3 flex flex-wrap gap-1">
                                                                         {(typeof r.markers === 'string' ? JSON.parse(r.markers) : r.markers).map((m, idx) => (
                                                                             <button
                                                                                 key={idx}
                                                                                 onClick={() => jumpToTime(r.id, m.time)}
-                                                                                className="text-[8px] border border-primary/30 bg-primary/5 hover:bg-primary/20 px-2 py-0.5 rounded text-white/80 transition-all active:scale-95"
+                                                                                className="text-[8px] border border-primary/30 bg-primary/5 hover:bg-primary/20 px-2 py-0.5 rounded text-black/70 dark:text-white/80 transition-all active:scale-95 flex items-center gap-1"
                                                                             >
-                                                                                <strong className="text-primary">{m.time}s</strong> : {m.label} ⚡
+                                                                                <strong className="text-primary">{m.time}s</strong> {m.label} ⚡
                                                                             </button>
                                                                         ))}
                                                                     </div>
                                                                 )}
                                                             </div>
+
                                                             <div className="flex gap-3 opacity-0 group-hover:opacity-100 transition-opacity ml-4">
                                                                 <button onClick={() => {
                                                                     setEditingRep(r.id);
                                                                     setMarkers(typeof r.markers === 'string' ? JSON.parse(r.markers || '[]') : (r.markers || []));
-                                                                }} className="text-white/30 hover:text-white text-[10px] font-black uppercase">Edit</button>
-                                                                <button onClick={() => handleRepDelete(r.id)} className="text-[#444] hover:text-primary text-[10px] font-black uppercase">Delete</button>
+                                                                }} className="text-black/30 dark:text-white/30 hover:text-primary dark:hover:text-white text-[10px] font-black uppercase">Edit</button>
+                                                                <button onClick={() => handleRepDelete(r.id)} className="text-gray-400 dark:text-[#444] hover:text-red-500 dark:hover:text-primary text-[10px] font-black uppercase">Delete</button>
                                                             </div>
                                                         </div>
 
@@ -985,11 +982,15 @@ function Dashboard() {
                                             </div>
                                         ))
                                     ) : (
-                                        <div className="text-center py-20 border border-dashed border-white/5 rounded-2xl opacity-20">
-                                            <p className="text-xs font-black uppercase tracking-widest">Aucun enregistrement disponible</p>
+                                        <div className="text-center py-20 border border-dashed border-black/10 dark:border-white/5 rounded-2xl opacity-40 dark:opacity-20">
+                                            <p className="text-xs font-black uppercase tracking-widest text-black dark:text-white">Aucun enregistrement disponible</p>
                                         </div>
                                     )}
-                                    <Pagination pages={repPages} onPageChange={fetchRepetitions} />
+
+                                    {/* Pagination */}
+                                    {repPages > 1 && (
+                                        <Pagination pages={repPages} onPageChange={fetchRepetitions} />
+                                    )}
                                 </div>
                             </div>
                         </section>
@@ -1002,8 +1003,8 @@ function Dashboard() {
                             <div className="grid lg:grid-cols-2 gap-12">
 
                                 {/* Formulaire d'ajout */}
-                                <div className="bg-[#0a0a0a] border border-white/5 p-8 rounded-2xl shadow-2xl">
-                                    <h3 className="text-sm font-black uppercase tracking-widest mb-6 opacity-40">Nouvelle Vidéo</h3>
+                                <div className="bg-white dark:bg-[#0a0a0a] border border-black/5 dark:border-white/5 p-8 rounded-2xl shadow-xl">
+                                    <h3 className="text-sm font-black uppercase tracking-widest mb-6 opacity-40 text-black dark:text-white">Nouvelle Vidéo</h3>
                                     <form onSubmit={handleVideoSubmit} className="space-y-4">
                                         <input
                                             type="text"
@@ -1023,7 +1024,7 @@ function Dashboard() {
 
                                         {/* Option 1: URL Youtube */}
                                         <div className="space-y-2">
-                                            <label className="text-[10px] font-black uppercase tracking-widest opacity-30 ml-1">Lien YouTube</label>
+                                            <label className="text-[10px] font-black uppercase tracking-widest opacity-30 ml-1 text-black dark:text-white">Lien YouTube</label>
                                             <input
                                                 type="text"
                                                 placeholder="ID YOUTUBE (ex: UrrtAPj9Nzw)"
@@ -1033,10 +1034,10 @@ function Dashboard() {
                                             />
                                         </div>
 
-                                        <div className="text-center text-[10px] font-black uppercase opacity-20 py-2">— OU —</div>
+                                        <div className="text-center text-[10px] font-black uppercase opacity-20 py-2 text-black dark:text-white">— OU —</div>
 
                                         {/* Option 2: Upload Fichier Vidéo */}
-                                        <div className="p-4 border-2 border-dashed border-white/5 rounded-lg text-center hover:border-primary/30 transition-all bg-white/5">
+                                        <div className="p-4 border-2 border-dashed border-black/5 dark:border-white/5 rounded-lg text-center hover:border-primary/30 transition-all bg-black/[0.02] dark:bg-white/5">
                                             <input
                                                 type="file"
                                                 accept="video/*"
@@ -1044,9 +1045,9 @@ function Dashboard() {
                                                 id="video-upload"
                                                 onChange={(e) => setVideoFile(e.target.files[0])}
                                             />
-                                            <label htmlFor="video-upload" className="cursor-pointer text-[10px] font-black uppercase tracking-[2px] text-[#666] hover:text-white block">
+                                            <label htmlFor="video-upload" className="cursor-pointer text-[10px] font-black uppercase tracking-[2px] text-black/40 dark:text-[#666] hover:text-primary dark:hover:text-white block transition-colors">
                                                 {videoFile ? (
-                                                    <span className="text-primary">🎬 {videoFile.name}</span>
+                                                    <span className="text-primary font-bold">🎬 {videoFile.name}</span>
                                                 ) : (
                                                     "Uploader un fichier vidéo (MP4...)"
                                                 )}
@@ -1061,7 +1062,7 @@ function Dashboard() {
                                 <div className="space-y-4">
                                     {videos.length > 0 ? (
                                         videos.map(v => (
-                                            <div key={v.id} className="p-5 bg-[#0a0a0a] border border-white/5 rounded-xl hover:border-white/10 transition-all group">
+                                            <div key={v.id} className="p-5 bg-white dark:bg-[#0a0a0a] border border-black/5 dark:border-white/5 rounded-xl hover:border-primary/20 dark:hover:border-white/10 transition-all group shadow-sm">
                                                 {editingVideo === v.id ? (
                                                     <div className="flex-1 flex flex-col gap-3">
                                                         <input
@@ -1074,7 +1075,7 @@ function Dashboard() {
                                                             className={inputClass}
                                                             value={v.description || ''}
                                                             onChange={(e) => setVideos(videos.map(item => item.id === v.id ? { ...item, description: e.target.value } : item))}
-                                                            placeholder="Lieu (ex: SIX-FOURS)"
+                                                            placeholder="Lieu"
                                                         />
                                                         <input
                                                             className={inputClass}
@@ -1084,28 +1085,28 @@ function Dashboard() {
                                                         />
                                                         <div className="flex gap-2 justify-end pt-2">
                                                             <button onClick={() => handleUpdateVideo(v)} className="bg-green-600 text-white px-4 py-2 rounded font-black text-[10px] uppercase">Sauvegarder</button>
-                                                            <button onClick={() => setEditingVideo(null)} className="bg-white/10 text-white px-4 py-2 rounded font-black text-[10px] uppercase">Annuler</button>
+                                                            <button onClick={() => setEditingVideo(null)} className="bg-black/5 dark:bg-white/10 text-black dark:text-white px-4 py-2 rounded font-black text-[10px] uppercase">Annuler</button>
                                                         </div>
                                                     </div>
                                                 ) : (
                                                     <div className="flex justify-between items-center">
                                                         <div>
-                                                            <span className="text-white font-bold block uppercase tracking-tight text-base">{v.titre}</span>
+                                                            <span className="text-black dark:text-white font-bold block uppercase tracking-tight text-base">{v.titre}</span>
                                                             <span className="text-[11px] text-primary font-bold uppercase tracking-widest">
                                                                 {v.description} — {v.url_youtube ? "YOUTUBE" : "FICHIER LOCAL"}
                                                             </span>
                                                         </div>
                                                         <div className="flex gap-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                            <button onClick={() => setEditingVideo(v.id)} className="text-white/30 hover:text-white text-[10px] font-black uppercase">Edit</button>
-                                                            <button onClick={() => handleVideoDelete(v.id)} className="text-[#444] hover:text-primary text-[10px] font-black uppercase">Delete</button>
+                                                            <button onClick={() => setEditingVideo(v.id)} className="text-black/30 dark:text-white/30 hover:text-primary dark:hover:text-white text-[10px] font-black uppercase tracking-widest">Edit</button>
+                                                            <button onClick={() => handleVideoDelete(v.id)} className="text-black/20 dark:text-[#444] hover:text-red-500 text-[10px] font-black uppercase tracking-widest">Delete</button>
                                                         </div>
                                                     </div>
                                                 )}
                                             </div>
                                         ))
                                     ) : (
-                                        <div className="text-center py-20 border border-dashed border-white/5 rounded-2xl opacity-20">
-                                            <p className="text-xs font-black uppercase tracking-widest">Aucune vidéo en ligne</p>
+                                        <div className="text-center py-20 border border-dashed border-black/10 dark:border-white/5 rounded-2xl opacity-40">
+                                            <p className="text-xs font-black uppercase tracking-widest text-black dark:text-white">Aucune vidéo en ligne</p>
                                         </div>
                                     )}
                                     <Pagination pages={videoPages} onPageChange={fetchVideos} />
@@ -1119,7 +1120,7 @@ function Dashboard() {
                         <section id="groupe" className="animate-in fade-in duration-500">
                             <SectionTitle subtitle="Band Identity">Le Groupe</SectionTitle>
 
-                            <div className="bg-[#0a0a0a] border border-white/5 p-8 rounded-2xl space-y-8 shadow-2xl">
+                            <div className="bg-white dark:bg-[#0a0a0a] border border-black/5 dark:border-white/5 p-8 rounded-2xl space-y-8 shadow-xl dark:shadow-2xl transition-colors">
 
                                 {/* Ligne : Annonce et Slogan */}
                                 <div className="grid md:grid-cols-2 gap-6">
@@ -1181,7 +1182,7 @@ function Dashboard() {
                                 </div>
 
                                 {/* Ligne : Crédits Photos */}
-                                <div className="pt-6 border-t border-white/5">
+                                <div className="pt-6 border-t border-black/5 dark:border-white/5">
                                     <div className="max-w-md space-y-2">
                                         <label className="text-[10px] font-black uppercase tracking-widest text-primary block">
                                             Crédits Photographiques (Footer)
@@ -1194,7 +1195,7 @@ function Dashboard() {
                                             onBlur={() => handleUpdateGroupText('photo_credits', groupTexts.photo_credits)}
                                             placeholder="Mika / Reservoir Rock..."
                                         />
-                                        <p className="text-[9px] text-white/20 uppercase tracking-[2px] mt-2">
+                                        <p className="text-[9px] text-black/30 dark:text-white/20 uppercase tracking-[2px] mt-2">
                                             Visible globalement en pied de page.
                                         </p>
                                     </div>
@@ -1208,10 +1209,13 @@ function Dashboard() {
                         <section id="membres" className="animate-in fade-in duration-500">
                             <SectionTitle subtitle="Band Members">Gestion des Musiciens</SectionTitle>
 
-                            <div className="bg-[#0a0a0a] border border-white/5 p-8 rounded-2xl shadow-2xl">
+                            <div className="bg-white dark:bg-[#0a0a0a] border border-black/5 dark:border-white/5 p-8 rounded-2xl shadow-xl dark:shadow-2xl transition-colors">
+
                                 {/* Formulaire d'ajout amélioré */}
-                                <div className="mb-10 p-6 bg-white/5 rounded-xl border border-white/5">
-                                    <h3 className="text-[10px] font-black uppercase tracking-[3px] mb-4 opacity-30 text-center">Ajouter un membre</h3>
+                                <div className="mb-10 p-6 bg-black/[0.02] dark:bg-white/5 rounded-xl border border-black/5 dark:border-white/5">
+                                    <h3 className="text-[10px] font-black uppercase tracking-[3px] mb-4 opacity-40 dark:opacity-30 text-center text-black dark:text-white">
+                                        Ajouter un membre
+                                    </h3>
                                     <form onSubmit={handleAddMember} className="grid grid-cols-1 md:grid-cols-4 gap-4">
                                         <input
                                             type="text"
@@ -1244,42 +1248,42 @@ function Dashboard() {
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                                     {groupMembers.length > 0 ? (
                                         groupMembers.map(m => (
-                                            <div key={m.id} className="relative p-5 bg-black border border-white/10 rounded-xl hover:border-primary/30 transition-all group min-h-[100px] flex items-center">
+                                            <div key={m.id} className="relative p-5 bg-black/[0.02] dark:bg-black border border-black/5 dark:border-white/10 rounded-xl hover:border-primary/30 transition-all group min-h-[100px] flex items-center">
                                                 {editingMember === m.id ? (
                                                     <div className="w-full space-y-3">
                                                         <input
-                                                            className="w-full bg-white/5 border border-white/10 p-2 text-xs rounded text-white font-bold"
+                                                            className="w-full bg-white dark:bg-white/5 border border-black/10 dark:border-white/10 p-2 text-xs rounded text-black dark:text-white font-bold"
                                                             value={m.nom}
                                                             onChange={(e) => setGroupMembers(groupMembers.map(item => item.id === m.id ? { ...item, nom: e.target.value } : item))}
                                                         />
                                                         <input
-                                                            className="w-full bg-white/5 border border-white/10 p-2 text-xs rounded text-primary font-bold"
+                                                            className="w-full bg-white dark:bg-white/5 border border-black/10 dark:border-white/10 p-2 text-xs rounded text-primary font-bold"
                                                             value={m.instrument}
                                                             onChange={(e) => setGroupMembers(groupMembers.map(item => item.id === m.id ? { ...item, instrument: e.target.value } : item))}
                                                         />
                                                         <div className="flex gap-2 pt-1">
                                                             <button onClick={() => handleUpdateMember(m)} className="bg-primary/20 text-primary px-3 py-1 rounded text-[10px] font-black uppercase hover:bg-primary hover:text-black transition-colors flex-1">Save</button>
-                                                            <button onClick={() => setEditingMember(null)} className="text-white/30 text-[10px] font-black uppercase underline flex-1 hover:text-white">Cancel</button>
+                                                            <button onClick={() => setEditingMember(null)} className="text-black/40 dark:text-white/30 text-[10px] font-black uppercase underline flex-1 hover:text-black dark:hover:text-white">Cancel</button>
                                                         </div>
                                                     </div>
                                                 ) : (
                                                     <>
                                                         <div className="absolute top-2 right-2 flex gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                            <button onClick={() => setEditingMember(m.id)} className="text-white/30 hover:text-white text-[9px] font-black uppercase">Edit</button>
-                                                            <button onClick={() => handleDeleteMember(m.id)} className="text-[#333] hover:text-red-500 text-[9px] font-black uppercase">Delete</button>
+                                                            <button onClick={() => setEditingMember(m.id)} className="text-black/40 dark:text-white/30 hover:text-primary dark:hover:text-white text-[9px] font-black uppercase">Edit</button>
+                                                            <button onClick={() => handleDeleteMember(m.id)} className="text-black/20 dark:text-[#333] hover:text-red-500 text-[9px] font-black uppercase">Delete</button>
                                                         </div>
 
                                                         {/* Avatar et Infos */}
                                                         <div className="flex items-center gap-4">
                                                             <div className="relative">
                                                                 {m.photo_url ? (
-                                                                    <img src={m.photo_url} alt={m.nom} className="w-12 h-12 rounded-full object-cover border-2 border-white/5" />
+                                                                    <img src={m.photo_url} alt={m.nom} className="w-12 h-12 rounded-full object-cover border-2 border-black/5 dark:border-white/5" />
                                                                 ) : (
-                                                                    <div className="w-12 h-12 rounded-full bg-white/5 border-2 border-white/5 flex items-center justify-center text-[10px] font-black opacity-20">N/A</div>
+                                                                    <div className="w-12 h-12 rounded-full bg-black/5 dark:bg-white/5 border-2 border-black/5 dark:border-white/5 flex items-center justify-center text-[10px] font-black opacity-20 text-black dark:text-white">N/A</div>
                                                                 )}
                                                             </div>
                                                             <div>
-                                                                <p className="text-white font-bold uppercase tracking-tight leading-none mb-1">{m.nom}</p>
+                                                                <p className="text-black dark:text-white font-bold uppercase tracking-tight leading-none mb-1">{m.nom}</p>
                                                                 <p className="text-primary text-[10px] font-black uppercase tracking-[2px]">{m.instrument}</p>
                                                             </div>
                                                         </div>
@@ -1288,15 +1292,14 @@ function Dashboard() {
                                             </div>
                                         ))
                                     ) : (
-                                        <div className="col-span-full py-12 text-center opacity-20 border border-dashed border-white/10 rounded-xl">
-                                            <p className="text-[10px] font-black uppercase tracking-widest">Aucun membre enregistré</p>
+                                        <div className="col-span-full py-12 text-center opacity-30 dark:opacity-20 border border-dashed border-black/10 dark:border-white/10 rounded-xl">
+                                            <p className="text-[10px] font-black uppercase tracking-widest text-black dark:text-white">Aucun membre enregistré</p>
                                         </div>
                                     )}
                                 </div>
                             </div>
                         </section>
                     )}
-
 
                     {/* SECTION LIVRE D'OR */}
                     {activeSection === 'messages' && (
@@ -1308,7 +1311,10 @@ function Dashboard() {
                                     messages.map((msg) => (
                                         <div
                                             key={msg.id}
-                                            className={`bg-[#0a0a0a] border ${msg.is_private ? 'border-primary/40 shadow-[0_0_20px_rgba(var(--primary-rgb),0.05)]' : 'border-white/5'} p-6 rounded-2xl transition-all group`}
+                                            className={`bg-white dark:bg-[#0a0a0a] border ${msg.is_private
+                                                    ? 'border-primary/40 shadow-[0_0_20px_rgba(var(--primary-rgb),0.05)]'
+                                                    : 'border-black/5 dark:border-white/5'
+                                                } p-6 rounded-2xl transition-all group shadow-sm dark:shadow-2xl`}
                                         >
                                             <div className="flex justify-between items-start mb-4">
                                                 <div className="space-y-2">
@@ -1325,7 +1331,7 @@ function Dashboard() {
                                                                     Message Privé
                                                                 </span>
                                                                 <span
-                                                                    className="text-white/60 text-[10px] font-mono bg-white/5 px-2 py-0.5 rounded border border-white/10 select-all cursor-help"
+                                                                    className="text-black/60 dark:text-white/60 text-[10px] font-mono bg-black/5 dark:bg-white/5 px-2 py-0.5 rounded border border-black/5 dark:border-white/10 select-all cursor-help"
                                                                     title="Cliquez pour copier l'email"
                                                                 >
                                                                     {msg.email || 'Email non trouvé'}
@@ -1333,26 +1339,26 @@ function Dashboard() {
                                                             </div>
                                                         )}
                                                     </div>
-                                                    <p className="text-white text-base italic leading-relaxed">"{msg.content}"</p>
+                                                    <p className="text-black dark:text-white text-base italic leading-relaxed">"{msg.content}"</p>
                                                 </div>
 
                                                 <button
                                                     onClick={() => handleDeleteMessage(msg.id)}
-                                                    className="text-[#333] hover:text-red-500 transition-colors text-[10px] font-black uppercase opacity-0 group-hover:opacity-100"
+                                                    className="text-black/20 dark:text-[#333] hover:text-red-500 transition-colors text-[10px] font-black uppercase md:opacity-0 group-hover:opacity-100"
                                                 >
                                                     Supprimer
                                                 </button>
                                             </div>
 
                                             {/* Zone de Réponse / Note */}
-                                            <div className="mt-6 pt-6 border-t border-white/5 bg-white/[0.02] -mx-6 px-6 -mb-6 rounded-b-2xl">
+                                            <div className="mt-6 pt-6 border-t border-black/5 dark:border-white/5 bg-black/[0.01] dark:bg-white/[0.02] -mx-6 px-6 -mb-6 rounded-b-2xl">
                                                 <div className="flex flex-col gap-3">
-                                                    <label className="text-[9px] font-black uppercase tracking-[2px] text-white/30">
+                                                    <label className="text-[9px] font-black uppercase tracking-[2px] text-black/40 dark:text-white/30">
                                                         {msg.is_private ? 'Note interne (Suivi de réponse)' : 'Réponse publique (Sera visible sur le site)'}
                                                     </label>
 
                                                     <textarea
-                                                        className={`${inputClass} min-h-[100px] text-sm bg-black/40 border-white/5 focus:border-primary/40`}
+                                                        className={`${inputClass} min-h-[100px] text-sm bg-white dark:bg-black/40 border-black/10 dark:border-white/5 focus:border-primary/40`}
                                                         placeholder={msg.is_private ? `L'adresse est ${msg.email}. Notez ici vos échanges...` : "Écrivez votre réponse publique..."}
                                                         value={msg.reponse || ''}
                                                         onChange={(e) => {
@@ -1362,12 +1368,12 @@ function Dashboard() {
                                                     />
 
                                                     <div className="flex justify-between items-center py-2">
-                                                        <span className="text-[9px] text-white/20 uppercase font-bold tracking-widest">
+                                                        <span className="text-[9px] text-black/30 dark:text-white/20 uppercase font-bold tracking-widest">
                                                             {msg.is_private ? "Les messages privés ne sont jamais publiés" : "Attention : La réponse sera publiée sur le site"}
                                                         </span>
                                                         <button
                                                             onClick={() => handleUpdateResponse(msg.id, msg.reponse)}
-                                                            className="bg-primary/10 hover:bg-primary text-primary hover:text-black px-6 py-2 rounded font-black text-[10px] uppercase transition-all border border-primary/20"
+                                                            className="bg-primary text-black dark:bg-primary/10 dark:text-primary dark:hover:bg-primary dark:hover:text-black px-6 py-2 rounded font-black text-[10px] uppercase transition-all border border-primary/20"
                                                         >
                                                             Enregistrer
                                                         </button>
@@ -1377,8 +1383,8 @@ function Dashboard() {
                                         </div>
                                     ))
                                 ) : (
-                                    <div className="text-center py-20 border border-dashed border-white/5 rounded-3xl opacity-20">
-                                        <p className="text-xs font-black uppercase tracking-[3px]">Le livre d'or est vide</p>
+                                    <div className="text-center py-20 border border-dashed border-black/10 dark:border-white/5 rounded-3xl opacity-40 dark:opacity-20">
+                                        <p className="text-xs font-black uppercase tracking-[3px] text-black dark:text-white">Le livre d'or est vide</p>
                                     </div>
                                 )}
                             </div>

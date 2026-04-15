@@ -1,13 +1,12 @@
+// pages/Repetitions.jsx
 import { useState, useEffect, useRef } from 'react';
 import RepetitionsSkeleton from '../components/RepetitionsSkeleton';
 
-// Sous-composant pour gérer la logique de lecture spécifique (Start/End)
 function AudioPlayer({ src, startTime, endTime }) {
     const audioRef = useRef(null);
 
     const handlePlay = () => {
         const audio = audioRef.current;
-        // Si on est au début (0) et qu'un temps de début est défini, on saute au début
         if (audio.currentTime < (startTime || 0)) {
             audio.currentTime = startTime || 0;
         }
@@ -15,10 +14,9 @@ function AudioPlayer({ src, startTime, endTime }) {
 
     const handleTimeUpdate = () => {
         const audio = audioRef.current;
-        // Si un temps de fin est défini et qu'on le dépasse
         if (endTime && audio.currentTime >= endTime) {
             audio.pause();
-            audio.currentTime = startTime || 0; // On revient au début du segment
+            audio.currentTime = startTime || 0;
         }
     };
 
@@ -57,10 +55,11 @@ function Repetitions() {
     }, []);
 
     return (
-        <div className="mt-[80px] min-h-[calc(100vh-82px)] bg-black">
+        <div className="mt-[80px] min-h-[calc(100vh-82px)] bg-white dark:bg-black transition-colors duration-300">
+            
             {/* EN-TÊTE */}
-            <div className="text-center py-[48px] bg-gradient-to-b from-[#111] to-black">
-                <h1 className="text-[3rem] md:text-[3.5rem] font-[300] uppercase m-0 leading-[1.2] tracking-[0.1em] text-white inline-block">
+            <div className="text-center py-[48px] bg-gray-50 dark:bg-gradient-to-b dark:from-[#111] dark:to-black border-b border-gray-100 dark:border-none">
+                <h1 className="text-[3rem] md:text-[3.5rem] font-[300] uppercase m-0 leading-[1.2] tracking-[0.1em] text-black dark:text-white inline-block">
                     Studio Répétitions
                 </h1>
                 <p className="text-primary font-black tracking-[5px] uppercase text-sm">
@@ -76,16 +75,24 @@ function Repetitions() {
                     morceaux.map((m, index) => (
                         <div
                             key={m.id || index}
-                            className="flex flex-col md:flex-row items-center gap-[24px] p-[20px] rounded-[1rem] border border-white/5 bg-gradient-to-r from-primary/20 via-black/40 to-black shadow-xl transition-all duration-300 hover:border-primary/40 hover:from-primary/30"
+                            className="flex flex-col md:flex-row items-center gap-[24px] p-[20px] rounded-[1rem] border transition-all duration-300 shadow-xl 
+                                /* Mode Clair */
+                                bg-gray-50 border-gray-200 
+                                /* Mode Sombre : Fond uni sombre pour faire ressortir le lecteur */
+                                dark:bg-[#111] dark:border-white/5 dark:hover:border-primary/30"
                         >
                             <div className="flex items-center gap-[16px] flex-1 w-full">
                                 <span className="text-[1.5rem] font-[900] text-primary min-w-[40px] drop-shadow-[0_0_8px_rgba(227,24,31,0.4)]">
                                     {(index + 1).toString().padStart(2, '0')}
                                 </span>
                                 <div className="flex flex-col">
-                                    <span className="text-white font-bold tracking-wide text-lg uppercase">{m.titre}</span>
+                                    <span className="text-black dark:text-white font-bold tracking-wide text-lg uppercase transition-colors">
+                                        {m.titre}
+                                    </span>
                                     <div className="flex items-center gap-3">
-                                        <small className="text-[#888] text-[0.8rem] font-medium">{m.detail}</small>
+                                        <small className="text-gray-500 dark:text-[#888] text-[0.8rem] font-medium transition-colors">
+                                            {m.detail}
+                                        </small>
                                         {m.end_time && (
                                             <span className="text-[10px] bg-primary/20 text-primary px-2 py-0.5 rounded font-bold uppercase tracking-tighter">
                                                 Segment: {m.start_time || 0}s - {m.end_time}s
@@ -95,8 +102,8 @@ function Repetitions() {
                                 </div>
                             </div>
 
-                            <div className="w-full max-w-[350px] p-[3px] rounded-full bg-gradient-to-r from-primary/60 via-black/80 to-black border border-white/10 shadow-lg">
-                                {/* Utilisation du nouveau lecteur intelligent */}
+                            {/* Conteneur Lecteur Audio : On a enlevé les dégradés ici car ils sont gérés par le CSS */}
+                            <div className="w-full max-w-[350px] p-[2px] rounded-full overflow-hidden border border-transparent dark:border-white/10 shadow-lg">
                                 <AudioPlayer 
                                     src={m.url.startsWith('/uploads') ? `http://localhost:5000${m.url}` : m.url}
                                     startTime={m.start_time}
@@ -106,22 +113,9 @@ function Repetitions() {
                         </div>
                     ))
                 ) : (
-                    <p className="text-center text-[#9ca3af]">Aucun enregistrement disponible pour le moment.</p>
+                    <p className="text-center text-gray-500 dark:text-[#9ca3af]">Aucun enregistrement disponible pour le moment.</p>
                 )}
             </div>
-
-            <style dangerouslySetInnerHTML={{
-                __html: `
-                audio::-webkit-media-controls-enclosure { background-color: transparent; }
-                audio::-webkit-media-controls-panel { background-color: transparent; }
-                audio::-webkit-media-controls-play-button,
-                audio::-webkit-media-controls-current-time-display,
-                audio::-webkit-media-controls-time-remaining-display,
-                audio::-webkit-media-controls-mute-button,
-                audio::-webkit-media-controls-volume-slider {
-                    filter: invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%);
-                }
-            ` }} />
         </div>
     );
 }
