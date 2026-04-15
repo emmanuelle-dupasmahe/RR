@@ -213,14 +213,14 @@ function Livredor() {
                         <button
                             disabled={page === 1}
                             onClick={() => { setPage(prev => prev - 1); window.scrollTo(0, 400); }}
-                            /* CHANGÉ ICI : hover:border-primary */
+                           
                             className="w-14 h-14 flex items-center justify-center border border-gray-200 dark:border-white/10 hover:border-primary dark:hover:border-primary disabled:opacity-20 transition-all text-black dark:text-white bg-white dark:bg-black rounded-full shadow-xl"
                         >
                             <span className="text-xl">←</span>
                         </button>
                         <div className="flex flex-col items-center">
                             <span className="text-[0.6rem] text-gray-400 font-bold uppercase tracking-tighter">Page</span>
-                            {/* CHANGÉ ICI : text-primary */}
+                           
                             <span className="text-primary font-black text-xl uppercase tracking-[3px]">
                                 {page} <span className="text-gray-300 dark:text-[#222]">/</span> {totalPages}
                             </span>
@@ -228,7 +228,7 @@ function Livredor() {
                         <button
                             disabled={page === totalPages}
                             onClick={() => { setPage(prev => prev + 1); window.scrollTo(0, 400); }}
-                            /* CHANGÉ ICI : hover:border-primary */
+                            
                             className="w-14 h-14 flex items-center justify-center border border-gray-200 dark:border-white/10 hover:border-primary dark:hover:border-primary disabled:opacity-20 transition-all text-black dark:text-white bg-white dark:bg-black rounded-full shadow-xl"
                         >
                             <span className="text-xl">→</span>

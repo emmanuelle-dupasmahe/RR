@@ -29,7 +29,7 @@ const Backstage = () => {
     if (loading) return (
         <div className="min-h-screen bg-black flex items-center justify-center">
             <div className="text-center">
-                {/* CHANGÉ ICI : border-primary et text-primary */}
+                
                 <div className="w-12 h-12 border-2 border-primary border-t-transparent rounded-full animate-spin mb-4 mx-auto"></div>
                 <p className="text-primary font-black uppercase tracking-[0.3em] text-xs">Initialisation Studio...</p>
             </div>
@@ -44,7 +44,7 @@ const Backstage = () => {
                     Backstage
                 </h1>
                 <div className="mt-4">
-                    {/* CHANGÉ ICI : text-primary */}
+                    
                     <p className="text-primary font-black tracking-[5px] uppercase text-[0.7rem] md:text-xs">
                         Espace Privé // Membres Uniquement
                     </p>
@@ -95,7 +95,7 @@ const Backstage = () => {
                                         <div className="w-full lg:w-80 bg-white dark:bg-white/5 p-5 rounded-xl border border-gray-200 dark:border-white/5 self-stretch shrink-0 shadow-sm">
                                             <div className="flex items-center justify-between mb-4 border-b border-gray-100 dark:border-white/5 pb-2">
                                                 
-                                                <h4 className="text-[10px] font-black uppercase text-primary tracking-widest">Index temporel</h4>
+                                                <h4 className="text-[10px] font-black uppercase text-primary tracking-widest">Marker</h4>
                                                 <span className="text-[9px] text-gray-400 font-bold uppercase">{markers.length} points</span>
                                             </div>
                                             

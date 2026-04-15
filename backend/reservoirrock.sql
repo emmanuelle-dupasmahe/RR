@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Apr 14, 2026 at 10:03 AM
+-- Generation Time: Apr 15, 2026 at 11:28 AM
 -- Server version: 8.0.30
 -- PHP Version: 8.1.10
 
@@ -171,7 +171,7 @@ CREATE TABLE `settings` (
 --
 
 INSERT INTO `settings` (`id`, `setting_key`, `setting_value`, `updated_at`) VALUES
-(1, 'tour_title', 'Tournée 2026', '2026-04-07 13:59:48');
+(1, 'tour_title', 'Tournée 2026', '2026-04-15 10:53:18');
 
 -- --------------------------------------------------------
 
@@ -199,7 +199,7 @@ INSERT INTO `users` (`id`, `firstname`, `lastname`, `email`, `password`, `role`,
 (4, 'Eric', 'Eric', 'eric@gmail.com', '$2b$10$PGdbWbi68Oc1n13MjQa.geNKYLkXgikmcjAqcj56Ja7TWvco9Usgy', 'member', '2026-04-14 09:47:34'),
 (5, 'Martial', 'Martial', 'martial@gmail.com', '$2b$10$YYv1Xgf1FbJ.zZIngLw1.e/yzMZfXDqAABPoJVqGtGHqKh37QM/x.', 'member', '2026-04-14 09:54:39'),
 (6, 'Romain', 'Romain', 'romain@gmail.com', '$2b$10$KP.bm0g6FTOpA5qKmbajaeS8QzSl4FPZskTwnjrASXQFrIZAmgU.6', 'member', '2026-04-14 09:55:11'),
-(7, 'Jm', 'Jm', 'jm@gmail.com', '$2b$10$0xEoUZnqToh3ATer1KTUf.OvJoJFXHBXt3vz6QrGFuouj09F7dNfa', 'admin', '2026-04-14 09:55:54');
+(7, 'JM', 'JM', 'jm@gmail.com', '$2b$10$0xEoUZnqToh3ATer1KTUf.OvJoJFXHBXt3vz6QrGFuouj09F7dNfa', 'admin', '2026-04-14 09:55:54');
 
 -- --------------------------------------------------------
 
@@ -227,7 +227,8 @@ CREATE TABLE `videos` (
 INSERT INTO `videos` (`id`, `titre`, `url_youtube`, `file_path`, `file_name`, `file_size`, `mime_type`, `description`, `created_at`, `updated_at`) VALUES
 (4, 'RéSERVOIR ROCK à BORMES ', 'ac_1MdSA9u0?si=brawqtRe5s_i7Kkj', NULL, NULL, NULL, NULL, 'BORMES LES MIMOSAS', '2026-04-07 13:14:13', '2026-04-10 07:41:56'),
 (5, 'RéSERVOIR ROCK au RAYOLET', 'UrrtAPj9Nzw?si=UmM5TPfUqaAht5zo', NULL, NULL, NULL, NULL, 'SIX FOURS', '2026-04-07 13:15:31', '2026-04-10 07:41:47'),
-(9, 'Réservoir Rock à la Coudoulière', 'tn8qVJyVRtc', NULL, NULL, NULL, NULL, 'SIX-FOURS', '2026-04-10 08:19:21', '2026-04-10 08:19:21');
+(9, 'Réservoir Rock à la Coudoulière', 'tn8qVJyVRtc', NULL, NULL, NULL, NULL, 'SIX-FOURS', '2026-04-10 08:19:21', '2026-04-10 08:19:21'),
+(11, 'réservoir rock à just rosé', 'ljN-FrVUXOI?si=2ThyO9NFpCah6iI9', NULL, NULL, NULL, NULL, 'SANARY SUR MER', '2026-04-15 11:14:13', '2026-04-15 11:20:01');
 
 --
 -- Indexes for dumped tables
@@ -293,25 +294,25 @@ ALTER TABLE `videos`
 -- AUTO_INCREMENT for table `concerts`
 --
 ALTER TABLE `concerts`
-  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT for table `guestbook`
 --
 ALTER TABLE `guestbook`
-  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `membres`
 --
 ALTER TABLE `membres`
-  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `repetitions`
 --
 ALTER TABLE `repetitions`
-  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
 
 --
 -- AUTO_INCREMENT for table `settings`
@@ -329,7 +330,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `videos`
 --
 ALTER TABLE `videos`
-  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- Constraints for dumped tables

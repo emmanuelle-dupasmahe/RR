@@ -728,7 +728,7 @@ function Dashboard() {
                                         />
 
                                         <textarea
-                                            placeholder="NOTES TECHNIQUES (ex: Attention à la transition bridge/refrain)"
+                                            placeholder="NOTES TECHNIQUES"
                                             className={`${inputClass} h-24 resize-none py-3 bg-gray-50 dark:bg-black border-black/10 dark:border-white/20`}
                                             value={repFormData.detail}
                                             onChange={(e) => setRepFormData({ ...repFormData, detail: e.target.value })}
@@ -736,7 +736,7 @@ function Dashboard() {
 
                                         {/* --- GESTION DES MARKERS --- */}
                                         <div className="bg-black/5 dark:bg-white/5 p-4 rounded-lg border border-black/5 dark:border-white/10 space-y-3">
-                                            <label className="block text-[10px] font-black uppercase text-primary/60 ml-1">Markers (Points d'intérêt)</label>
+                                            <label className="block text-[10px] font-black uppercase text-primary/60 ml-1">Markers</label>
                                             <div className="flex gap-2">
                                                 <input
                                                     type="number"
@@ -1016,7 +1016,7 @@ function Dashboard() {
                                         />
                                         <input
                                             type="text"
-                                            placeholder="DESCRIPTION / LIEU (ex: LIVE À SIX-FOURS)"
+                                            placeholder="DESCRIPTION / LIEU (ex : SIX-FOURS)"
                                             className={inputClass}
                                             value={videoFormData.description}
                                             onChange={(e) => setVideoFormData({ ...videoFormData, description: e.target.value })}
@@ -1312,8 +1312,8 @@ function Dashboard() {
                                         <div
                                             key={msg.id}
                                             className={`bg-white dark:bg-[#0a0a0a] border ${msg.is_private
-                                                    ? 'border-primary/40 shadow-[0_0_20px_rgba(var(--primary-rgb),0.05)]'
-                                                    : 'border-black/5 dark:border-white/5'
+                                                ? 'border-primary/40 shadow-[0_0_20px_rgba(var(--primary-rgb),0.05)]'
+                                                : 'border-black/5 dark:border-white/5'
                                                 } p-6 rounded-2xl transition-all group shadow-sm dark:shadow-2xl`}
                                         >
                                             <div className="flex justify-between items-start mb-4">

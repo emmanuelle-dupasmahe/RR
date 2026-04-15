@@ -19,9 +19,9 @@ const authMiddleware = async (req, res, next) => {
         if (!user) {
             return res.status(401).json({ error: 'Utilisateur non trouvé' });
         }
-        if (req.method !== 'GET' && user.role !== 'admin') {
-            return res.status(403).json({ error: 'Accès refusé : Droits administrateur requis' });
-        }
+        // if (req.method !== 'GET' && user.role !== 'admin') {
+        //     return res.status(403).json({ error: 'Accès refusé : Droits administrateur requis' });
+        // }
         req.user = user;
         next();//pour ne pas tourner en boucle
     } catch (error) {
