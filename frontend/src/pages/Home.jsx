@@ -31,14 +31,13 @@ function Home() {
                 Réservoir Rock
 
             </h1>
-
-            {/* Section Concert : Version avec transparence rouge sombre */}
-            <section className="px-[40px] py-[30px] mt-[60px] rounded-[8px] animate-pulse-rock border-2 transition-all duration-300
-    /* Version Claire : On garde le blanc propre */
-    bg-white border-primary shadow-[10px_10px_0px_0px_rgba(185,28,28,0.1)]
+            {/* Section Concert : Rouge Vif Électrique (Moins sombre) */}
+            <section className="px-[40px] py-[30px] mt-[60px] rounded-[8px] animate-pulse-rock transition-all duration-300
+    /* Mode Clair */
+    bg-white shadow-[10px_10px_0px_0px_rgba(255,0,0,0.1)]
     
-    /* Version Sombre : Fond Noir teinté de rouge (15%) + Flou intense */
-    dark:bg-[#B91C1C]/15 dark:border-primary/60 dark:backdrop-blur-xl dark:shadow-[0_0_30px_rgba(185,28,28,0.2)]">
+    /* Mode Sombre : Rouge pur sans compromis (#ff0000) et opacité augmentée à 20% */
+    dark:bg-[#ff0000]/20 dark:backdrop-blur-lg dark:shadow-[0_0_30px_rgba(255,0,0,0.25)]">
 
                 <h2 className="text-[1.5rem] font-black uppercase mb-[12px] text-black dark:text-white transition-colors tracking-tighter">
                     Prochain Concert
@@ -46,11 +45,11 @@ function Home() {
 
                 {nextConcert ? (
                     <div className="space-y-2">
-                        <p className="text-primary dark:text-white text-[1.2rem] font-black uppercase tracking-[0.2em]">
+                        <p className="text-[#ff0000] dark:text-white text-[1.2rem] font-black uppercase tracking-[0.2em]">
                             {new Date(nextConcert.date_concert).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
                         </p>
                         <p className="text-gray-900 dark:text-white text-[1.1rem] font-medium transition-colors">
-                            {nextConcert.titre} <span className="text-primary mx-2">//</span> {nextConcert.lieu}
+                            {nextConcert.titre} <span className="text-[#ff0000] mx-2">//</span> {nextConcert.lieu}
                         </p>
                         <p className="text-gray-600 dark:text-white/60 text-sm font-bold uppercase tracking-widest mt-2">
                             {nextConcert.heure.substring(0, 5)}
