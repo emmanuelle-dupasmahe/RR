@@ -1,59 +1,79 @@
 // pages/Home.jsx
 import { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth.js';
-import { concertService } from '../services/api';
+import { concertService, settingsService, BASE_URL } from '../services/api';
 
 function Home() {
     const { isAuthenticated } = useAuth();
     const [nextConcert, setNextConcert] = useState(null);
+    
+    // États pour les images (valeurs par défaut pointant sur tes fichiers actuels)
+    const [heroDesktop, setHeroDesktop] = useState('/images/groupe.jpg');
+    const [heroMobile, setHeroMobile] = useState('/images/RR_mobile.jpg');
 
     useEffect(() => {
+        // 1. Charger le prochain concert
         concertService.getAll()
             .then(data => {
                 if (Array.isArray(data.concerts) && data.concerts.length > 0) {
                     setNextConcert(data.concerts[0]);
                 }
             })
-            .catch(err => console.error("Erreur chargement prochain concert:", err));
+            .catch(err => console.error("Erreur prochain concert:", err));
+
+        // 2. Charger les photos personnalisées du Dashboard (si elles existent)
+settingsService.getGroupSettings()
+    .then(settings => {
+        // settings est maintenant un objet direct, plus besoin de .find() !
+        
+        if (settings.hero_desktop) {
+            setHeroDesktop(`${BASE_URL}${settings.hero_desktop}`);
+        }
+        
+        if (settings.hero_mobile) {
+            setHeroMobile(`${BASE_URL}${settings.hero_mobile}`);
+        }
+    })
+    .catch(err => console.log("Utilisation des images par défaut", err));
     }, []);
 
+    // Détermination de l'image selon la taille de l'écran (approche simple)
+    const [currentHero, setCurrentHero] = useState(heroDesktop);
+    
+    useEffect(() => {
+        const handleResize = () => {
+            setCurrentHero(window.innerWidth < 768 ? heroMobile : heroDesktop);
+        };
+        handleResize(); // Init
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, [heroDesktop, heroMobile]);
+
+    // Préparation des gradients (on garde tes réglages exacts)
+    const lightGradient = `linear-gradient(rgba(255,255,255,0.7),rgba(255,255,255,0.85))`;
+    const darkGradient = `linear-gradient(rgba(0,0,0,0.2),rgba(0,0,0,0.8))`;
+
     return (
+        <div 
+            className="mt-[80px] min-h-[calc(100vh-82px)] flex flex-col justify-center items-center text-center bg-no-repeat bg-cover bg-center transition-all duration-500"
+            style={{ 
+                // On injecte l'image dynamiquement ici
+                backgroundImage: `var(--hero-gradient), url(${currentHero})` 
+            }}
+        >
+            {/* Petit hack CSS pour gérer le gradient Clair/Sombre dynamiquement */}
+            <style>{`
+                div { --hero-gradient: ${lightGradient}; }
+                .dark div { --hero-gradient: ${darkGradient}; }
+            `}</style>
 
-    //     <div className="mt-[80px] min-h-[calc(100vh-82px)] flex flex-col justify-center items-center text-center 
-    // bg-no-repeat bg-cover transition-all duration-500
-    // /* Position : Centré horizontalement, calé à 20% du haut sur mobile, centré sur desktop */
-    // bg-[position:center_20%] md:bg-center
-    
-   
-    // bg-[linear-gradient(rgba(255,255,255,0.7),rgba(255,255,255,0.85)),url('/images/groupe.jpg')] 
-    // dark:bg-[linear-gradient(rgba(0,0,0,0.2),rgba(0,0,0,0.8)),url('/images/groupe.jpg')]">
-
-    <div className={`
-    mt-[80px] min-h-[calc(100vh-82px)] flex flex-col justify-center items-center text-center 
-    bg-no-repeat bg-cover bg-center transition-all duration-500
-    
-    /* MOBILE : Ta nouvelle photo verticale */
-    bg-[linear-gradient(rgba(255,255,255,0.7),rgba(255,255,255,0.85)),url('/images/groupe-mobile.jpg')]
-    dark:bg-[linear-gradient(rgba(0,0,0,0.2),rgba(0,0,0,0.8)),url('/images/RR_mobile.jpg')]
-
-    /* DESKTOP (à partir de 768px) : Ta photo horizontale actuelle */
-    md:bg-[linear-gradient(rgba(255,255,255,0.7),rgba(255,255,255,0.85)),url('/images/groupe.jpg')]
-    md:dark:bg-[linear-gradient(rgba(0,0,0,0.2),rgba(0,0,0,0.8)),url('/images/groupe.jpg')]
-`}>
-
-            {/* Titre principal */}
             <h1 className="text-[3.5rem] md:text-[5.5rem] uppercase m-0 leading-[1.2] tracking-[0.1em] animate-shimmer inline-block transform origin-center text-black dark:text-white transition-colors duration-300">
-
                 Réservoir Rock
-
             </h1>
-            {/* Section Concert : Rouge Vif Électrique (Moins sombre) */}
+
             <section className="px-[40px] py-[30px] mt-[60px] rounded-[8px] animate-pulse-rock transition-all duration-300
-    /* Mode Clair */
-    bg-white shadow-[10px_10px_0px_0px_rgba(255,0,0,0.1)]
-    
-    /* Mode Sombre : Rouge pur sans compromis (#ff0000) et opacité augmentée à 20% */
-    dark:bg-[#ff0000]/20 dark:backdrop-blur-lg dark:shadow-[0_0_30px_rgba(255,0,0,0.15)]">
+                bg-white shadow-[10px_10px_0px_0px_rgba(255,0,0,0.1)]
+                dark:bg-[#ff0000]/20 dark:backdrop-blur-lg dark:shadow-[0_0_30px_rgba(255,0,0,0.15)]">
 
                 <h2 className="text-[1.5rem] font-black uppercase mb-[12px] text-black dark:text-white transition-colors tracking-tighter">
                     Prochain Concert

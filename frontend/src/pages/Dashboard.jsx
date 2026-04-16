@@ -382,7 +382,7 @@ function Dashboard() {
     };
 
     const handleToggleRole = async (userId, currentRole) => {
-        const newRole = currentRole === 'user' ? 'membre' : 'user';
+        const newRole = currentRole === 'user' ? 'member' : 'user';
         try {
             await userService.updateRole(userId, newRole);
             fetchUsers();
@@ -406,6 +406,23 @@ function Dashboard() {
             fetchUsers();
         }
     }, [activeSection]);
+
+
+    //pour changer l'image page Home
+    const handleHeroUpload = async (e, key) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('image', file);
+
+        try {
+            await settingsService.updateHeroImage(key, formData);
+            alert("Image mise à jour !");
+        } catch (err) {
+            alert("Erreur lors de l'envoi");
+        }
+    };
 
     // --- COMPOSANTS  ---
     const Pagination = ({ pages, onPageChange }) => (
@@ -471,6 +488,7 @@ function Dashboard() {
                             { id: 'repetitions', label: 'Répétitions' },
                             { id: 'videos', label: 'Vidéos' },
                             { id: 'groupe', label: 'Le Groupe' },
+                            { id: 'design', label: 'Héro' },
                             { id: 'membres', label: 'Musiciens' },
                             { id: 'messages', label: "Livre d'Or" },
                             { id: 'users', label: "Utilisateurs" },
@@ -1155,6 +1173,40 @@ function Dashboard() {
                         </section>
                     )}
 
+
+                    {/* --- SECTION : DESIGN / HERO --- */}
+                    {activeSection === 'design' && (
+                        <section className="animate-in fade-in duration-500">
+                            <SectionTitle subtitle="Visuals">Design du Site</SectionTitle>
+
+                            <div className="bg-white dark:bg-[#0a0a0a] border border-black/5 dark:border-white/5 p-8 rounded-2xl shadow-xl">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+                                    {/* Photo Desktop */}
+                                    <div className="space-y-4">
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-primary">Photo Accueil (Desktop)</p>
+                                        <input
+                                            type="file"
+                                            className={inputClass}
+                                            onChange={(e) => handleHeroUpload(e, 'hero_desktop')}
+                                        />
+                                    </div>
+
+                                    {/* Photo Mobile */}
+                                    <div className="space-y-4">
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-primary">Photo Accueil (Mobile)</p>
+                                        <input
+                                            type="file"
+                                            className={inputClass}
+                                            onChange={(e) => handleHeroUpload(e, 'hero_mobile')}
+                                        />
+                                    </div>
+
+                                </div>
+                            </div>
+                        </section>
+                    )}
+
                     {/* SECTION MUSICIENS */}
                     {activeSection === 'membres' && (
                         <section id="membres" className="animate-in fade-in duration-500">
@@ -1379,7 +1431,7 @@ function Dashboard() {
                                                     </td>
                                                     <td className="px-6 py-4">
                                                         <span className={`text-[9px] font-black uppercase px-2 py-1 rounded ${user.role === 'admin' ? 'bg-primary text-white' :
-                                                            user.role === 'membre' ? 'bg-blue-500/20 text-blue-500' :
+                                                            user.role === 'member' ? 'bg-blue-500/20 text-blue-500' :
                                                                 'bg-gray-500/20 text-gray-500'
                                                             }`}>
                                                             {user.role}

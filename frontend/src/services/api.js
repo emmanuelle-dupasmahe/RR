@@ -101,6 +101,11 @@ export const settingsService = {
     updateGroupSetting: (key, value) => fetchAPI('/groupesettings', { 
         method: 'POST', 
         body: JSON.stringify({ key_name: key, value_text: value }) 
+    }),
+    // AJOUT DE LA FONCTION POUR LES PHOTOS HERO
+    updateHeroImage: (key, formData) => fetchAPI(`/groupesettings/hero/${key}`, { 
+        method: 'POST', 
+        body: formData 
     })
 };
 
