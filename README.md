@@ -20,19 +20,21 @@ Plateforme web dynamique pour le groupe **Réservoir Rock** (Six-Fours-les-Plage
 ## ✨ Fonctionnalités
 
 ### Pour les utilisateurs
-- **Accueil** : Affichage dynamique du prochain concert.
+- **Accueil** : Affichage dynamique du prochain concert et visuels (Hero) mis à jour par l'admin.
 - **Le Groupe** : Présentation des musiciens, histoire du groupe et répertoire.
 - **Concerts** : Liste chronologique des prochaines dates de tournée.
 - **Vidéos** : Galerie de vidéos (Intégrations YouTube ou fichiers locaux).
 - **Studio Répétitions** : Lecteur audio pour écouter les derniers enregistrements du groupe.
 - **Livre d'or** : Espace de discussion pour les fans (authentification requise pour poster).
+- **Espace Membre (Backstage)** : Accès exclusif aux enregistrements privés (WIP) pour les utilisateurs ayant le rôle "Membre".
 
 ### Pour les administrateurs (BackStage)
 - **Gestion des Concerts** : CRUD complet (Ajouter, Modifier, Supprimer).
 - **Gestion des Musiciens** : Mise à jour des membres et de leurs photos.
-- **Gestion Média** : Upload et gestion des morceaux audio et des vidéos.
+- **Gestion Média** : Upload et gestion des morceaux audio (avec système de **Markers**/horodatage) et des vidéos.
 - **Modération** : Suppression de messages sur le livre d'or et système de réponse officielle.
-- **Paramètres** : Modification dynamique du titre de la tournée et des textes du site.
+- **Gestion des Utilisateurs** : Contrôle des accès, promotion des comptes au rang de "Membre" et suppression d'utilisateurs.
+- **Design & Contenu** : Mise à jour dynamique des images Hero (Desktop/Mobile), du slogan, de l'histoire du groupe et du répertoire.
 
 ## 🛠️ Installation et Configuration
 
@@ -57,6 +59,7 @@ DB_USER=root
 DB_PASS=
 DB_NAME=votre_bdd
 JWT_SECRET=votre_cle_secrete
+JWT_EXPIRES_IN=7d
 ```
 4. Importez le schéma SQL fourni dans votre base de données MySQL.
 5. Démarrez le serveur : `npm start` (ou `node server.js`)
