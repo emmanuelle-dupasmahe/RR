@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Apr 15, 2026 at 11:56 AM
+-- Generation Time: Apr 16, 2026 at 02:36 PM
 -- Server version: 8.0.30
 -- PHP Version: 8.1.10
 
@@ -56,20 +56,24 @@ INSERT INTO `concerts` (`id`, `titre`, `date_concert`, `heure`, `lieu`, `descrip
 
 CREATE TABLE `group_settings` (
   `key_name` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
-  `value_text` text COLLATE utf8mb4_general_ci
+  `value_text` text COLLATE utf8mb4_general_ci,
+  `group_repertoire` text COLLATE utf8mb4_general_ci
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `group_settings`
 --
 
-INSERT INTO `group_settings` (`key_name`, `value_text`) VALUES
-('group_announce', 'En préparation : Tribute U2 & MUSE'),
-('group_history_1', 'Composé de Jean-Marc, Martial, Romain et Éric, le groupe a forgé son identité sur une obsession : la précision sonore. Ils allient le pur plaisir du jeu à des prestations de qualité professionnelle.'),
-('group_history_2', 'Une importance capitale est accordée à la technique et au matériel de pointe, transformant chaque scène en un spectacle soigné et immersif.'),
-('group_slogan', 'Plus qu\'un simple groupe de reprises, Réservoir Rock puise son énergie dans un répertoire éclectique et puissant.'),
-('group_title_history', 'L\'ÉMOTION PURE, L\'EXIGENCE DU SON'),
-('photo_credits', 'MIKA');
+INSERT INTO `group_settings` (`key_name`, `value_text`, `group_repertoire`) VALUES
+('group_announce', 'En préparation : Tribute U2 & MUSE', NULL),
+('group_history_1', 'Composé de Jean-Marc, Martial, Romain et Éric, le groupe a forgé son identité sur une obsession : la précision sonore. Ils allient le pur plaisir du jeu à des prestations de qualité professionnelle.', NULL),
+('group_history_2', 'Une importance capitale est accordée à la technique et au matériel de pointe, transformant chaque scène en un spectacle soigné et immersif.', NULL),
+('group_repertoire', 'U2 • Muse • Téléphone • The Police • Genesis • Les Rita Mitsouko • Eminem • Axel Bauer • Bruno Mars • Harry Styles • Santana • BB Brunes • Queen • The Supermen Lovers • AC/DC • Kaleo • Trust • DNCE • Lenny Kravitz • Zucchero • Bob Marley • -M- • Rare Earth • Junkie XL • Nickelback • The Killers • Rage Against ThE Machine...', NULL),
+('group_slogan', 'Plus qu\'un simple groupe de reprises, Réservoir Rock puise son énergie dans un répertoire éclectique et puissant.', NULL),
+('group_title_history', 'L\'ÉMOTION PURE, L\'EXIGENCE DU SON', NULL),
+('hero_desktop', '/uploads/1776350033860-414553274.jpg', NULL),
+('hero_mobile', '/uploads/1776350046682-749864974.png', NULL),
+('photo_credits', 'MIKA', NULL);
 
 -- --------------------------------------------------------
 
@@ -149,9 +153,9 @@ INSERT INTO `repetitions` (`id`, `titre`, `detail`, `url`, `file_name`, `file_si
 (10, 'locked out of heaven - Bruno Mars', 'répète du 8 avril 2025', 'audio/Locked_out.mp3', NULL, NULL, NULL, '2026-04-08 08:38:52', '2026-04-13 12:56:25', 0, NULL, 'public', NULL),
 (11, 'Atomic City - U2', 'répète du 3 avril 2026', 'audio/Atomic_city.mp3', NULL, NULL, NULL, '2026-04-09 11:13:55', '2026-04-13 12:56:15', 0, NULL, 'public', NULL),
 (14, 'CAKE BY THE OCEAN - DNCE', 'répète 2025', 'audio/Cake_ocean.mp3', NULL, NULL, NULL, '2026-04-13 11:45:42', '2026-04-14 09:44:06', 0, NULL, 'public', '[]'),
-(17, 'new years day', 'morceau à revoir', '/uploads/1776152187946-825842868.mp3', 'New years day.mp3', 6881052, 'audio/mpeg', '2026-04-14 07:36:27', '2026-04-14 09:07:13', 3, 60, 'private', '[{\"time\":15,\"label\":\"voir ici\"},{\"time\":18,\"label\":\"ici\"},{\"time\":30,\"label\":\"ici\"}]'),
-(19, 'new years day - U2', 'repete 2026', '/uploads/1776158300289-252935965.mp3', 'New years day.mp3', 6881052, 'audio/mpeg', '2026-04-14 09:18:20', '2026-04-14 09:43:19', 2, 320, 'public', '[]'),
-(22, 'Atomic city', '', 'audio/Atomic_city.mp3', NULL, NULL, NULL, '2026-04-14 09:59:31', '2026-04-14 09:59:31', 2, NULL, 'private', '[{\"time\":15,\"label\":\"ici\"}]');
+(32, 'UNDISCLOSED DESIRES ', 'super les chœurs', 'audio/Undisclosed_desire.mp3', NULL, NULL, NULL, '2026-04-16 11:34:57', '2026-04-16 11:36:59', 0, NULL, 'private', '[{\"time\":52,\"label\":\"top\"}]'),
+(35, 'NEW YEARS DAY', 'répète 2026', '/uploads/1776341622695-562535890.mp3', 'New years day.mp3', 6881052, 'audio/mpeg', '2026-04-16 12:13:42', '2026-04-16 12:37:32', 3, 200, 'public', '[]'),
+(36, 'NEW YEARS DAY', 'revoir', '/uploads/1776342690113-401085490.mp3', 'New years day.mp3', 6881052, 'audio/mpeg', '2026-04-16 12:31:30', '2026-04-16 12:36:24', 0, NULL, 'private', '[{\"time\":262,\"label\":\"Oups\"}]');
 
 -- --------------------------------------------------------
 
@@ -171,7 +175,7 @@ CREATE TABLE `settings` (
 --
 
 INSERT INTO `settings` (`id`, `setting_key`, `setting_value`, `updated_at`) VALUES
-(1, 'tour_title', 'Tournée 2026', '2026-04-15 10:53:18');
+(1, 'tour_title', 'Tournée 2026', '2026-04-16 14:08:27');
 
 -- --------------------------------------------------------
 
@@ -185,7 +189,7 @@ CREATE TABLE `users` (
   `lastname` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `email` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
   `password` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
-  `role` enum('admin','member','user') COLLATE utf8mb4_general_ci DEFAULT 'user',
+  `role` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'user',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -225,10 +229,9 @@ CREATE TABLE `videos` (
 --
 
 INSERT INTO `videos` (`id`, `titre`, `url_youtube`, `file_path`, `file_name`, `file_size`, `mime_type`, `description`, `created_at`, `updated_at`) VALUES
-(4, 'RéSERVOIR ROCK à BORMES ', 'ac_1MdSA9u0?si=brawqtRe5s_i7Kkj', NULL, NULL, NULL, NULL, 'BORMES LES MIMOSAS', '2026-04-07 13:14:13', '2026-04-10 07:41:56'),
+(4, 'RéSERVOIR ROCK à BORMES ', 'ac_1MdSA9u0', NULL, NULL, NULL, NULL, 'BORMES LES MIMOSAS', '2026-04-07 13:14:13', '2026-04-15 12:50:18'),
 (5, 'RéSERVOIR ROCK au RAYOLET', 'UrrtAPj9Nzw?si=UmM5TPfUqaAht5zo', NULL, NULL, NULL, NULL, 'SIX FOURS', '2026-04-07 13:15:31', '2026-04-10 07:41:47'),
-(9, 'Réservoir Rock à la Coudoulière', 'tn8qVJyVRtc', NULL, NULL, NULL, NULL, 'SIX-FOURS', '2026-04-10 08:19:21', '2026-04-10 08:19:21'),
-(11, 'réservoir rock à just rosé', 'ljN-FrVUXOI?si=2ThyO9NFpCah6iI9', NULL, NULL, NULL, NULL, 'SANARY SUR MER', '2026-04-15 11:14:13', '2026-04-15 11:20:01');
+(9, 'Réservoir Rock à la Coudoulière', 'tn8qVJyVRtc', NULL, NULL, NULL, NULL, 'SIX-FOURS', '2026-04-10 08:19:21', '2026-04-10 08:19:21');
 
 --
 -- Indexes for dumped tables
@@ -294,25 +297,25 @@ ALTER TABLE `videos`
 -- AUTO_INCREMENT for table `concerts`
 --
 ALTER TABLE `concerts`
-  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT for table `guestbook`
 --
 ALTER TABLE `guestbook`
-  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
 -- AUTO_INCREMENT for table `membres`
 --
 ALTER TABLE `membres`
-  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `repetitions`
 --
 ALTER TABLE `repetitions`
-  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
+  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
 
 --
 -- AUTO_INCREMENT for table `settings`
@@ -330,7 +333,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `videos`
 --
 ALTER TABLE `videos`
-  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- Constraints for dumped tables
