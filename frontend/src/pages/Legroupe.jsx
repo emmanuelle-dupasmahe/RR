@@ -127,14 +127,15 @@ export default function Groupe() {
                 </div>
             </div>
 
-            {/* RÉPERTOIRE */}
+            {/* RÉPERTOIRE DYNAMIQUE */}
             <div className="bg-gray-50 dark:bg-[#0a0a0a] py-16 px-6 transition-colors">
                 <div className="max-w-[1100px] mx-auto text-center">
                     <h3 className="text-[#888] dark:text-[#685c5c] font-black uppercase tracking-[8px] text-[0.85rem] mb-6 transition-colors">
                         Expanded Repertoire
                     </h3>
                     <p className="text-gray-400 dark:text-[#888] text-[10px] md:text-[12px] leading-[2.5] uppercase tracking-[3px] font-medium transition-colors">
-                        U2 • Muse • Téléphone • The Police • Genesis • Les Rita Mitsouko • Eminem • Axel Bauer • Bruno Mars • Harry Styles • Santana • BB Brunes • Queen • The Supermen Lovers • AC/DC • Kaleo • Trust • DNCE • Lenny Kravitz • Zucchero • Bob Marley • -M- • Rare Earth • Junkie XL • Nickelback • The Killers • Rage Against The Machine...
+                        {/* Si le répertoire est vide en BDD, on peut mettre une valeur par défaut ou rien */}
+                        {groupTexts.group_repertoire || "Répertoire en cours de mise à jour..."}
                     </p>
                 </div>
             </div>

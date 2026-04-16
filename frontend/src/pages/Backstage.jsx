@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import WavePlayer from '../components/WavePlayer';
-import { repetitionService } from '../services/api';
+import { repetitionService, BASE_URL } from '../services/api';
 
 const Backstage = () => {
     const [morceaux, setMorceaux] = useState([]);
@@ -78,7 +78,7 @@ const Backstage = () => {
 
                                             <div className="mt-4 p-2 bg-gray-200 dark:bg-black rounded-xl overflow-hidden shadow-inner [&_.text-white]:text-black dark:[&_.text-white]:text-white">
                                                 <WavePlayer
-                                                    url={m.url.startsWith('/uploads') ? `http://192.168.10.108:5000${m.url}` : m.url}
+                                                    url={m.url.startsWith('/uploads') ? `${BASE_URL}${m.url}` : m.url}
                                                     startTime={m.start_time}
                                                     endTime={m.end_time}
                                                     id={`wave-${m.id}`}

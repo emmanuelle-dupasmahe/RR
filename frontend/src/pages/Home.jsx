@@ -18,12 +18,28 @@ function Home() {
     }, []);
 
     return (
-        <div className="mt-[80px] min-h-[calc(100vh-82px)] flex flex-col justify-center items-center text-center 
-            bg-no-repeat bg-center bg-cover transition-all duration-500
-            /* Overlay clair */
-            bg-[linear-gradient(rgba(255,255,255,0.7),rgba(255,255,255,0.85)),url('/images/groupe.jpg')] 
-            /* Overlay sombre légèrement réduit pour voir l'image (0.5 au lieu de 0.6) */
-            dark:bg-[linear-gradient(rgba(0,0,0,0.5),rgba(0,0,0,0.8)),url('/images/groupe.jpg')]">
+
+    //     <div className="mt-[80px] min-h-[calc(100vh-82px)] flex flex-col justify-center items-center text-center 
+    // bg-no-repeat bg-cover transition-all duration-500
+    // /* Position : Centré horizontalement, calé à 20% du haut sur mobile, centré sur desktop */
+    // bg-[position:center_20%] md:bg-center
+    
+   
+    // bg-[linear-gradient(rgba(255,255,255,0.7),rgba(255,255,255,0.85)),url('/images/groupe.jpg')] 
+    // dark:bg-[linear-gradient(rgba(0,0,0,0.2),rgba(0,0,0,0.8)),url('/images/groupe.jpg')]">
+
+    <div className={`
+    mt-[80px] min-h-[calc(100vh-82px)] flex flex-col justify-center items-center text-center 
+    bg-no-repeat bg-cover bg-center transition-all duration-500
+    
+    /* MOBILE : Ta nouvelle photo verticale */
+    bg-[linear-gradient(rgba(255,255,255,0.7),rgba(255,255,255,0.85)),url('/images/groupe-mobile.jpg')]
+    dark:bg-[linear-gradient(rgba(0,0,0,0.2),rgba(0,0,0,0.8)),url('/images/RR_mobile.jpg')]
+
+    /* DESKTOP (à partir de 768px) : Ta photo horizontale actuelle */
+    md:bg-[linear-gradient(rgba(255,255,255,0.7),rgba(255,255,255,0.85)),url('/images/groupe.jpg')]
+    md:dark:bg-[linear-gradient(rgba(0,0,0,0.2),rgba(0,0,0,0.8)),url('/images/groupe.jpg')]
+`}>
 
             {/* Titre principal */}
             <h1 className="text-[3.5rem] md:text-[5.5rem] uppercase m-0 leading-[1.2] tracking-[0.1em] animate-shimmer inline-block transform origin-center text-black dark:text-white transition-colors duration-300">
@@ -37,7 +53,7 @@ function Home() {
     bg-white shadow-[10px_10px_0px_0px_rgba(255,0,0,0.1)]
     
     /* Mode Sombre : Rouge pur sans compromis (#ff0000) et opacité augmentée à 20% */
-    dark:bg-[#ff0000]/20 dark:backdrop-blur-lg dark:shadow-[0_0_30px_rgba(255,0,0,0.25)]">
+    dark:bg-[#ff0000]/20 dark:backdrop-blur-lg dark:shadow-[0_0_30px_rgba(255,0,0,0.15)]">
 
                 <h2 className="text-[1.5rem] font-black uppercase mb-[12px] text-black dark:text-white transition-colors tracking-tighter">
                     Prochain Concert

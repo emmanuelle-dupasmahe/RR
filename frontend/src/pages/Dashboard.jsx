@@ -7,7 +7,9 @@ import {
     videoService,
     memberService,
     settingsService,
-    guestbookService
+    guestbookService,
+    userService,
+    BASE_URL
 } from '../services/api';
 
 function Dashboard() {
@@ -56,6 +58,7 @@ function Dashboard() {
     const [newMarker, setNewMarker] = useState({ time: '', label: '' });
 
     const [updateFile, setUpdateFile] = useState(null);
+    const [allUsers, setAllUsers] = useState([]);
 
     // --- LOGIQUE FETCH ---
 
@@ -368,6 +371,42 @@ function Dashboard() {
         }
     };
 
+    //pour gérer les utilisateurs
+    const fetchUsers = async () => {
+        try {
+            const data = await userService.getAll();
+            setAllUsers(data);
+        } catch (error) {
+            console.error("Erreur:", error.message);
+        }
+    };
+
+    const handleToggleRole = async (userId, currentRole) => {
+        const newRole = currentRole === 'user' ? 'membre' : 'user';
+        try {
+            await userService.updateRole(userId, newRole);
+            fetchUsers();
+        } catch (error) {
+            alert(error.message);
+        }
+    };
+
+    const handleDeleteUser = async (userId) => {
+        if (!window.confirm("Supprimer cet utilisateur ?")) return;
+        try {
+            await userService.delete(userId);
+            fetchUsers();
+        } catch (error) {
+            alert(error.message);
+        }
+    };
+
+    useEffect(() => {
+        if (activeSection === 'users') {
+            fetchUsers();
+        }
+    }, [activeSection]);
+
     // --- COMPOSANTS  ---
     const Pagination = ({ pages, onPageChange }) => (
         pages.total > 1 && (
@@ -434,6 +473,7 @@ function Dashboard() {
                             { id: 'groupe', label: 'Le Groupe' },
                             { id: 'membres', label: 'Musiciens' },
                             { id: 'messages', label: "Livre d'Or" },
+                            { id: 'users', label: "Utilisateurs" },
                         ].map((item) => {
                             const isActive = activeSection === item.id;
                             return (
@@ -447,7 +487,7 @@ function Dashboard() {
                                             : 'bg-transparent text-gray-600 dark:text-gray-400 border-transparent hover:bg-gray-100 dark:hover:bg-white/5 hover:text-black dark:hover:text-white'
                                         }
                                 `}
-                                    // Style inline pour être certain de prendre le dessus si Tailwind est ignoré
+
                                     style={{ color: isActive ? 'white' : undefined }}
                                 >
                                     {item.label}
@@ -865,7 +905,7 @@ function Dashboard() {
                                                         <div className="mt-4">
                                                             <WavePlayer
                                                                 id={`wave-${r.id}`}
-                                                                url={r.url.startsWith('/uploads') ? `http://192.168.10.108:5000${r.url}` : r.url}
+                                                                url={r.url.startsWith('/uploads') ? `${BASE_URL}${r.url}` : r.url}
                                                                 startTime={r.start_time}
                                                                 endTime={r.end_time}
                                                             />
@@ -1073,6 +1113,24 @@ function Dashboard() {
                                         />
                                     </div>
                                 </div>
+                                {/* Ligne : Répertoire */}
+                                <div className="pt-6 border-t border-black/5 dark:border-white/5">
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-primary block">
+                                            Répertoire / Artistes (Séparés par des " • " ou ",")
+                                        </label>
+                                        <textarea
+                                            className={`${inputClass} min-h-[100px] leading-relaxed py-4 text-xs uppercase tracking-widest`}
+                                            value={groupTexts.group_repertoire || ''}
+                                            onChange={(e) => setGroupTexts({ ...groupTexts, group_repertoire: e.target.value })}
+                                            onBlur={() => handleUpdateGroupText('group_repertoire', groupTexts.group_repertoire)}
+                                            placeholder="U2 • Muse • Téléphone..."
+                                        />
+                                        <p className="text-[9px] text-black/30 dark:text-white/20 uppercase tracking-[2px] mt-2">
+                                            La liste des artistes s'affiche en bas de la page "Le Groupe".
+                                        </p>
+                                    </div>
+                                </div>
 
                                 {/* Ligne : Crédits Photos */}
                                 <div className="pt-6 border-t border-black/5 dark:border-white/5">
@@ -1114,7 +1172,7 @@ function Dashboard() {
                                             type="text"
                                             placeholder="Nom du musicien"
                                             className={inputClass}
-                                            value={newMember.nom}
+                                            value={newMember.nom || ''}
                                             onChange={(e) => setNewMember({ ...newMember, nom: e.target.value })}
                                             required
                                         />
@@ -1122,7 +1180,7 @@ function Dashboard() {
                                             type="text"
                                             placeholder="Instrument (ex: Guitar)"
                                             className={inputClass}
-                                            value={newMember.instrument}
+                                            value={newMember.instrument || ''}
                                             onChange={(e) => setNewMember({ ...newMember, instrument: e.target.value })}
                                             required
                                         />
@@ -1130,7 +1188,7 @@ function Dashboard() {
                                             type="text"
                                             placeholder="URL de la photo"
                                             className={inputClass}
-                                            value={newMember.photo_url}
+                                            value={newMember.photo_url || ''}
                                             onChange={(e) => setNewMember({ ...newMember, photo_url: e.target.value })}
                                         />
                                         <button type="submit" className={btnClass}>Ajouter au groupe</button>
@@ -1146,12 +1204,12 @@ function Dashboard() {
                                                     <div className="w-full space-y-3">
                                                         <input
                                                             className="w-full bg-white dark:bg-white/5 border border-black/10 dark:border-white/10 p-2 text-xs rounded text-black dark:text-white font-bold"
-                                                            value={m.nom}
+                                                            value={m.nom || ''}
                                                             onChange={(e) => setGroupMembers(groupMembers.map(item => item.id === m.id ? { ...item, nom: e.target.value } : item))}
                                                         />
                                                         <input
                                                             className="w-full bg-white dark:bg-white/5 border border-black/10 dark:border-white/10 p-2 text-xs rounded text-primary font-bold"
-                                                            value={m.instrument}
+                                                            value={m.instrument || ''}
                                                             onChange={(e) => setGroupMembers(groupMembers.map(item => item.id === m.id ? { ...item, instrument: e.target.value } : item))}
                                                         />
                                                         <div className="flex gap-2 pt-1">
@@ -1167,17 +1225,27 @@ function Dashboard() {
                                                         </div>
 
                                                         {/* Avatar et Infos */}
-                                                        <div className="flex items-center gap-4">
-                                                            <div className="relative">
+                                                        <div className="flex items-center gap-4 min-w-0"> {/* min-w-0 aide à la gestion du texte long en flex */}
+                                                            <div className="relative flex-shrink-0 w-12 h-12"> {/* flex-shrink-0 est CRUCIAL ici */}
                                                                 {m.photo_url ? (
-                                                                    <img src={m.photo_url} alt={m.nom} className="w-12 h-12 rounded-full object-cover border-2 border-black/5 dark:border-white/5" />
+                                                                    <img
+                                                                        src={m.photo_url.startsWith('/uploads') ? `${BASE_URL}${m.photo_url}` : m.photo_url}
+                                                                        alt={m.nom}
+                                                                        className="w-full h-full rounded-full object-cover border-2 border-black/5 dark:border-white/5 shadow-sm"
+                                                                    />
                                                                 ) : (
-                                                                    <div className="w-12 h-12 rounded-full bg-black/5 dark:bg-white/5 border-2 border-black/5 dark:border-white/5 flex items-center justify-center text-[10px] font-black opacity-20 text-black dark:text-white">N/A</div>
+                                                                    <div className="w-full h-full rounded-full bg-black/5 dark:bg-white/5 border-2 border-black/5 dark:border-white/5 flex items-center justify-center text-[10px] font-black opacity-20 text-black dark:text-white">
+                                                                        N/A
+                                                                    </div>
                                                                 )}
                                                             </div>
-                                                            <div>
-                                                                <p className="text-black dark:text-white font-bold uppercase tracking-tight leading-none mb-1">{m.nom}</p>
-                                                                <p className="text-primary text-[10px] font-black uppercase tracking-[2px]">{m.instrument}</p>
+                                                            <div className="min-w-0 overflow-hidden"> {/* Empêche le texte de déborder ou de pousser l'image */}
+                                                                <p className="text-black dark:text-white font-bold uppercase tracking-tight leading-none mb-1 truncate">
+                                                                    {m.nom}
+                                                                </p>
+                                                                <p className="text-primary text-[10px] font-black uppercase tracking-[2px] leading-tight">
+                                                                    {m.instrument}
+                                                                </p>
                                                             </div>
                                                         </div>
                                                     </>
@@ -1280,6 +1348,72 @@ function Dashboard() {
                                         <p className="text-xs font-black uppercase tracking-[3px] text-black dark:text-white">Le livre d'or est vide</p>
                                     </div>
                                 )}
+                            </div>
+                        </section>
+                    )}
+
+                    {/* SECTION GESTION DES UTILISATEURS */}
+                    {activeSection === 'users' && (
+                        <section id="users" className="animate-fadeIn">
+                            <SectionTitle subtitle="Access Control">Gestion des Utilisateurs</SectionTitle>
+
+                            <div className="bg-white dark:bg-[#0a0a0a] border border-black/5 dark:border-white/5 rounded-2xl overflow-hidden shadow-xl">
+                                <table className="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr className="bg-black/5 dark:bg-white/5 text-[10px] font-black uppercase tracking-widest text-gray-500">
+                                            <th className="px-6 py-4">Utilisateur</th>
+                                            <th className="px-6 py-4">Rôle Actuel</th>
+                                            <th className="px-6 py-4 text-right">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-black/5 dark:divide-white/5">
+                                        {/* Sécurité : On vérifie que allUsers est un tableau avant de mapper */}
+                                        {Array.isArray(allUsers) && allUsers.length > 0 ? (
+                                            allUsers.map(user => (
+                                                <tr key={user.id} className="hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors">
+                                                    <td className="px-6 py-4">
+                                                        <div className="font-bold text-sm">
+                                                            {user.firstname} {user.lastname}
+                                                        </div>
+                                                        <div className="text-[10px] opacity-50">{user.email}</div>
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <span className={`text-[9px] font-black uppercase px-2 py-1 rounded ${user.role === 'admin' ? 'bg-primary text-white' :
+                                                            user.role === 'membre' ? 'bg-blue-500/20 text-blue-500' :
+                                                                'bg-gray-500/20 text-gray-500'
+                                                            }`}>
+                                                            {user.role}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-6 py-4 text-right space-x-3">
+                                                        {user.role !== 'admin' && (
+                                                            <>
+                                                                <button
+                                                                    onClick={() => handleToggleRole(user.id, user.role)}
+                                                                    className="text-[10px] font-black uppercase text-blue-500 hover:underline"
+                                                                >
+                                                                    {user.role === 'user' ? 'Promouvoir Membre' : 'Rétrograder User'}
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => handleDeleteUser(user.id)}
+                                                                    className="text-[10px] font-black uppercase text-primary hover:underline"
+                                                                >
+                                                                    Supprimer
+                                                                </button>
+                                                            </>
+                                                        )}
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        ) : (
+                                            <tr>
+                                                <td colSpan="3" className="px-6 py-10 text-center text-sm text-gray-500 italic">
+                                                    Chargement des utilisateurs ou liste vide...
+                                                </td>
+                                            </tr>
+                                        )}
+                                    </tbody>
+                                </table>
                             </div>
                         </section>
                     )}

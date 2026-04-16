@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { repetitionService } from '../services/api';
 import RepetitionsSkeleton from '../components/RepetitionsSkeleton';
+import { BASE_URL } from '../services/api';
 
 function AudioPlayer({ src, startTime, endTime }) {
     const audioRef = useRef(null);
@@ -41,11 +42,19 @@ function Repetitions() {
 
     const fetchMorceaux = async () => {
         try {
-            const data = await repetitionService.getAll();
-            setMorceaux(Array.isArray(data) ? data : data.repetitions || []);
-            setLoading(false);
+            setLoading(true);
+            // On récupère toutes les répétitions (comme dans le backstage)
+            const data = await repetitionService.getAll(1, 100);
+            const allData = Array.isArray(data) ? data : data.repetitions || [];
+
+            // --- FILTRE STRICT : Uniquement le contenu PUBLIC ---
+            // Même si un admin est connecté, il ne verra ici que ce que le public voit.
+            const morceauxPublics = allData.filter(m => m.status === 'public');
+
+            setMorceaux(morceauxPublics);
         } catch (err) {
             console.error("Erreur lors du chargement des morceaux :", err);
+        } finally {
             setLoading(false);
         }
     };
@@ -117,7 +126,7 @@ function Repetitions() {
                     dark:bg-gradient-to-r dark:from-primary/80 dark:via-[#222] dark:to-[#111] dark:border dark:border-white/10"
                             >
                                 <AudioPlayer
-                                    src={m.url.startsWith('/uploads') ? `http://192.168.10.108:5000${m.url}` : m.url}
+                                    src={m.url.startsWith('/uploads') ? `${BASE_URL}${m.url}` : m.url}
                                     startTime={m.start_time}
                                     endTime={m.end_time}
                                 />

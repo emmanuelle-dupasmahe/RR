@@ -29,7 +29,7 @@ const WavePlayer = ({ url, startTime, endTime, id }) => {
             normalize: true,
             partialRender: true,
             minPxPerSec: zoomLevel,
-            // Optionnel : masquer la scrollbar native de WaveSurfer si elle apparaît
+            
             hideScrollbar: false, 
         });
 
@@ -123,7 +123,7 @@ const WavePlayer = ({ url, startTime, endTime, id }) => {
                     )}
                 </button>
 
-                {/* CONTENEUR AVEC SCROLLBAR PERSONNALISÉE */}
+                {/* CONTENEUR*/}
                 <div 
                     ref={containerRef} 
                     className="flex-1 overflow-x-auto overflow-y-hidden

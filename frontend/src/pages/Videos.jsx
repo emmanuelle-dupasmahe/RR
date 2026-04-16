@@ -97,12 +97,13 @@ function Videos() {
 
 function VideoCard({ video }) {
     const isYoutube = !!video.url_youtube;
-    
+
     // Ajout de playsinline=1 pour forcer la lecture dans le site sur mobile
     const url = isYoutube
         ? `https://www.youtube.com/embed/${video.url_youtube}?playsinline=1&rel=0`
-        : `http://192.168.10.108:5000${video.file_path}`;
-
+        : video.file_path?.startsWith('/uploads')
+            ? `${BASE_URL}${video.file_path}`
+            : video.file_path;
     return (
         <div className="group relative rounded-[1.2rem] transition-all duration-500 shadow-2xl
             bg-gray-50 border border-gray-200
@@ -126,11 +127,11 @@ function VideoCard({ video }) {
                                 sandbox="allow-forms allow-scripts allow-pointer-lock allow-same-origin allow-top-navigation-by-user-activation allow-presentation"
                             ></iframe>
                         ) : (
-                            <video 
-                                src={url} 
-                                controls 
+                            <video
+                                src={url}
+                                controls
                                 playsInline // IMPORTANT pour les fichiers locaux également
-                                className="w-full h-full block object-cover" 
+                                className="w-full h-full block object-cover"
                             />
                         )}
                     </div>
