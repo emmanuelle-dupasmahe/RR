@@ -4,7 +4,7 @@
  * CONFIGURATION DE L'ADRESSE IP
  * Modifie uniquement BASE_URL si ton adresse IP change (ex: passage de .108 à .110)
  */
-export const BASE_URL = 'http://192.168.10.110:5000';
+export const BASE_URL = 'http://192.168.10.107:5000';
 const API_URL = `${BASE_URL}/api`;
 
 /**
