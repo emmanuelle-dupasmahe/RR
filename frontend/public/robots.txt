@@ -1,0 +1,7 @@
+User-agent: *
+
+# Pages privées
+Disallow: /dashboard
+Disallow: /backstage
+
+Sitemap: https://resrock.fr/sitemap.xml

@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="fr" class="dark notranslate" translate="no">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/png" href="/images/rr_trans.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preload" as="style"
+    href="https://fonts.googleapis.com/css2?family=Onest:wght@300;400;700;900&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@300;400;700;900&display=swap"
+    media="print" onload="this.media='all'" />
+  <link rel="preload" as="image" href="/images/groupe.jpg" fetchpriority="high" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="index, follow, max-image-preview:large" />
+  <meta name="author" content="Reservoir Rock" />
+  <meta name="theme-color" content="#000000" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Reservoir Rock" />
+  <meta name="google" content="notranslate" />
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="fr_FR" />
+  <meta property="og:site_name" content="Reservoir Rock" />
+  <meta property="og:title" content="Reservoir Rock | Groupe de Rock" />
+  <meta property="og:description"
+    content="Découvrez Reservoir Rock: concerts, répétitions, vidéos et univers du groupe." />
+  <meta property="og:url" content="https://resrock.fr/" />
+  <meta property="og:image" content="https://resrock.fr/images/rr_trans.png" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Reservoir Rock | Groupe de Rock" />
+  <meta name="twitter:description" content="Concerts, répétitions, vidéos et actualités du groupe Reservoir Rock." />
+  <meta name="twitter:image" content="https://resrock.fr/images/rr_trans.png" />
+
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "MusicGroup",
+      "name": "Reservoir Rock",
+      "url": "https://resrock.fr/",
+      "image": "https://resrock.fr/images/rr_trans.png",
+      "genre": "Rock",
+      "sameAs": []
+    }
+  </script>
+
+  <script>
+    if (localStorage.getItem('theme') === 'light') {
+      document.documentElement.classList.remove('dark')
+    } else {
+      document.documentElement.classList.add('dark')
+    }
+  </script>
+</head>
+
+<body class="bg-white dark:bg-black notranslate" translate="no">
+  <noscript>Reservoir Rock nécessite JavaScript pour afficher le contenu complet du site.</noscript>
+  <div id="root"></div>
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+
+</html>
