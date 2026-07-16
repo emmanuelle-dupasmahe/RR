@@ -146,6 +146,18 @@ function Agenda() {
         setIsModalOpen(true);
     };
 
+    const handleSelectSlot = (slotInfo) => {
+        setEditingId(null);
+        setNewEvent({
+            title: isAdmin ? '' : `❌ Indispo - ${user?.firstname || 'Membre'}`,
+            start: formatForInput(slotInfo.start),
+            end: formatForInput(slotInfo.end || slotInfo.start),
+            location: '',
+            type: 'indispo'
+        });
+        setIsModalOpen(true);
+    };
+
     const handleSelectEvent = (event) => {
         setEditingId(event.id);
 
@@ -291,6 +303,62 @@ function Agenda() {
                 <meta name="robots" content="noindex, nofollow" />
             </Helmet>
 
+            {/* Injection des Overrides CSS pour améliorer le mode sombre et ajouter le bouton + au survol */}
+            <style>{`
+                .dark .rbc-toolbar button {
+                    color: #ffffff !important;
+                    border-color: rgba(255, 255, 255, 0.3) !important;
+                }
+                .dark .rbc-toolbar button:hover, .dark .rbc-toolbar button:focus {
+                    color: #ffffff !important;
+                    background-color: rgba(255, 255, 255, 0.1) !important;
+                }
+                .dark .rbc-toolbar button.rbc-active {
+                    background-color: #dc2626 !important;
+                    color: #ffffff !important;
+                    border-color: #dc2626 !important;
+                }
+                .dark .rbc-toolbar .rbc-toolbar-label {
+                    color: #ffffff !important;
+                }
+                .dark .rbc-month-view, .dark .rbc-time-view, .dark .rbc-agenda-view {
+                    border-color: rgba(255, 255, 255, 0.1) !important;
+                }
+                .dark .rbc-day-bg + .rbc-day-bg, .dark .rbc-month-row + .rbc-month-row {
+                    border-left-color: rgba(255, 255, 255, 0.1) !important;
+                    border-top-color: rgba(255, 255, 255, 0.1) !important;
+                }
+                .dark .rbc-header {
+                    border-bottom-color: rgba(255, 255, 255, 0.1) !important;
+                    color: #ffffff !important;
+                }
+                
+                /* ─── EFFET SURVOL : BOUTON "+" ROUGE DANS LES CASES ─── */
+                .rbc-day-bg {
+                    position: relative;
+                }
+                .rbc-day-bg:hover::after {
+                    content: "+";
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background-color: #dc2626; /* Le rouge de ta charte */
+                    color: #ffffff;
+                    width: 34px;
+                    height: 34px;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 22px;
+                    font-weight: bold;
+                    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+                    pointer-events: none; /* Le clic traverse le "+" pour valider la sélection de la date */
+                    z-index: 10;
+                }
+            `}</style>
+
             <div className="mt-[80px] min-h-[calc(100vh-82px)] bg-white dark:bg-black text-black dark:text-white font-sans p-4 md:p-8 relative">
                 <div className="max-w-[1200px] mx-auto">
 
@@ -325,6 +393,8 @@ function Agenda() {
                             startAccessor="start"
                             endAccessor="end"
                             culture="fr"
+                            selectable={true}
+                            onSelectSlot={handleSelectSlot}
                             date={currentDate}
                             onNavigate={(newDate) => setCurrentDate(newDate)}
                             view={currentView}
@@ -391,27 +461,13 @@ function Agenda() {
                                     <div className="space-y-1">
                                         <label className="text-[10px] font-black uppercase tracking-widest opacity-50 ml-1">Lieu / Adresse</label>
                                         {isAdmin ? (
-                                            <div className="space-y-2">
-                                                <input
-                                                    type="text"
-                                                    value={newEvent.location}
-                                                    onChange={(e) => setNewEvent({ ...newEvent, location: e.target.value })}
-                                                    placeholder="Ex: rue de la Mairie, 83110 Sanary"
-                                                    className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 p-3 rounded-lg text-sm text-black dark:text-white focus:border-primary focus:outline-none transition-colors"
-                                                />
-                                                {newEvent.location && newEvent.location.trim() !== '' && (
-                                                    <div className="text-right">
-                                                        <a
-                                                            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(newEvent.location)}`}
-                                                            target="_blank"
-                                                            rel="noopener noreferrer"
-                                                            className="text-primary hover:underline text-[11px] font-black uppercase tracking-wider inline-flex items-center gap-1"
-                                                        >
-                                                            🗺️ Tester l'itinéraire Google Maps
-                                                        </a>
-                                                    </div>
-                                                )}
-                                            </div>
+                                            <input
+                                                type="text"
+                                                value={newEvent.location}
+                                                onChange={(e) => setNewEvent({ ...newEvent, location: e.target.value })}
+                                                placeholder="Ex: rue de la Mairie, 83110 Sanary"
+                                                className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 p-3 rounded-lg text-sm text-black dark:text-white focus:border-primary focus:outline-none transition-colors"
+                                            />
                                         ) : (
                                             <div className="w-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 p-3 rounded-lg text-sm text-black dark:text-white flex justify-between items-center">
                                                 <span>{newEvent.location || "Aucune adresse indiquée"}</span>
