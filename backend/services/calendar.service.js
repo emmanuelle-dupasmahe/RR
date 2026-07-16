@@ -69,3 +69,29 @@ export const removeEvent = async (eventId) => {
         throw error;
     }
 };
+
+export const editEvent = async (eventId, eventDetails) => {
+    try {
+        const response = await calendar.events.update({
+            calendarId: CALENDAR_ID,
+            eventId: eventId,
+            requestBody: {
+                summary: eventDetails.title,
+                location: eventDetails.location,
+                description: eventDetails.description,
+                start: {
+                    dateTime: eventDetails.startDate,
+                    timeZone: 'Europe/Paris',
+                },
+                end: {
+                    dateTime: eventDetails.endDate,
+                    timeZone: 'Europe/Paris',
+                },
+            },
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Erreur lors de la mise à jour sur Google Calendar :', error);
+        throw error;
+    }
+};

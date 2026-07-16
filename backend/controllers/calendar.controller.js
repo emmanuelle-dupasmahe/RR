@@ -42,3 +42,27 @@ export const deleteEvent = async (req, res) => {
         res.status(500).json({ message: 'Erreur lors de la suppression' });
     }
 };
+
+export const updateEvent = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { title, location, description, startDate, endDate } = req.body;
+
+        if (!title || !startDate || !endDate) {
+            return res.status(400).json({ message: 'Le titre, la date de début et de fin sont obligatoires.' });
+        }
+
+        const updatedEvent = await calendarService.editEvent(id, {
+            title,
+            location,
+            description,
+            startDate,
+            endDate
+        });
+
+        res.status(200).json({ message: 'Événement mis à jour avec succès', event: updatedEvent });
+    } catch (error) {
+        console.error('Erreur contrôleur updateEvent:', error);
+        res.status(500).json({ message: 'Erreur lors de la mise à jour de l\'événement' });
+    }
+};

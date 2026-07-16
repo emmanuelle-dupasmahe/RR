@@ -13,7 +13,7 @@ import settingsRoutes from './routes/settings.routes.js';
 import videoRoutes from './routes/videos.routes.js';
 import membresRoutes from './routes/membres.routes.js';
 import groupeSettingsRoutes from './routes/groupesettings.routes.js';
-import calendarRoutes from './routes/calendar.routes.js'; // <-- NOUVEL IMPORT
+import calendarRoutes from './routes/calendar.routes.js'; 
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

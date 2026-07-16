@@ -239,11 +239,19 @@ function Agenda() {
             finalTitle = `${finalTitle} 📍 ${safeLocation.trim()}`;
         }
 
-        // ── ENVOI DES DONNÉES AU BACKEND ──
+        // ── ENVOI DES DONNÉES AU BACKEND (POST ou PUT) ──
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/calendar`, {
-                method: 'POST',
+
+            // Si on a un editingId, on met à jour (PUT), sinon on crée (POST)
+            const url = editingId
+                ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/calendar/${editingId}`
+                : `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/calendar`;
+
+            const method = editingId ? 'PUT' : 'POST';
+
+            const response = await fetch(url, {
+                method: method,
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
@@ -273,8 +281,10 @@ function Agenda() {
             };
 
             if (editingId) {
+                // Remplacement de l'ancien événement par le nouveau dans le state
                 setEvents(events.map(e => e.id === editingId ? eventToSave : e));
             } else {
+                // Ajout du nouvel événement
                 setEvents([...events, eventToSave]);
             }
 
@@ -303,7 +313,6 @@ function Agenda() {
                 <meta name="robots" content="noindex, nofollow" />
             </Helmet>
 
-            {/* Injection des Overrides CSS pour améliorer le mode sombre et ajouter le bouton + au survol */}
             <style>{`
                 .dark .rbc-toolbar button {
                     color: #ffffff !important;
@@ -333,7 +342,6 @@ function Agenda() {
                     color: #ffffff !important;
                 }
                 
-                /* ─── EFFET SURVOL : BOUTON "+" ROUGE DANS LES CASES ─── */
                 .rbc-day-bg {
                     position: relative;
                 }
@@ -343,7 +351,7 @@ function Agenda() {
                     top: 50%;
                     left: 50%;
                     transform: translate(-50%, -50%);
-                    background-color: #dc2626; /* Le rouge de ta charte */
+                    background-color: #dc2626;
                     color: #ffffff;
                     width: 34px;
                     height: 34px;
@@ -354,7 +362,7 @@ function Agenda() {
                     font-size: 22px;
                     font-weight: bold;
                     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-                    pointer-events: none; /* Le clic traverse le "+" pour valider la sélection de la date */
+                    pointer-events: none;
                     z-index: 10;
                 }
             `}</style>
@@ -461,13 +469,27 @@ function Agenda() {
                                     <div className="space-y-1">
                                         <label className="text-[10px] font-black uppercase tracking-widest opacity-50 ml-1">Lieu / Adresse</label>
                                         {isAdmin ? (
-                                            <input
-                                                type="text"
-                                                value={newEvent.location}
-                                                onChange={(e) => setNewEvent({ ...newEvent, location: e.target.value })}
-                                                placeholder="Ex: rue de la Mairie, 83110 Sanary"
-                                                className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 p-3 rounded-lg text-sm text-black dark:text-white focus:border-primary focus:outline-none transition-colors"
-                                            />
+                                            <div className="space-y-2">
+                                                <input
+                                                    type="text"
+                                                    value={newEvent.location}
+                                                    onChange={(e) => setNewEvent({ ...newEvent, location: e.target.value })}
+                                                    placeholder="Ex: rue de la Mairie, 83110 Sanary"
+                                                    className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 p-3 rounded-lg text-sm text-black dark:text-white focus:border-primary focus:outline-none transition-colors"
+                                                />
+                                                {newEvent.location && newEvent.location.trim() !== '' && (
+                                                    <div className="text-right">
+                                                        <a
+                                                            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(newEvent.location)}`}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="text-primary hover:underline text-[11px] font-black uppercase tracking-wider inline-flex items-center gap-1"
+                                                        >
+                                                            🗺️ Tester l'itinéraire Google Maps
+                                                        </a>
+                                                    </div>
+                                                )}
+                                            </div>
                                         ) : (
                                             <div className="w-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 p-3 rounded-lg text-sm text-black dark:text-white flex justify-between items-center">
                                                 <span>{newEvent.location || "Aucune adresse indiquée"}</span>
