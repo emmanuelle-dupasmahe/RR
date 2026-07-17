@@ -48,12 +48,15 @@ function Agenda() {
         start: '',
         end: '',
         location: '',
-        type: 'indispo'
+        type: 'indispo',
+        publicTime: ''
     });
 
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const isAdmin = user?.role === 'admin';
+    // ── ÉTATS POUR L'AUTOCOMPLÉTION DES ADRESSES ──
+    const [addressSuggestions, setAddressSuggestions] = useState([]);
+    const [showSuggestions, setShowSuggestions] = useState(false);
 
     // ── CHARGEMENT DES DONNÉES DEPUIS LE BACKEND ──
     useEffect(() => {
@@ -77,13 +80,17 @@ function Agenda() {
                         if (lowerDesc.includes('type: concert') || lowerTitle.includes('concert')) type = 'concert';
                         else if (lowerDesc.includes('type: repetition') || lowerTitle.includes('répétition')) type = 'repetition';
 
+                        const publicTimeMatch = evt.description ? evt.description.match(/Heure public:\s*([0-9]{2}:[0-9]{2})/) : null;
+                        const publicTime = publicTimeMatch ? publicTimeMatch[1] : '';
+
                         return {
                             id: evt.id,
                             title: evt.summary,
                             start: new Date(evt.start?.dateTime || evt.start?.date),
                             end: new Date(evt.end?.dateTime || evt.end?.date),
                             location: evt.location || '',
-                            type: type
+                            type: type,
+                            publicTime: publicTime
                         };
                     });
 
@@ -119,10 +126,9 @@ function Agenda() {
         };
     };
 
-    // ── GESTION DES PLACEHOLDERS DYNAMIQUES ──
     const getPlaceholder = () => {
         if (newEvent.type === 'indispo') {
-            return "Ex: ❌ Indispo - Romain";
+            return `Ex: ❌ Indispo - ${user?.firstname || 'Membre'}`;
         }
         if (newEvent.type === 'repetition') {
             return "Ex: Répétition";
@@ -133,28 +139,31 @@ function Agenda() {
         return "Titre de l'événement";
     };
 
-    // ── ACTIONS SUR LE CALENDRIER ──
     const handleOpenModalForCreate = () => {
         setEditingId(null);
         setNewEvent({
-            title: isAdmin ? '' : `❌ Indispo - ${user?.firstname || 'Membre'}`,
+            title: '',
             start: '',
             end: '',
             location: '',
-            type: 'indispo'
+            type: 'indispo',
+            publicTime: ''
         });
+        setAddressSuggestions([]);
         setIsModalOpen(true);
     };
 
     const handleSelectSlot = (slotInfo) => {
         setEditingId(null);
         setNewEvent({
-            title: isAdmin ? '' : `❌ Indispo - ${user?.firstname || 'Membre'}`,
+            title: '',
             start: formatForInput(slotInfo.start),
             end: formatForInput(slotInfo.end || slotInfo.start),
             location: '',
-            type: 'indispo'
+            type: 'indispo',
+            publicTime: ''
         });
+        setAddressSuggestions([]);
         setIsModalOpen(true);
     };
 
@@ -171,13 +180,13 @@ function Agenda() {
             start: formatForInput(event.start),
             end: formatForInput(event.end),
             location: event.location || '',
-            type: event.type || 'indispo'
+            type: event.type || 'indispo',
+            publicTime: event.publicTime || ''
         });
-
+        setAddressSuggestions([]);
         setIsModalOpen(true);
     };
 
-    // ── GESTION DE LA SUPPRESSION ──
     const handleDelete = async () => {
         if (!editingId) return;
 
@@ -186,9 +195,7 @@ function Agenda() {
                 const token = localStorage.getItem('token');
                 const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/calendar/${editingId}`, {
                     method: 'DELETE',
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
+                    headers: { 'Authorization': `Bearer ${token}` }
                 });
 
                 if (response.ok) {
@@ -204,13 +211,38 @@ function Agenda() {
         }
     };
 
+    // ── RECHERCHE D'ADRESSE VIA L'API DATA.GOUV ──
+    const handleLocationChange = async (e) => {
+        const value = e.target.value;
+        setNewEvent({ ...newEvent, location: value });
+
+        if (value.length > 3) {
+            try {
+                const res = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(value)}&limit=5`);
+                const data = await res.json();
+                setAddressSuggestions(data.features);
+                setShowSuggestions(true);
+            } catch (err) {
+                console.error("Erreur avec l'API adresse :", err);
+            }
+        } else {
+            setShowSuggestions(false);
+            setAddressSuggestions([]);
+        }
+    };
+
+    const selectAddress = (label) => {
+        setNewEvent({ ...newEvent, location: label });
+        setShowSuggestions(false);
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
         const startDate = new Date(newEvent.start);
 
         if (isNaN(startDate.getTime())) {
-            alert("Attention : La date de début est obligatoire.");
+            alert("Attention : La date d'arrivée sur site est obligatoire.");
             setIsSubmitting(false);
             return;
         }
@@ -227,7 +259,7 @@ function Agenda() {
         }
 
         if (endDate <= startDate) {
-            alert("Attention : La date de fin doit être ultérieure à la date de début.");
+            alert("Attention : La date de fin doit être ultérieure à la date d'arrivée.");
             setIsSubmitting(false);
             return;
         }
@@ -235,19 +267,24 @@ function Agenda() {
         let finalTitle = newEvent.title || '';
         let safeLocation = newEvent.location || '';
 
+        if (newEvent.type === 'indispo' && finalTitle.trim() === '') {
+            finalTitle = `❌ Indispo - ${user?.firstname || 'Membre'}`;
+        }
+
         if (newEvent.type === 'concert' && safeLocation.trim() !== '') {
             finalTitle = `${finalTitle} 📍 ${safeLocation.trim()}`;
         }
 
-        // ── ENVOI DES DONNÉES AU BACKEND (POST ou PUT) ──
+        let finalDescription = `Type: ${newEvent.type}`;
+        if (newEvent.type === 'concert' && newEvent.publicTime) {
+            finalDescription += `\nHeure public: ${newEvent.publicTime}`;
+        }
+
         try {
             const token = localStorage.getItem('token');
-
-            // Si on a un editingId, on met à jour (PUT), sinon on crée (POST)
             const url = editingId
                 ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/calendar/${editingId}`
                 : `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/calendar`;
-
             const method = editingId ? 'PUT' : 'POST';
 
             const response = await fetch(url, {
@@ -259,15 +296,13 @@ function Agenda() {
                 body: JSON.stringify({
                     title: finalTitle,
                     location: safeLocation,
-                    description: `Type: ${isAdmin ? newEvent.type : 'indispo'}`,
+                    description: finalDescription,
                     startDate: startDate.toISOString(),
                     endDate: endDate.toISOString()
                 })
             });
 
-            if (!response.ok) {
-                throw new Error("Erreur lors de l'enregistrement sur Google Agenda");
-            }
+            if (!response.ok) throw new Error("Erreur lors de l'enregistrement sur Google Agenda");
 
             const result = await response.json();
 
@@ -276,15 +311,14 @@ function Agenda() {
                 title: result.event.summary,
                 start: new Date(result.event.start?.dateTime || startDate),
                 end: new Date(result.event.end?.dateTime || endDate),
-                type: isAdmin ? newEvent.type : 'indispo',
-                location: result.event.location || ''
+                type: newEvent.type,
+                location: result.event.location || '',
+                publicTime: newEvent.publicTime
             };
 
             if (editingId) {
-                // Remplacement de l'ancien événement par le nouveau dans le state
                 setEvents(events.map(e => e.id === editingId ? eventToSave : e));
             } else {
-                // Ajout du nouvel événement
                 setEvents([...events, eventToSave]);
             }
 
@@ -429,35 +463,29 @@ function Agenda() {
                         <div className="bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-white/10 p-6 md:p-8 rounded-2xl shadow-2xl w-full max-w-md relative max-h-[90vh] overflow-y-auto">
 
                             <h2 className="text-lg font-black uppercase tracking-widest mb-6 border-b border-gray-100 dark:border-white/10 pb-4">
-                                {editingId
-                                    ? (isAdmin ? "Modifier l'événement" : "Détails de l'événement")
-                                    : (isAdmin ? "Ajouter une date" : "Déclarer une indisponibilité")
-                                }
+                                {editingId ? "Modifier l'événement" : "Ajouter une date"}
                             </h2>
 
                             <form onSubmit={handleSubmit} className="space-y-4">
 
-                                {isAdmin && (
-                                    <div className="space-y-1">
-                                        <label className="text-[10px] font-black uppercase tracking-widest opacity-50 ml-1">Type d'événement</label>
-                                        <select
-                                            value={newEvent.type}
-                                            onChange={(e) => setNewEvent({ ...newEvent, type: e.target.value })}
-                                            className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 p-3 rounded-lg text-sm text-black dark:text-white focus:border-primary focus:outline-none transition-colors appearance-none"
-                                        >
-                                            <option value="indispo" className="bg-white dark:bg-[#111] text-black dark:text-white">Indisponibilité</option>
-                                            <option value="repetition" className="bg-white dark:bg-[#111] text-black dark:text-white">Répétition</option>
-                                            <option value="concert" className="bg-white dark:bg-[#111] text-black dark:text-white">Concert</option>
-                                        </select>
-                                    </div>
-                                )}
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-black uppercase tracking-widest opacity-50 ml-1">Type d'événement</label>
+                                    <select
+                                        value={newEvent.type}
+                                        onChange={(e) => setNewEvent({ ...newEvent, type: e.target.value })}
+                                        className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 p-3 rounded-lg text-sm text-black dark:text-white focus:border-primary focus:outline-none transition-colors appearance-none"
+                                    >
+                                        <option value="indispo" className="bg-white dark:bg-[#111] text-black dark:text-white">Indisponibilité</option>
+                                        <option value="repetition" className="bg-white dark:bg-[#111] text-black dark:text-white">Répétition</option>
+                                        <option value="concert" className="bg-white dark:bg-[#111] text-black dark:text-white">Concert</option>
+                                    </select>
+                                </div>
 
                                 <div className="space-y-1">
                                     <label className="text-[10px] font-black uppercase tracking-widest opacity-50 ml-1">Titre de l'événement</label>
                                     <input
                                         type="text"
-                                        readOnly={!isAdmin && newEvent.type === 'concert'}
-                                        required
+                                        required={newEvent.type !== 'indispo'}
                                         value={newEvent.title}
                                         onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })}
                                         placeholder={getPlaceholder()}
@@ -466,17 +494,33 @@ function Agenda() {
                                 </div>
 
                                 {newEvent.type === 'concert' && (
-                                    <div className="space-y-1">
-                                        <label className="text-[10px] font-black uppercase tracking-widest opacity-50 ml-1">Lieu / Adresse</label>
-                                        {isAdmin ? (
+                                    <>
+                                        <div className="space-y-1 relative">
+                                            <label className="text-[10px] font-black uppercase tracking-widest opacity-50 ml-1">Lieu / Adresse</label>
                                             <div className="space-y-2">
                                                 <input
                                                     type="text"
                                                     value={newEvent.location}
-                                                    onChange={(e) => setNewEvent({ ...newEvent, location: e.target.value })}
-                                                    placeholder="Ex: rue de la Mairie, 83110 Sanary"
+                                                    onChange={handleLocationChange}
+                                                    onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                                                    placeholder="Commencez à taper l'adresse..."
                                                     className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 p-3 rounded-lg text-sm text-black dark:text-white focus:border-primary focus:outline-none transition-colors"
                                                 />
+                                                {/* Menu déroulant des suggestions d'adresses */}
+                                                {showSuggestions && addressSuggestions.length > 0 && (
+                                                    <ul className="absolute z-50 w-full bg-white dark:bg-[#111] border border-gray-200 dark:border-white/10 rounded-lg shadow-xl mt-1 max-h-48 overflow-auto">
+                                                        {addressSuggestions.map((s, idx) => (
+                                                            <li
+                                                                key={idx}
+                                                                className="p-3 text-sm text-black dark:text-white hover:bg-gray-100 dark:hover:bg-white/10 cursor-pointer border-b border-gray-100 dark:border-white/5 last:border-none"
+                                                                onClick={() => selectAddress(s.properties.label)}
+                                                            >
+                                                                {s.properties.label}
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                )}
+
                                                 {newEvent.location && newEvent.location.trim() !== '' && (
                                                     <div className="text-right">
                                                         <a
@@ -490,30 +534,27 @@ function Agenda() {
                                                     </div>
                                                 )}
                                             </div>
-                                        ) : (
-                                            <div className="w-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 p-3 rounded-lg text-sm text-black dark:text-white flex justify-between items-center">
-                                                <span>{newEvent.location || "Aucune adresse indiquée"}</span>
-                                                {newEvent.location && (
-                                                    <a
-                                                        href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(newEvent.location)}`}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="text-primary hover:underline text-[11px] font-black uppercase tracking-wider ml-2 flex items-center gap-1 shrink-0"
-                                                    >
-                                                        🗺️ Voir l'itinéraire
-                                                    </a>
-                                                )}
-                                            </div>
-                                        )}
-                                    </div>
+                                        </div>
+
+                                        <div className="space-y-1">
+                                            <label className="text-[10px] font-black uppercase tracking-widest opacity-50 ml-1">Heure pour le public</label>
+                                            <input
+                                                type="time"
+                                                value={newEvent.publicTime}
+                                                onChange={(e) => setNewEvent({ ...newEvent, publicTime: e.target.value })}
+                                                className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 p-3 rounded-lg text-sm text-black dark:text-white focus:border-primary focus:outline-none transition-colors"
+                                            />
+                                        </div>
+                                    </>
                                 )}
 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-1">
-                                        <label className="text-[10px] font-black uppercase tracking-widest opacity-50 ml-1">Début</label>
+                                        <label className="text-[10px] font-black uppercase tracking-widest opacity-50 ml-1">
+                                            {newEvent.type === 'concert' ? 'Arrivée sur site' : 'Début'}
+                                        </label>
                                         <input
                                             type="datetime-local"
-                                            readOnly={!isAdmin && newEvent.type === 'concert'}
                                             required
                                             value={newEvent.start}
                                             onChange={(e) => setNewEvent({ ...newEvent, start: e.target.value })}
@@ -526,7 +567,6 @@ function Agenda() {
                                         </label>
                                         <input
                                             type="datetime-local"
-                                            readOnly={!isAdmin && newEvent.type === 'concert'}
                                             value={newEvent.end}
                                             onChange={(e) => setNewEvent({ ...newEvent, end: e.target.value })}
                                             className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 p-3 rounded-lg text-sm text-black dark:text-white focus:border-primary focus:outline-none"
@@ -535,7 +575,7 @@ function Agenda() {
                                 </div>
 
                                 <div className="flex gap-3 pt-4">
-                                    {isAdmin && editingId && (
+                                    {editingId && (
                                         <button
                                             type="button"
                                             onClick={handleDelete}
@@ -553,15 +593,13 @@ function Agenda() {
                                         Fermer
                                     </button>
 
-                                    {(isAdmin || newEvent.type !== 'concert') && (
-                                        <button
-                                            type="submit"
-                                            disabled={isSubmitting}
-                                            className={`flex-1 text-white px-4 py-3 rounded-lg text-[10px] font-black uppercase tracking-widest transition-colors ${isSubmitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-primary hover:bg-black dark:hover:bg-white dark:hover:text-black'}`}
-                                        >
-                                            {isSubmitting ? 'Enregistrement...' : 'Enregistrer'}
-                                        </button>
-                                    )}
+                                    <button
+                                        type="submit"
+                                        disabled={isSubmitting}
+                                        className={`flex-1 text-white px-4 py-3 rounded-lg text-[10px] font-black uppercase tracking-widest transition-colors ${isSubmitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-primary hover:bg-black dark:hover:bg-white dark:hover:text-black'}`}
+                                    >
+                                        {isSubmitting ? 'Enregistrement...' : 'Enregistrer'}
+                                    </button>
                                 </div>
                             </form>
                         </div>

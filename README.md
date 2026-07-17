@@ -8,6 +8,7 @@ Plateforme web dynamique pour le groupe **Réservoir Rock** (Six-Fours-les-Plage
 - **React.js** (Vite)
 - **Tailwind CSS** (Styling moderne et responsive)
 - **React Router Dom** (Navigation)
+- **React Big Calendar** (Affichage de l'agenda des concerts)
 - **Framer Motion** (Animations - optionnel)
 
 ### Backend
@@ -16,20 +17,25 @@ Plateforme web dynamique pour le groupe **Réservoir Rock** (Six-Fours-les-Plage
 - **JSON Web Tokens (JWT)** (Authentification sécurisée)
 - **Multer** (Gestion de l'upload de fichiers audio/vidéo)
 - **Dotenv** (Variables d'environnement)
+- **Google APIs (googleapis)** (Synchronisation avec Google Calendar)
 
 ## ✨ Fonctionnalités
 
 ### Pour les utilisateurs
 - **Accueil** : Affichage dynamique du prochain concert et visuels (Hero) mis à jour par l'admin.
 - **Le Groupe** : Présentation des musiciens, histoire du groupe et répertoire.
-- **Concerts** : Liste chronologique des prochaines dates de tournée.
 - **Vidéos** : Galerie de vidéos (Intégrations YouTube ou fichiers locaux).
 - **Studio Répétitions** : Lecteur audio pour écouter les derniers enregistrements du groupe.
 - **Livre d'or** : Espace de discussion pour les fans (authentification requise pour poster).
-- **Espace Membre (Backstage)** : Accès exclusif aux enregistrements privés (WIP) pour les utilisateurs ayant le rôle "Membre".
+- **Agenda** : Calendrier des concerts synchronisé avec l'agenda Google du groupe.
+- **Contact** : Formulaire pour envoyer un message directement au groupe.
 
-### Pour les administrateurs (BackStage)
-- **Gestion des Concerts** : CRUD complet (Ajouter, Modifier, Supprimer).
+### Pour les membres (Backstage)
+- **Espace Privé** : Accès à des enregistrements et contenus exclusifs (WIP).
+- **Liste des Concerts** : Vue complète de tous les concerts, passés et à venir.
+
+### Pour les administrateurs (Dashboard)
+- **Gestion des Concerts** : CRUD complet (Ajouter, Modifier, Supprimer) avec synchronisation automatique vers un agenda Google Calendar partagé.
 - **Gestion des Musiciens** : Mise à jour des membres et de leurs photos.
 - **Gestion Média** : Upload et gestion des morceaux audio (avec système de **Markers**/horodatage) et des vidéos.
 - **Modération** : Suppression de messages sur le livre d'or et système de réponse officielle.

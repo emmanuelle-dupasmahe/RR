@@ -100,20 +100,20 @@ function Home() {
                                 {nextConcert.titre} <span className="text-[#ff0000] mx-2">//</span> {nextConcert.lieu}
                             </p>
                             <p className="text-gray-700 dark:text-white/60 text-[11px] md:text-sm font-black uppercase tracking-[0.18em] md:tracking-widest mt-2 flex justify-center items-center flex-wrap">
-    {nextConcert.heure.substring(0, 5)} 
-    {nextConcert.statut && (
-        <>
-            <span className="text-[#ff0000] mx-2">•</span> 
-            <span className={nextConcert.statut === 'Privé' ? 'text-orange-600 dark:text-orange-400 font-extrabold' : ''}>
-                {nextConcert.statut}
-            </span>
-        </>
-    )}
-</p>
+                                {nextConcert.heure.substring(0, 5)}
+                                {nextConcert.statut && (
+                                    <>
+                                        <span className="text-[#ff0000] mx-2">•</span>
+                                        <span className={nextConcert.statut === 'Privé' ? 'text-orange-600 dark:text-orange-400 font-extrabold' : ''}>
+                                            {nextConcert.statut}
+                                        </span>
+                                    </>
+                                )}
+                            </p>
                         </div>
                     ) : (
                         <p className="text-gray-600 dark:text-white/40 text-[0.95rem] md:text-[1rem] leading-[1.5] italic transition-colors">
-                            Aucune date programmée pour le moment.
+                            🎸 Nouvelles dates en préparation... À vos agendas !
                         </p>
                     )}
                 </section>

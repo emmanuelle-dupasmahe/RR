@@ -1,4 +1,3 @@
-// controllers/concerts.controller.js
 import Concert from '../models/concert.model.js';
 
 // GET /api/concerts
