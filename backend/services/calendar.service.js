@@ -14,8 +14,8 @@ const auth = new google.auth.GoogleAuth({
 });
 
 const calendar = google.calendar({ version: 'v3', auth });
-// const CALENDAR_ID = 'danceny83@gmail.com';
-const CALENDAR_ID = '7f063ec0a2ede0e96bc8821ef7fac095dca0a63be1848ee9a701451281b92014@group.calendar.google.com';
+const CALENDAR_ID = process.env.GOOGLE_CALENDAR_ID;
+
 
 export const addEvent = async (eventDetails) => {
     try {
@@ -47,7 +47,7 @@ export const getUpcomingEvents = async () => {
         const response = await calendar.events.list({
             calendarId: CALENDAR_ID,
             timeMin: new Date().toISOString(),
-            maxResults: 10,
+            maxResults: 2500,
             singleEvents: true,
             orderBy: 'startTime',
         });

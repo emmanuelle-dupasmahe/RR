@@ -399,6 +399,11 @@ function Agenda() {
                     pointer-events: none;
                     z-index: 10;
                 }
+                    .dark input[type="time"]::-webkit-calendar-picker-indicator,
+    .dark input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+        filter: invert(1);
+        cursor: pointer;
+    }
             `}</style>
 
             <div className="mt-[80px] min-h-[calc(100vh-82px)] bg-white dark:bg-black text-black dark:text-white font-sans p-4 md:p-8 relative">

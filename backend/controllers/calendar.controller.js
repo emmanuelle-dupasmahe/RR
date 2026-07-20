@@ -23,7 +23,7 @@ const parseConcertData = (title, description, startDate, location) => {
         date_concert,
         heure,
         lieu: location || 'Lieu à définir',
-        adresse: location || ''
+        adresse: '' // On laisse vide pour éviter le doublon d'affichage
     };
 };
 
