@@ -268,7 +268,7 @@ function Dashboard() {
         }
     };
 
-    //REPETITIONS
+    // REPETITIONS
     const handleRepSubmit = async (e) => {
         e.preventDefault();
         const data = new FormData();
@@ -284,9 +284,21 @@ function Dashboard() {
 
         try {
             await repetitionService.create(data);
-            setRepFormData({ titre: '', detail: '', url: '' });
+
+            
+            setRepFormData({ titre: '', detail: '', url: '', start_time: 0, end_time: '', status: 'private' });
+
+            
             setRepFile(null);
+
+            
             setMarkers([]);
+            setNewMarker({ time: '', label: '' });
+
+            
+            const fileInput = document.getElementById('audio-upload');
+            if (fileInput) fileInput.value = '';
+
             e.target.reset();
             fetchRepetitions();
             alert('Morceau ajouté au studio !');
