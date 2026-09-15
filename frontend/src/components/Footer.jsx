@@ -21,12 +21,12 @@ function Footer() {
             <div className="max-w-[80rem] mx-auto flex flex-col items-center gap-[24px]">
 
                 <div className="space-y-1">
-                    {/* Texte copyright : gris plus foncé en mode clair pour la lisibilité */}
+                    {/* Texte copyright */}
                     <p className="m-0 text-[0.875rem] text-gray-500 dark:text-[#888]">
                         Réservoir Rock - © {new Date().getFullYear()} Tous droits réservés.
                     </p>
 
-                    {/* Crédits : On ajuste le contraste du gris secondaire */}
+                    {/* Crédits */}
                     <p className="m-0 text-[11px] text-gray-400 dark:text-[#aaaaaa] uppercase tracking-[2.5px] font-semibold transition-colors">
                         Crédits photographiques : <span className="text-primary">{credits}</span>
                     </p>

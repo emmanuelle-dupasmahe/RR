@@ -204,7 +204,7 @@ function Livredor() {
                         )}
                     </div>
 
-                    {/* PAGINATION CIRCULAIRE */}
+                    {/* PAGINATION */}
                     {totalPages > 1 && (
                         <div className="mt-20 flex justify-center items-center gap-8">
                             <button

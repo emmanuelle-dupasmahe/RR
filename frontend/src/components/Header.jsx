@@ -14,7 +14,7 @@ function Header() {
     const [isStandalone, setIsStandalone] = useState(false);
     const navigate = useNavigate();
 
-    // --- LOGIQUE DARK MODE ---
+
     const [theme, setTheme] = useState(() => {
         const saved = localStorage.getItem('theme');
         return saved ? saved : 'dark';
@@ -71,7 +71,7 @@ function Header() {
     };
 
     const logoSrc = `${import.meta.env.BASE_URL}images/rr_trans.png`;
-    // --------------------------
+
 
     const isAdmin = user?.role === 'admin';
 
@@ -132,15 +132,15 @@ function Header() {
                 )}
 
                 <NavLink to="/videos" className={navLinkClass}>Vidéos</NavLink>
-                
-                {/* ── AJOUT CONCERTS ET AGENDA PROTÉGÉS ── */}
+
+                {/* AJOUT CONCERTS ET AGENDA PROTÉGÉS */}
                 {isAuthenticated && (user?.role === 'admin' || user?.role === 'member') && (
                     <>
                         <NavLink to="/concerts" className={navLinkClass}>Concerts</NavLink>
                         <NavLink to="/agenda" className={navLinkClass}>Agenda</NavLink>
                     </>
                 )}
-                
+
                 <NavLink to="/livredor" className={navLinkClass}>Livre d'or</NavLink>
                 <NavLink to="/contact" className={navLinkClass}>Contact</NavLink>
 
@@ -225,18 +225,18 @@ function Header() {
                         <NavLink to="/backstage" onClick={() => setIsMenuOpen(false)} className={backstageClass}>Backstage</NavLink>
                     )}
                     <NavLink to="/videos" onClick={() => setIsMenuOpen(false)} className={navLinkClass}>Vidéos</NavLink>
-                    
-                    {/* ── AJOUT CONCERTS ET AGENDA PROTÉGÉS ── */}
+
+                    {/* AJOUT CONCERTS ET AGENDA PROTÉGÉS */}
                     {isAuthenticated && (user?.role === 'admin' || user?.role === 'member') && (
                         <>
                             <NavLink to="/concerts" onClick={() => setIsMenuOpen(false)} className={navLinkClass}>Concerts</NavLink>
                             <NavLink to="/agenda" onClick={() => setIsMenuOpen(false)} className={navLinkClass}>Agenda</NavLink>
                         </>
                     )}
-                    
+
                     <NavLink to="/livredor" onClick={() => setIsMenuOpen(false)} className={navLinkClass}>Livre d'or</NavLink>
                     <NavLink to="/contact" onClick={() => setIsMenuOpen(false)} className={navLinkClass}>Contact</NavLink>
-                    
+
                     {isAuthenticated && user?.role === 'admin' && (
                         <NavLink to="/dashboard" onClick={() => setIsMenuOpen(false)} className={navLinkClass}>Admin</NavLink>
                     )}

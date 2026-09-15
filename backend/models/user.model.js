@@ -17,7 +17,7 @@ const User = {
         return results[0] || null;
     },
 
-    // --- NOUVEAU : Récupérer tous les utilisateurs (pour l'admin) ---
+    // Récupérer tous les utilisateurs (pour l'admin) 
     async findAll() {
         const sql = 'SELECT id, email, firstname, lastname, role, created_at FROM users ORDER BY created_at DESC';
         return await query(sql);
@@ -39,13 +39,13 @@ const User = {
         return { id: result.insertId, email, firstname, lastname, role: 'user' };
     },
 
-    // --- NOUVEAU : Modifier le rôle d'un utilisateur ---
+    // Modifier le rôle d'un utilisateur 
     async updateRole(id, role) {
         const sql = 'UPDATE users SET role = ? WHERE id = ?';
         return await query(sql, [role, id]);
     },
 
-    // --- NOUVEAU : Supprimer un utilisateur ---
+    // Supprimer un utilisateur 
     async delete(id) {
         const sql = 'DELETE FROM users WHERE id = ?';
         return await query(sql, [id]);

@@ -46,7 +46,7 @@ export default function Groupe() {
         /* Le fond devient blanc en mode clair, noir en mode dark */
             <div className="mt-[80px] min-h-[calc(100vh-82px)] bg-white dark:bg-black text-black dark:text-white transition-colors duration-300">
 
-                {/* Header avec dégradé adaptable */}
+                {/* Header */}
                 <div className="text-center pt-[48px] pb-[20px] bg-gradient-to-b from-gray-100 to-white dark:from-[#111] dark:to-black px-4 transition-colors duration-300">
                     <h1 className="text-[3rem] md:text-[3.5rem] font-[300] uppercase m-0 leading-[1.2] tracking-[0.1em] text-black dark:text-white inline-block">
                         Le Groupe
@@ -145,7 +145,7 @@ export default function Groupe() {
                             Expanded Repertoire
                         </h3>
                         <p className="text-gray-400 dark:text-[#888] text-[10px] md:text-[12px] leading-[2.5] uppercase tracking-[3px] font-medium transition-colors">
-                            {/* Si le répertoire est vide en BDD, on peut mettre une valeur par défaut ou rien */}
+
                             {groupTexts.group_repertoire || "Répertoire en cours de mise à jour..."}
                         </p>
                     </div>

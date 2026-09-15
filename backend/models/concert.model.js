@@ -1,7 +1,7 @@
 import { query } from '../config/db.js';
 
 const Concert = {
-    // ── MÉTHODES EXISTANTES  ──
+
     async findAllFuture(limit, offset) {
         const sql = 'SELECT * FROM concerts WHERE date_concert >= CURDATE() ORDER BY date_concert ASC LIMIT ? OFFSET ?';
         return await query(sql, [limit, offset]);
@@ -33,7 +33,7 @@ const Concert = {
         return await query(sql, [id]);
     },
 
-    // ── NOUVELLES MÉTHODES POUR LA SYNCHRONISATION GOOGLE AGENDA ──
+    // ── SYNCHRONISATION GOOGLE AGENDA ──
 
     async findByGoogleId(google_event_id) {
         const sql = 'SELECT * FROM concerts WHERE google_event_id = ?';

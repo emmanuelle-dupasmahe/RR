@@ -19,7 +19,7 @@ async function fetchAPI(endpoint, options = {}) {
         headers['Authorization'] = `Bearer ${token}`;
     }
 
-    // Gestion automatique du JSON pour le body (sauf si c'est un FormData pour l'upload)
+    // Gestion automatique du JSON pour le body 
     if (options.body && !(options.body instanceof FormData) && !headers['Content-Type']) {
         headers['Content-Type'] = 'application/json';
     }

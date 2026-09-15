@@ -67,7 +67,7 @@ export const addResponse = async (req, res) => {
 // GET /api/livredor/admin/all
 export const getAllMessages = async (req, res) => {
     try {
-        // Vérifier que l'utilisateur est admin
+        // on vérifie que l'utilisateur est admin
         if (req.user.role !== 'admin') {
             return res.status(403).json({ error: 'Accès interdit' });
         }

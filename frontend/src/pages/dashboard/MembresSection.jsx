@@ -176,7 +176,7 @@ function MembresSection({
                     </form>
                 </div>
 
-                {/* ── Members grid ── */}
+                {/* Members grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                     {groupMembers.length > 0 ? groupMembers.map(m => (
                         <div key={m.id} className="relative p-5 bg-black/[0.02] dark:bg-black border border-black/5 dark:border-white/10 rounded-xl hover:border-primary/30 hover:shadow-[0_0_20px_rgba(227,24,31,0.12)] transition-all group min-h-[120px] flex items-center">

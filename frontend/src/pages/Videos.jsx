@@ -40,7 +40,7 @@ function Videos() {
 
             <div className="mt-[80px] min-h-[calc(100vh-82px)] bg-white dark:bg-black transition-colors duration-300 font-sans">
 
-                {/* EN-TÊTE ADAPTATIF */}
+                {/* EN-TÊTE */}
                 <div className="text-center py-[48px] bg-gray-50 dark:bg-gradient-to-b dark:from-[#111] dark:to-black border-b border-gray-100 dark:border-none">
                     <h1 className="text-[3rem] md:text-[3.5rem] font-[300] uppercase m-0 leading-[1.2] tracking-[0.1em] text-black dark:text-white inline-block">
                         Vidéos Live
@@ -142,7 +142,7 @@ function VideoCard({ video }) {
                             <video
                                 src={url}
                                 controls
-                                playsInline // IMPORTANT pour les fichiers locaux également
+                                playsInline // pour les fichiers locaux également
                                 className="w-full h-full block object-cover"
                             />
                         )}

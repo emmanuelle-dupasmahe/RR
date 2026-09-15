@@ -31,7 +31,7 @@ export const createConcert = async (req, res) => {
         return res.status(400).json({ error: 'Tous les champs sont obligatoires' });
     }
 
-    // Logique métier : vérifier que la date n'est pas dans le passé
+    // on vérifie que la date n'est pas dans le passé
     const today = new Date().toLocaleDateString('en-CA');
     if (date_concert < today) {
         return res.status(400).json({ error: "La date du concert ne peut pas être dans le passé." });
@@ -67,7 +67,7 @@ export const updateConcert = async (req, res) => {
             return res.status(400).json({ error: 'Tous les champs sont obligatoires' });
         }
 
-        // Vérifier que le concert existe
+        // Von verifie que le concert existe
         const concert = await Concert.findById(id);
         if (!concert) {
             return res.status(404).json({ error: 'Concert non trouvé' });

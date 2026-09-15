@@ -479,7 +479,7 @@ function Dashboard() {
         }
     };
 
-    // --- COMPOSANTS  ---
+    // COMPOSANTS  
     const Pagination = ({ pages, onPageChange }) => (
         pages.total > 1 && (
             <div className="flex justify-center gap-4 mt-8">

@@ -11,8 +11,8 @@ const RepetitionsSkeleton = () => {
                     <div className="flex items-center gap-[16px] flex-1 w-full">
                         {/* Carré Numéro */}
                         <div className="w-[40px] h-[40px] bg-[#222] rounded-[4px] shrink-0 animate-pulse" />
-                        
-                        {/* Bloc Texte - On utilise des div pour forcer l'étalement */}
+
+                        {/* Bloc Texte */}
                         <div className="flex flex-col flex-1 gap-3">
                             <div className="h-[20px] w-[80%] bg-[#222] rounded animate-pulse" />
                             <div className="h-[14px] w-[40%] bg-[#111] rounded animate-pulse" />

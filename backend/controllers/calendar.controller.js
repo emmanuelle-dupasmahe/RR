@@ -23,7 +23,7 @@ const parseConcertData = (title, description, startDate, location) => {
         date_concert,
         heure,
         lieu: location || 'Lieu à définir',
-        adresse: '' // On laisse vide pour éviter le doublon d'affichage
+        adresse: ''
     };
 };
 
@@ -45,10 +45,10 @@ export const createEvent = async (req, res) => {
             return res.status(400).json({ message: 'Le titre, la date de début et de fin sont obligatoires.' });
         }
 
-        // 1. Sauvegarde dans Google Agenda
+        // Sauvegarde dans Google Agenda
         const newEvent = await calendarService.addEvent({ title, location, description, startDate, endDate });
 
-        // 2. Synchronisation en base de données MySQL
+        // Synchronisation en base de données MySQL
         const concertData = parseConcertData(title, description, startDate, location);
 
         if (concertData) {

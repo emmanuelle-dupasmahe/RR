@@ -22,7 +22,7 @@ export const updateSetting = async (req, res) => {
     }
 
     try {
-        // Vérifier que le paramètre existe
+        // on verifie que le paramètre existe
         const setting = await GroupSetting.findByKey(key_name);
         if (!setting) {
             return res.status(404).json({ error: "Paramètre non trouvé" });

@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Sun, Moon } from 'lucide-react'; // Si tu utilises lucide-react, sinon utilise des emojis
+import { Sun, Moon } from 'lucide-react';
 
 export default function ThemeToggle() {
-  // On initialise avec 'dark' car c'est ton look actuel
+
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
 
   useEffect(() => {

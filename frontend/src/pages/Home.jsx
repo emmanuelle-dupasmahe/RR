@@ -8,12 +8,12 @@ function Home() {
     const { isAuthenticated } = useAuth();
     const [nextConcert, setNextConcert] = useState(null);
 
-    // États pour les images (valeurs par défaut pointant sur tes fichiers actuels)
+    // pour les images hero
     const [heroDesktop, setHeroDesktop] = useState('/images/groupe.jpg');
     const [heroMobile, setHeroMobile] = useState('/images/RR_mobile.jpg');
 
     useEffect(() => {
-        // 1. Charger le prochain concert
+        // le prochain concert
         concertService.getAll()
             .then(data => {
                 if (Array.isArray(data.concerts) && data.concerts.length > 0) {
@@ -22,10 +22,10 @@ function Home() {
             })
             .catch(err => console.error("Erreur prochain concert:", err));
 
-        // 2. Charger les photos personnalisées du Dashboard (si elles existent)
+        // photos personnalisées du Dashboard 
         settingsService.getGroupSettings()
             .then(settings => {
-                // settings est maintenant un objet direct, plus besoin de .find() !
+
 
                 if (settings.hero_desktop) {
                     setHeroDesktop(`${BASE_URL}${settings.hero_desktop}`);
@@ -38,7 +38,7 @@ function Home() {
             .catch(err => console.log("Utilisation des images par défaut", err));
     }, []);
 
-    // Détermination de l'image selon la taille de l'écran (approche simple)
+    // Détermination de l'image selon la taille de l'écran 
     const [currentHero, setCurrentHero] = useState(heroDesktop);
 
     useEffect(() => {
@@ -50,7 +50,7 @@ function Home() {
         return () => window.removeEventListener('resize', handleResize);
     }, [heroDesktop, heroMobile]);
 
-    // Préparation des gradients (on garde tes réglages exacts)
+
     const lightGradient = `linear-gradient(rgba(255,255,255,0.2),rgba(255,255,255,0.55))`;
     const darkGradient = `linear-gradient(rgba(0,0,0,0.2),rgba(0,0,0,0.4))`;
 
@@ -68,11 +68,11 @@ function Home() {
             <div
                 className="mt-[80px] min-h-[calc(100vh-82px)] flex flex-col justify-center items-center text-center bg-no-repeat bg-cover bg-center transition-all duration-500"
                 style={{
-                    // On injecte l'image dynamiquement ici
+
                     backgroundImage: `var(--hero-gradient), url(${currentHero})`
                 }}
             >
-                {/* Petit hack CSS pour gérer le gradient Clair/Sombre dynamiquement */}
+
                 <style>{`
                 div { --hero-gradient: ${lightGradient}; }
                 .dark div { --hero-gradient: ${darkGradient}; }

@@ -9,7 +9,7 @@ export const getAllRepetitions = async (req, res) => {
         const limit = parseInt(req.query.limit) || 10;
         const offset = (page - 1) * limit;
 
-        // Déterminer le rôle de l'utilisateur
+        // on détermine le rôle de l'utilisateur
         let userRole = 'guest';
         const authHeader = req.headers.authorization;
         if (authHeader) {

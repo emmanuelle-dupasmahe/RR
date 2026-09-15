@@ -14,7 +14,7 @@ const router = express.Router();
 // Routes spécifiques d'abord (avant les routes avec :id)
 router.get('/admin/all', authMiddleware, getAllMessages);
 
-// Puis les routes génériques
+//  routes génériques
 router.get('/', getAllPublicMessages);
 router.post('/', authMiddleware, createMessage);
 router.put('/:id/reponse', addResponse);

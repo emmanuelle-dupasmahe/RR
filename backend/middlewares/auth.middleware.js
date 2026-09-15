@@ -9,7 +9,7 @@ const authMiddleware = async (req, res, next) => {
         }
         const token = authHeader.split(' ')[1];
 
-        // Vérification sommaire de la structure (doit avoir 2 points pour 3 parties)
+        // Vérification de la structure 
         if (!token || token.split('.').length !== 3 || token === 'undefined' || token === 'null') {
             return res.status(401).json({ error: 'Format de token invalide (malformed)' });
         }
@@ -20,7 +20,7 @@ const authMiddleware = async (req, res, next) => {
             return res.status(401).json({ error: 'Utilisateur non trouvé' });
         }
         req.user = user;
-        next();//pour ne pas tourner en boucle
+        next();
     } catch (error) {
         console.error("Erreur JWT Middleware:", error.message);
         if (error.name === 'TokenExpiredError') {

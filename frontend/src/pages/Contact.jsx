@@ -11,7 +11,7 @@ const contactsAdminInfo = [
     { nom: "Jean-Marc", role: "Relation clientèle", tel: "06 87 13 62 00", fallbackPhoto: "/images/jeanmarc.jpg" }
 ];
 
-// ── SOUS-COMPOSANT POUR MASQUER/AFFICHER LE NUMÉRO ──
+// SOUS-COMPOSANT POUR MASQUER/AFFICHER LE NUMÉRO 
 function ContactCard({ contact }) {
     const [showPhone, setShowPhone] = useState(false);
 
@@ -51,7 +51,7 @@ function ContactCard({ contact }) {
     );
 }
 
-// ── COMPOSANT PRINCIPAL ──
+// COMPOSANT PRINCIPAL 
 function Contact() {
     const { user, isAuthenticated } = useAuth();
     const [message, setMessage] = useState('');

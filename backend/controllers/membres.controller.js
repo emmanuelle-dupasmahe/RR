@@ -43,7 +43,7 @@ export const updateMembre = async (req, res) => {
     }
 
     try {
-        // Vérifier que le membre existe
+        // on vérifie que le membre existe
         const membre = await Membre.findById(id);
         if (!membre) {
             return res.status(404).json({ error: 'Membre non trouvé' });
@@ -62,7 +62,7 @@ export const deleteMembre = async (req, res) => {
     const { id } = req.params;
 
     try {
-        // Vérifier que le membre existe
+        // on vérifie que le membre existe
         const membre = await Membre.findById(id);
         if (!membre) {
             return res.status(404).json({ error: 'Membre non trouvé' });

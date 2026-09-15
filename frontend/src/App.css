@@ -9,9 +9,7 @@
   --font-sans: "Onest", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
-/* ============================================================
-   STYLES GLOBAUX - Prevent layout shift
-   ============================================================ */
+/* STYLES GLOBAUX */
 html {
   overflow-y: scroll;
   overflow-x: hidden;
@@ -32,11 +30,9 @@ body {
   overflow-x: clip;
 }
 
-/* ============================================================
-   STYLE DES LECTEURS AUDIO 
-   ============================================================ */
+/* STYLE DES LECTEURS AUDIO  */
 
-/* --- LOOK SOMBRE  --- */
+/* Look dark */
 .dark audio {
   background-color: transparent !important;
   border-radius: 9999px;
@@ -47,7 +43,7 @@ body {
   background-color: #000000 !important;
 }
 
-/* Inversion des boutons pour qu'ils soient blancs sur le rouge/noir */
+/* boutons blancs sur le rouge/noir */
 .dark audio::-webkit-media-controls-play-button,
 .dark audio::-webkit-media-controls-mute-button,
 .dark audio::-webkit-media-controls-current-time-display,
@@ -55,15 +51,13 @@ body {
   filter: invert(1) brightness(2) !important;
 }
 
-/* --- MODE CLAIR  --- */
+/* Mode light */
 html:not(.dark) audio::-webkit-media-controls-panel {
   background-image: none !important;
   background-color: #e5e7eb !important;
 }
 
-/* ============================================================
-   ANIMATIONS & SHIMMER
-   ============================================================ */
+/* ANIMATIONS & SHIMMER */
 @keyframes shimmer {
   0% {
     background-position: 200% center;
