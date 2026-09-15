@@ -112,7 +112,7 @@ function Videos() {
 function VideoCard({ video }) {
     const isYoutube = !!video.url_youtube;
 
-    // Ajout de playsinline=1 pour forcer la lecture dans le site sur mobile
+    
     const url = isYoutube
         ? `https://www.youtube.com/embed/${video.url_youtube}?playsinline=1&rel=0`
         : video.file_path?.startsWith('/uploads')
@@ -134,10 +134,8 @@ function VideoCard({ video }) {
                                 src={url}
                                 title={video.titre}
                                 className="w-full h-full block"
-                                // allow="presentation" aide parfois sur certains navigateurs mobiles
                                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                                 allowFullScreen
-                                // sandbox peut aider à restreindre les redirections automatiques
                                 sandbox="allow-forms allow-scripts allow-pointer-lock allow-same-origin allow-top-navigation-by-user-activation allow-presentation"
                             ></iframe>
                         ) : (

@@ -19,7 +19,7 @@ const WavePlayer = ({ url, startTime, endTime, id, markers = [] }) => {
     };
 
     useEffect(() => {
-        // Réduire drastiquement minPxPerSec en mobile pour eviter le débordement
+       
         const isMobile = window.innerWidth < 768;
         const minPxSec = isMobile ? 0.5 : zoomLevel;
         setMinPxPerSec(minPxSec);
@@ -27,7 +27,7 @@ const WavePlayer = ({ url, startTime, endTime, id, markers = [] }) => {
         wavesurferRef.current = WaveSurfer.create({
             container: containerRef.current,
             waveColor: '#a1a1aa',
-            progressColor: '#e3181f', // Rouge Primaire
+            progressColor: '#e3181f', 
             cursorColor: '#e3181f',
             barWidth: 2,
             barRadius: 3,
