@@ -1,7 +1,7 @@
 import * as calendarService from '../services/calendar.service.js';
 import Concert from '../models/concert.model.js';
 
-// ── FONCTION UTILITAIRE POUR PARSER LES DONNÉES DU CONCERT ──
+// pour parser les données du concert
 const parseConcertData = (title, description, startDate, location) => {
     const isConcert = description && description.toLowerCase().includes('type: concert');
     if (!isConcert) return null;

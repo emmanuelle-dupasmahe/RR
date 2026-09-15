@@ -9,7 +9,7 @@ const authMiddleware = async (req, res, next) => {
         }
         const token = authHeader.split(' ')[1];
 
-        // Vérification de la structure 
+        // Vérification 
         if (!token || token.split('.').length !== 3 || token === 'undefined' || token === 'null') {
             return res.status(401).json({ error: 'Format de token invalide (malformed)' });
         }
