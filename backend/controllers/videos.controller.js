@@ -33,7 +33,6 @@ export const createVideo = async (req, res) => {
 
     try {
         // On passe explicitement des valeurs nulles pour les anciens champs de fichiers
-        // (Cela évite de devoir modifier ton modèle SQL tout de suite)
         await Video.create(titre, description, url_youtube, null, null, null, null);
         res.status(201).json({ message: 'Vidéo ajoutée avec succès !' });
     } catch (error) {
