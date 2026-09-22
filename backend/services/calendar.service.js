@@ -46,12 +46,30 @@ export const getUpcomingEvents = async () => {
     try {
         const response = await calendar.events.list({
             calendarId: CALENDAR_ID,
-            timeMin: new Date().toISOString(),
+            // On enlève q: 'concert' pour que Google nous renvoie tout le calendrier sans restriction
             maxResults: 2500,
             singleEvents: true,
             orderBy: 'startTime',
         });
-        return response.data.items;
+
+        const now = new Date();
+
+        // On filtre intelligemment les résultats en JavaScript
+        const filteredEvents = response.data.items.filter(event => {
+            // On récupère la date de l'événement (gère les événements sur une journée entière ou avec heure précise)
+            const eventDate = new Date(event.start.dateTime || event.start.date);
+
+
+            // On cherche le mot "concert" de façon large, soit dans le titre, soit dans la description
+            const titleMatch = event.summary && event.summary.toLowerCase().includes('concert');
+            const descMatch = event.description && event.description.toLowerCase().includes('concert');
+            const isConcert = titleMatch || descMatch;
+
+            // Règle : on conserve l'événement SI c'est dans le futur (indispos, réunions...) OU SI c'est un concert
+            return eventDate >= now || isConcert;
+        });
+
+        return filteredEvents;
     } catch (error) {
         console.error('Erreur lors de la récupération de l\'agenda :', error);
         throw error;

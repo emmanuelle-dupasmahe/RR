@@ -20,24 +20,16 @@ const storage = multer.diskStorage({
 
 // Filtre de sécurité strict côté serveur
 const fileFilter = (req, file, cb) => {
-    // Liste des extensions autorisées (images, audio, vidéo)
     const allowedFileTypes = /jpeg|jpg|png|webp|mp3|mp4|wav|m4a/;
-
-    // Vérification de l'extension du nom de fichier
     const extname = allowedFileTypes.test(path.extname(file.originalname).toLowerCase());
-
-    // Vérification du type MIME (la véritable signature du fichier)
     const mimetype = allowedFileTypes.test(file.mimetype);
-
     if (mimetype && extname) {
-        return cb(null, true); // Le fichier est sûr et accepté
+        return cb(null, true); 
     } else {
-        // Rejet immédiat si le format n'est pas dans la liste
+        // rejet immédiat si le format n'est pas dans la liste
         cb(new Error("Erreur de sécurité : Type de fichier non autorisé."));
     }
 };
-
-// Intégration du filtre à l'export de Multer
 export const upload = multer({
     storage,
     fileFilter
