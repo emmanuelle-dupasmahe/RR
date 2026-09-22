@@ -1,6 +1,7 @@
 // components/Footer.jsx
 import { useState, useEffect } from 'react';
 import { settingsService } from '../services/api';
+import { Link } from 'react-router-dom';
 
 function Footer() {
     const [credits, setCredits] = useState('Mika');
@@ -20,16 +21,24 @@ function Footer() {
         <footer className="bg-white dark:bg-black px-[40px] py-[30px] text-center transition-colors duration-300 font-sans">
             <div className="max-w-[80rem] mx-auto flex flex-col items-center gap-[24px]">
 
-                <div className="space-y-1">
-                    {/* Texte copyright */}
-                    <p className="m-0 text-[0.875rem] text-gray-500 dark:text-[#888]">
-                        Réservoir Rock - © {new Date().getFullYear()} Tous droits réservés.
-                    </p>
+                <div className="space-y-4 text-center">
+                    {/* Liens Légaux */}
+                    <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-[0.75rem] text-gray-500 dark:text-[#888] font-medium tracking-wide uppercase">
+                        <Link to="/mentions-legales" className="hover:text-primary transition-colors">Mentions Légales</Link>
+                        <Link to="/confidentialite" className="hover:text-primary transition-colors">Politique de Confidentialité (RGPD)</Link>
+                        <Link to="/accessibilite" className="hover:text-primary transition-colors">Accessibilité (RGAA)</Link>
+                    </div>
+                    <div className="space-y-1">
+                        {/* Texte copyright */}
+                        <p className="m-0 text-[0.875rem] text-gray-500 dark:text-[#888]">
+                            Réservoir Rock - © {new Date().getFullYear()} Tous droits réservés.
+                        </p>
 
-                    {/* Crédits */}
-                    <p className="m-0 text-[11px] text-gray-400 dark:text-[#aaaaaa] uppercase tracking-[2.5px] font-semibold transition-colors">
-                        Crédits photographiques : <span className="text-primary">{credits}</span>
-                    </p>
+                        {/* Crédits */}
+                        <p className="m-0 text-[11px] text-gray-400 dark:text-[#aaaaaa] uppercase tracking-[2.5px] font-semibold transition-colors">
+                            Crédits photographiques : <span className="text-primary">{credits}</span>
+                        </p>
+                    </div>
                 </div>
 
                 {/* RÉSEAUX SOCIAUX */}

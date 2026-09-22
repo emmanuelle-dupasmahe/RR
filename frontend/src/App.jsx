@@ -16,6 +16,9 @@ import Livredor from './pages/Livredor.jsx';
 import Backstage from './pages/Backstage';
 import Contact from './pages/Contact.jsx';
 import Agenda from './pages/Agenda.jsx'; 
+import MentionsLegales from './pages/MentionsLegales.jsx';
+import PolitiqueConfidentialite from './pages/PolitiqueConfidentialite.jsx';
+import Accessibilite from './pages/Accessibilite.jsx';
 
 function App() {
   const { loading } = useAuth();
@@ -36,11 +39,22 @@ function App() {
         } />
         <Route path="/livredor" element={<Livredor />} />
         <Route path="/contact" element={<Contact />} />
-        <Route path="/agenda" element={<Agenda />} />
+        
+        
+        <Route path="/agenda" element={
+          <PrivateRoute><Agenda /></PrivateRoute>
+        } />
+        
+        {/* Déclaration des nouvelles routes légales */}
+        <Route path="/mentions-legales" element={<MentionsLegales />} />
+        <Route path="/confidentialite" element={<PolitiqueConfidentialite />} />
+        <Route path="/accessibilite" element={<Accessibilite />} />
+
         <Route path="/dashboard" element={
           <PrivateRoute adminOnly={true}><Dashboard /></PrivateRoute>
         } />
       </Route>
+
       {/* Routes SANS Header (plein écran) */}
       <Route element={<AuthLayout />}>
         <Route path="/login" element={<Login />} />
