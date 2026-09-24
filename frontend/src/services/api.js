@@ -114,7 +114,6 @@ export const settingsService = {
         method: 'POST',
         body: JSON.stringify({ key_name: key, value_text: value })
     }),
-    // AJOUT DE LA FONCTION POUR LES PHOTOS HERO
     updateHeroImage: (key, formData) => fetchAPI(`/groupesettings/hero/${key}`, {
         method: 'POST',
         body: formData
@@ -146,4 +145,19 @@ export const userService = {
     delete: (id) => fetchAPI(`/auth/users/${id}`, {
         method: 'DELETE'
     })
+};
+
+// --- SERVICES PHOTOS (Carrousel) ---
+export const photoService = {
+    getAll: () => fetchAPI('/photos'),
+    create: (formData) => fetchAPI('/photos', { method: 'POST', body: formData }),
+    delete: (id) => fetchAPI(`/photos/${id}`, { method: 'DELETE' })
+};
+
+// --- SERVICES OFFRES ---
+export const offreService = {
+    getAll: (activeOnly = false) => fetchAPI(`/offres${activeOnly ? '?active=true' : ''}`),
+    create: (formData) => fetchAPI('/offres', { method: 'POST', body: formData }),
+    update: (id, formData) => fetchAPI(`/offres/${id}`, { method: 'PUT', body: formData }),
+    delete: (id) => fetchAPI(`/offres/${id}`, { method: 'DELETE' })
 };

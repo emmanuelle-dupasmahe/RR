@@ -9,6 +9,9 @@ import VideosSection from './dashboard/VideosSection';
 import GroupeSection from './dashboard/GroupeSection';
 import MembresSection from './dashboard/MembresSection';
 import MessagesSection from './dashboard/MessagesSection';
+
+import PhotosSection from './dashboard/PhotosSection';
+import OffresSection from './dashboard/OffresSection';
 import {
     concertService,
     repetitionService,
@@ -17,6 +20,8 @@ import {
     settingsService,
     guestbookService,
     userService,
+    photoService,
+    offreService,
     BASE_URL
 } from '../services/api';
 
@@ -72,7 +77,25 @@ function Dashboard() {
     const [updateFile, setUpdateFile] = useState(null);
     const [allUsers, setAllUsers] = useState([]);
 
-    // --- LOGIQUE FETCH ---
+    // STATES POUR PHOTOS ET OFFRES
+    const [photos, setPhotos] = useState([]);
+    const [offres, setOffres] = useState([]);
+
+    // FONCTIONS FETCH POUR PHOTOS ET OFFRES
+    const fetchPhotos = async () => {
+        try {
+            const data = await photoService.getAll();
+            setPhotos(data.photos || []);
+        } catch (err) { console.error("Erreur photos:", err); }
+    };
+
+    const fetchOffres = async () => {
+        try {
+            const data = await offreService.getAll();
+            setOffres(data.offres || []);
+        } catch (err) { console.error("Erreur offres:", err); }
+    };
+
 
     const fetchRepetitions = async (page = 1) => {
         try {
@@ -104,6 +127,8 @@ function Dashboard() {
         fetchConcerts();
         fetchRepetitions();
         fetchVideos();
+        fetchPhotos();
+        fetchOffres();
         settingsService.getTourTitle()
             .then(data => setTourTitle(data.value || ''));
 
@@ -285,17 +310,17 @@ function Dashboard() {
         try {
             await repetitionService.create(data);
 
-            
+
             setRepFormData({ titre: '', detail: '', url: '', start_time: 0, end_time: '', status: 'private' });
 
-            
+
             setRepFile(null);
 
-            
+
             setMarkers([]);
             setNewMarker({ time: '', label: '' });
 
-            
+
             const fileInput = document.getElementById('audio-upload');
             if (fileInput) fileInput.value = '';
 
@@ -542,6 +567,8 @@ function Dashboard() {
                             { id: 'concerts', label: 'Concerts' },
                             { id: 'repetitions', label: 'Répétitions' },
                             { id: 'videos', label: 'Vidéos' },
+                            { id: 'photos', label: 'Galerie Photos' },
+                            { id: 'offres', label: 'Nos Offres' },
                             { id: 'groupe', label: 'Le Groupe' },
                             { id: 'design', label: 'Hero' },
                             { id: 'membres', label: 'Musiciens' },
@@ -729,6 +756,32 @@ function Dashboard() {
                             allUsers={allUsers}
                             handleToggleRole={handleToggleRole}
                             handleDeleteUser={handleDeleteUser}
+                        />
+                    )}
+
+                    {/*  PHOTOS */}
+                    {activeSection === 'photos' && (
+                        <PhotosSection
+                            SectionTitle={SectionTitle}
+                            photos={photos}
+                            fetchPhotos={fetchPhotos}
+                            photoService={photoService}
+                            inputClass={inputClass}
+                            btnClass={btnClass}
+                            BASE_URL={BASE_URL}
+                        />
+                    )}
+
+                    {/* OFFRES */}
+                    {activeSection === 'offres' && (
+                        <OffresSection
+                            SectionTitle={SectionTitle}
+                            offres={offres}
+                            fetchOffres={fetchOffres}
+                            offreService={offreService}
+                            inputClass={inputClass}
+                            btnClass={btnClass}
+                            BASE_URL={BASE_URL}
                         />
                     )}
 

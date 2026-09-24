@@ -13,7 +13,9 @@ import settingsRoutes from './routes/settings.routes.js';
 import videoRoutes from './routes/videos.routes.js';
 import membresRoutes from './routes/membres.routes.js';
 import groupeSettingsRoutes from './routes/groupesettings.routes.js';
-import calendarRoutes from './routes/calendar.routes.js'; 
+import calendarRoutes from './routes/calendar.routes.js';
+import photoRoutes from './routes/photo.routes.js';
+import offreRoutes from './routes/offre.routes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -61,7 +63,9 @@ app.use('/api/settings', settingsRoutes);
 app.use('/api/videos', videoRoutes);
 app.use('/api/membres', membresRoutes);
 app.use('/api/groupesettings', groupeSettingsRoutes);
-app.use('/api/calendar', calendarRoutes); // <-- NOUVELLE ROUTE
+app.use('/api/calendar', calendarRoutes);
+app.use('/api/photos', photoRoutes);
+app.use('/api/offres', offreRoutes);
 
 // Frontend build (static + SPA fallback)
 const frontendDistPath = path.join(__dirname, '../frontend/dist');

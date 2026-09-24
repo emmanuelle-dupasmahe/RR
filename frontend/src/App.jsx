@@ -10,15 +10,16 @@ import Register from './pages/Register.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import Concerts from './pages/Concerts.jsx';
 import Repetitions from './pages/Repetitions.jsx';
-import Videos from './pages/Videos.jsx';
+import Medias from './pages/Medias.jsx';
 import Legroupe from './pages/Legroupe.jsx';
 import Livredor from './pages/Livredor.jsx';
 import Backstage from './pages/Backstage';
 import Contact from './pages/Contact.jsx';
-import Agenda from './pages/Agenda.jsx'; 
+import Agenda from './pages/Agenda.jsx';
 import MentionsLegales from './pages/MentionsLegales.jsx';
 import PolitiqueConfidentialite from './pages/PolitiqueConfidentialite.jsx';
 import Accessibilite from './pages/Accessibilite.jsx';
+import Offres from './pages/Offres.jsx';
 
 function App() {
   const { loading } = useAuth();
@@ -30,7 +31,8 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/legroupe" element={<Legroupe />} />
         <Route path="/repetition" element={<Repetitions />} />
-        <Route path="/videos" element={<Videos />} />
+        <Route path="/medias" element={<Medias />} />
+        <Route path="/offres" element={<Offres />} />
         <Route path="/backstage" element={
           <PrivateRoute><Backstage /></PrivateRoute>
         } />
@@ -39,12 +41,12 @@ function App() {
         } />
         <Route path="/livredor" element={<Livredor />} />
         <Route path="/contact" element={<Contact />} />
-        
-        
+
+
         <Route path="/agenda" element={
           <PrivateRoute><Agenda /></PrivateRoute>
         } />
-        
+
         {/* Déclaration des nouvelles routes légales */}
         <Route path="/mentions-legales" element={<MentionsLegales />} />
         <Route path="/confidentialite" element={<PolitiqueConfidentialite />} />

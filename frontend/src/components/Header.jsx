@@ -14,7 +14,6 @@ function Header() {
     const [isStandalone, setIsStandalone] = useState(false);
     const navigate = useNavigate();
 
-
     const [theme, setTheme] = useState(() => {
         const saved = localStorage.getItem('theme');
         return saved ? saved : 'dark';
@@ -71,7 +70,6 @@ function Header() {
     };
 
     const logoSrc = `${import.meta.env.BASE_URL}images/rr_trans.png`;
-
 
     const isAdmin = user?.role === 'admin';
 
@@ -131,7 +129,8 @@ function Header() {
                     </NavLink>
                 )}
 
-                <NavLink to="/videos" className={navLinkClass}>Vidéos</NavLink>
+                <NavLink to="/medias" className={navLinkClass}>Médias</NavLink>
+                <NavLink to="/offres" className={navLinkClass}>Nos Offres</NavLink> {/* NOUVEAU LIEN */}
 
                 {/* AJOUT CONCERTS ET AGENDA PROTÉGÉS */}
                 {isAuthenticated && (user?.role === 'admin' || user?.role === 'member') && (
@@ -224,7 +223,8 @@ function Header() {
                     {isAuthenticated && (user?.role === 'admin' || user?.role === 'member') && (
                         <NavLink to="/backstage" onClick={() => setIsMenuOpen(false)} className={backstageClass}>Backstage</NavLink>
                     )}
-                    <NavLink to="/videos" onClick={() => setIsMenuOpen(false)} className={navLinkClass}>Vidéos</NavLink>
+                    <NavLink to="/medias" onClick={() => setIsMenuOpen(false)} className={navLinkClass}>Médias</NavLink>
+                    <NavLink to="/offres" onClick={() => setIsMenuOpen(false)} className={navLinkClass}>Nos Offres</NavLink> {/* NOUVEAU LIEN */}
 
                     {/* AJOUT CONCERTS ET AGENDA PROTÉGÉS */}
                     {isAuthenticated && (user?.role === 'admin' || user?.role === 'member') && (
