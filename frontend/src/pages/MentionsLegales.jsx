@@ -6,16 +6,16 @@ function MentionsLegales() {
                 <h1 className="text-[2rem] md:text-[3rem] font-[300] uppercase mb-12 text-center tracking-[0.1em]">
                     Mentions Légales
                 </h1>
-                
+
                 <div className="space-y-8 text-sm md:text-base leading-relaxed text-gray-700 dark:text-gray-300">
                     <section>
                         <h2 className="text-xl font-bold mb-4 text-primary uppercase tracking-wide">1. Édition du site</h2>
-                        <p className="mb-2">Conformément aux dispositions de l'article 6 de la Loi n° 2004-575 du 21 juin 2004 pour la Confiance dans l'Économie Numérique (LCEN), il est porté à la connaissance des utilisateurs du site web Réservoir Rock l'identité des différents intervenants dans le cadre de sa réalisation et de son suivi :[cite: 2]</p>
+                        <p className="mb-2">Conformément aux dispositions de l'article 6 de la Loi n° 2004-575 du 21 juin 2004 pour la Confiance dans l'Économie Numérique (LCEN), il est porté à la connaissance des utilisateurs du site web Réservoir Rock l'identité des différents intervenants dans le cadre de sa réalisation et de son suivi :</p>
                         <ul className="list-disc pl-6 space-y-1">
                             <li><strong>Propriétaire du site :</strong> [Réservoir Rock]</li>
-                            <li><strong>Adresse :</strong> []</li>
-                            <li><strong>Contact :</strong> [] — Téléphone : []</li>
-                            <li><strong>Directeur de la publication :</strong> []</li>
+                            <li><strong>Adresse :</strong> [790 chemin des Puérats, 83140 Six-Fours-les-Plages]</li>
+                            <li><strong>Contact :</strong> [0609978124] — Téléphone : []</li>
+                            <li><strong>Directeur de la publication :</strong> [Réservoir Rock]</li>
                         </ul>
                     </section>
 

@@ -117,7 +117,6 @@ function Header() {
             {/* NAVIGATION DESKTOP */}
             <nav className="hidden lg:flex flex-nowrap absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 lg:gap-[16px] xl:gap-[25px] items-center justify-center">
                 <NavLink to="/legroupe" className={navLinkClass}>Le groupe</NavLink>
-                <NavLink to="/repetition" className={navLinkClass}>Répétitions</NavLink>
 
                 {isAuthenticated && (user?.role === 'admin' || user?.role === 'member') && (
                     <NavLink to="/backstage" className={backstageClass}>
@@ -130,17 +129,17 @@ function Header() {
                 )}
 
                 <NavLink to="/medias" className={navLinkClass}>Médias</NavLink>
-                <NavLink to="/offres" className={navLinkClass}>Nos Offres</NavLink> {/* NOUVEAU LIEN */}
+                <NavLink to="/offres" className={navLinkClass}>Nos Offres</NavLink>
 
-                {/* AJOUT CONCERTS ET AGENDA PROTÉGÉS */}
+                {/* LIENS PROTÉGÉS (Visibles uniquement par le groupe) */}
                 {isAuthenticated && (user?.role === 'admin' || user?.role === 'member') && (
                     <>
+                        <NavLink to="/repetition" className={navLinkClass}>Répétitions</NavLink>
                         <NavLink to="/concerts" className={navLinkClass}>Concerts</NavLink>
                         <NavLink to="/agenda" className={navLinkClass}>Agenda</NavLink>
                     </>
                 )}
 
-                <NavLink to="/livredor" className={navLinkClass}>Livre d'or</NavLink>
                 <NavLink to="/contact" className={navLinkClass}>Contact</NavLink>
 
                 {isAuthenticated && user?.role === 'admin' && (
@@ -219,22 +218,23 @@ function Header() {
                 } bg-white dark:bg-black`}>
                 <nav className="flex flex-col items-center gap-8 mb-12">
                     <NavLink to="/legroupe" onClick={() => setIsMenuOpen(false)} className={navLinkClass}>Le groupe</NavLink>
-                    <NavLink to="/repetition" onClick={() => setIsMenuOpen(false)} className={navLinkClass}>Répétitions</NavLink>
+
                     {isAuthenticated && (user?.role === 'admin' || user?.role === 'member') && (
                         <NavLink to="/backstage" onClick={() => setIsMenuOpen(false)} className={backstageClass}>Backstage</NavLink>
                     )}
-                    <NavLink to="/medias" onClick={() => setIsMenuOpen(false)} className={navLinkClass}>Médias</NavLink>
-                    <NavLink to="/offres" onClick={() => setIsMenuOpen(false)} className={navLinkClass}>Nos Offres</NavLink> {/* NOUVEAU LIEN */}
 
-                    {/* AJOUT CONCERTS ET AGENDA PROTÉGÉS */}
+                    <NavLink to="/medias" onClick={() => setIsMenuOpen(false)} className={navLinkClass}>Médias</NavLink>
+                    <NavLink to="/offres" onClick={() => setIsMenuOpen(false)} className={navLinkClass}>Nos Offres</NavLink>
+
+                    {/* LIENS PROTÉGÉS (Visibles uniquement par le groupe) */}
                     {isAuthenticated && (user?.role === 'admin' || user?.role === 'member') && (
                         <>
+                            <NavLink to="/repetition" onClick={() => setIsMenuOpen(false)} className={navLinkClass}>Répétitions</NavLink>
                             <NavLink to="/concerts" onClick={() => setIsMenuOpen(false)} className={navLinkClass}>Concerts</NavLink>
                             <NavLink to="/agenda" onClick={() => setIsMenuOpen(false)} className={navLinkClass}>Agenda</NavLink>
                         </>
                     )}
 
-                    <NavLink to="/livredor" onClick={() => setIsMenuOpen(false)} className={navLinkClass}>Livre d'or</NavLink>
                     <NavLink to="/contact" onClick={() => setIsMenuOpen(false)} className={navLinkClass}>Contact</NavLink>
 
                     {isAuthenticated && user?.role === 'admin' && (

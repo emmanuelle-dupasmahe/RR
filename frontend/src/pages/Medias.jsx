@@ -176,18 +176,24 @@ function Medias() {
 
             {/* OVERLAY MODAL 3D POUR LE ZOOM IMAGE */}
             <div
-                className={`fixed inset-0 z-[100] flex items-center justify-center bg-black/95 transition-opacity duration-700 ${modalPhoto ? (isAnimating ? 'opacity-100' : 'opacity-0') : 'hidden'}`}
+                className={`fixed inset-0 z-[9999] flex items-center justify-center bg-black/95 transition-opacity duration-700 ${modalPhoto ? (isAnimating ? 'opacity-100' : 'opacity-0') : 'hidden'}`}
                 onClick={closeModal}
                 style={{ perspective: '1200px' }} // Crée la profondeur pour l'effet 3D
             >
+                {/* BOUTON FERMER (Sorti de la zone 3D et fixé à l'écran) */}
+                <button
+                    onClick={closeModal}
+                    className="fixed top-4 right-4 md:top-8 md:right-8 bg-[#e3181f] text-white w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center font-bold text-xl md:text-2xl shadow-xl hover:scale-110 hover:bg-white hover:text-[#e3181f] transition-all z-[10000]"
+                >
+                    ×
+                </button>
+
                 {modalPhoto && (
                     <div
                         className="relative max-w-[95vw] max-h-[90vh]"
                         style={{
                             transformStyle: 'preserve-3d',
-                            // État 1 (fermé) : Tourné à 180°, taille 30% / État 2 (ouvert) : Tourné à 0°, taille 100%
                             transform: isAnimating ? 'rotateY(0deg) scale(1)' : 'rotateY(-180deg) scale(0.3)',
-                            // cubic-bezier permet d'avoir un léger effet de "ressort" à la fin de la rotation
                             transition: 'transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1)'
                         }}
                         onClick={(e) => e.stopPropagation()} // Empêche le clic sur l'image de fermer la modale
@@ -197,14 +203,6 @@ function Medias() {
                             alt={modalPhoto.description || 'Zoom'}
                             className="max-w-full max-h-[90vh] object-contain rounded-xl shadow-[0_0_50px_rgba(227,24,31,0.2)] border border-[#e3181f]/20 select-none"
                         />
-
-                        {/* Bouton croix pour fermer */}
-                        <button
-                            onClick={closeModal}
-                            className="absolute -top-4 -right-4 md:-top-6 md:-right-6 bg-[#e3181f] text-white w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center font-bold text-xl md:text-2xl shadow-xl hover:scale-110 hover:bg-white hover:text-[#e3181f] transition-all"
-                        >
-                            ×
-                        </button>
 
                         {/* Légende en dessous de l'image zoomée (si elle existe) */}
                         {modalPhoto.description && (

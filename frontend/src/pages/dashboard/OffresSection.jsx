@@ -8,6 +8,7 @@ function OffresSection({ SectionTitle, offres, fetchOffres, offreService, inputC
     const [prix, setPrix] = useState('');
     const [file, setFile] = useState(null);
     const [isActive, setIsActive] = useState(true);
+    const [existingImage, setExistingImage] = useState(null); // NOUVEAU : On stocke l'image existante
 
     const resetForm = () => {
         setEditingId(null);
@@ -16,6 +17,7 @@ function OffresSection({ SectionTitle, offres, fetchOffres, offreService, inputC
         setPrix('');
         setFile(null);
         setIsActive(true);
+        setExistingImage(null); // NOUVEAU : On réinitialise l'image existante
         const fileInput = document.getElementById('offre-image-upload');
         if (fileInput) fileInput.value = '';
     };
@@ -27,6 +29,7 @@ function OffresSection({ SectionTitle, offres, fetchOffres, offreService, inputC
         setPrix(offre.prix || '');
         setIsActive(offre.is_active === 1);
         setFile(null);
+        setExistingImage(offre.image_url); // NOUVEAU : On sauvegarde l'URL de l'image actuelle
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
@@ -38,8 +41,14 @@ function OffresSection({ SectionTitle, offres, fetchOffres, offreService, inputC
         formData.append('description', description);
         formData.append('prix', prix);
         formData.append('is_active', isActive ? '1' : '0');
+
+        // NOUVEAU : La logique d'envoi de l'image
         if (file) {
+            // Si on a sélectionné un nouveau fichier, on l'envoie
             formData.append('image', file);
+        } else if (existingImage) {
+            // Sinon, si une image existait déjà, on renvoie son URL au backend pour qu'il la conserve
+            formData.append('existing_image', existingImage);
         }
 
         try {
@@ -131,6 +140,12 @@ function OffresSection({ SectionTitle, offres, fetchOffres, offreService, inputC
                             onChange={(e) => setFile(e.target.files[0])}
                             className={inputClass}
                         />
+                        {/* Petit rappel visuel de l'image existante */}
+                        {editingId && existingImage && !file && (
+                            <span className="text-[10px] text-green-600 dark:text-green-400 font-bold uppercase mt-1 block">
+                                ✓ Image actuelle conservée
+                            </span>
+                        )}
                     </div>
 
                     <div className="flex items-center gap-3 md:mt-6">
