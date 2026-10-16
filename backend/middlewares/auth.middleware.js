@@ -22,9 +22,8 @@ const authMiddleware = async (req, res, next) => {
             return res.status(401).json({ error: 'Utilisateur non trouvé' });
         }
 
-        // Blocage strict : seuls les membres du groupe et l'admin passent
-        if (user.role !== 'admin' && user.role !== 'member') {
-            return res.status(403).json({ error: 'Accès refusé : espace réservé au groupe' });
+        if (!['user', 'member', 'admin'].includes(user.role)) {
+            return res.status(403).json({ error: 'Accès refusé' });
         }
 
         req.user = user;
