@@ -56,60 +56,60 @@ function Offres() {
                             {offres.map((offre) => {
                                 const { label, titre } = splitTitre(offre.titre);
                                 return (
-                                    <div key={offre.id} className="group flex flex-col bg-gray-50 dark:bg-[#0a0a0a] rounded-[1.2rem] overflow-hidden shadow-xl border border-gray-200 dark:border-white/5 transition-all duration-500 hover:shadow-[0_0_30px_rgba(227,24,31,0.15)] hover:border-[#e3181f]/50">
+                                <div key={offre.id} className="group flex flex-col bg-gray-50 dark:bg-[#0a0a0a] rounded-[1.2rem] overflow-hidden shadow-xl border border-gray-200 dark:border-white/5 transition-all duration-500 hover:shadow-[0_0_30px_rgba(227,24,31,0.15)] hover:border-[#e3181f]/50">
 
-                                        {/* 1. EN-TÊTE DE LA CARTE (Libellé + Titre + Prix) */}
-                                        <div className="p-6 md:p-8 pb-6 border-l-4 border-[#e3181f]">
-                                            {label && (
-                                                <span className="block text-[#e3181f] font-black uppercase tracking-[0.25em] text-xs mb-3">
-                                                    {label}
-                                                </span>
-                                            )}
-                                            <h2 className="text-2xl md:text-[1.75rem] font-black uppercase text-black dark:text-white tracking-wide leading-[1.15] [text-wrap:balance]">
-                                                {titre}
-                                            </h2>
-                                            <div className="mt-5 inline-flex items-center gap-2 border border-[#e3181f]/40 bg-[#e3181f]/10 text-[#e3181f] px-4 py-1.5 rounded-full font-bold uppercase tracking-widest text-[0.7rem]">
-                                                <span className="h-1.5 w-1.5 rounded-full bg-[#e3181f]"></span>
-                                                {offre.prix || 'Sur devis'}
-                                            </div>
-                                        </div>
-
-                                        {/* 2. IMAGE (affichée en entier sur fond flouté) */}
-                                        {offre.image_url && (
-                                            <div className="aspect-[16/10] w-full relative overflow-hidden bg-black">
-                                                <img
-                                                    src={`${BASE_URL}${offre.image_url}`}
-                                                    alt=""
-                                                    aria-hidden="true"
-                                                    className="absolute inset-0 w-full h-full object-cover blur-2xl scale-110 opacity-40"
-                                                />
-                                                <img
-                                                    src={`${BASE_URL}${offre.image_url}`}
-                                                    alt={offre.titre}
-                                                    className="relative w-full h-full object-contain transition-transform duration-700 group-hover:scale-[1.03]"
-                                                />
-                                            </div>
+                                    {/* 1. EN-TÊTE DE LA CARTE (Libellé + Titre + Prix) */}
+                                    <div className="p-6 md:p-8 pb-6 border-l-4 border-[#e3181f]">
+                                        {label && (
+                                            <span className="block text-[#e3181f] font-black uppercase tracking-[0.25em] text-xs mb-3">
+                                                {label}
+                                            </span>
                                         )}
+                                        <h2 className="text-2xl md:text-[1.75rem] font-black uppercase text-black dark:text-white tracking-wide leading-[1.15] [text-wrap:balance]">
+                                            {titre}
+                                        </h2>
+                                        <div className="mt-5 inline-flex items-center gap-2 border border-[#e3181f]/40 bg-[#e3181f]/10 text-[#e3181f] px-4 py-1.5 rounded-full font-bold uppercase tracking-widest text-[0.7rem]">
+                                            <span className="h-1.5 w-1.5 rounded-full bg-[#e3181f]"></span>
+                                            {offre.prix || 'Sur devis'}
+                                        </div>
+                                    </div>
 
-                                        {/* 3. CONTENU (Description + Bouton) */}
-                                        <div className="p-6 md:p-8 pt-6 flex-1 flex flex-col">
-                                            <div className="flex-1">
-                                                <p className="text-gray-600 dark:text-gray-300 leading-relaxed whitespace-pre-line">
-                                                    {offre.description?.trim()}
-                                                </p>
-                                            </div>
+                                    {/* 2. IMAGE (affichée en entier sur fond flouté) */}
+                                    {offre.image_url && (
+                                        <div className="aspect-[16/10] w-full relative overflow-hidden bg-black">
+                                            <img
+                                                src={`${BASE_URL}${offre.image_url}`}
+                                                alt=""
+                                                aria-hidden="true"
+                                                className="absolute inset-0 w-full h-full object-cover blur-2xl scale-110 opacity-40"
+                                            />
+                                            <img
+                                                src={`${BASE_URL}${offre.image_url}`}
+                                                alt={offre.titre}
+                                                className="relative w-full h-full object-contain transition-transform duration-700 group-hover:scale-[1.03]"
+                                            />
+                                        </div>
+                                    )}
 
-                                            <div className="mt-8 pt-6 border-t border-gray-200 dark:border-white/10">
-                                                <a
-                                                    href="/contact"
-                                                    className="inline-block w-full text-center bg-black dark:bg-white text-white dark:text-black py-4 font-black uppercase tracking-widest rounded-lg transition-colors hover:bg-[#e3181f] dark:hover:bg-[#e3181f] hover:text-white"
-                                                >
-                                                    Demander un devis
-                                                </a>
-                                            </div>
+                                    {/* 3. CONTENU (Description + Bouton) */}
+                                    <div className="p-6 md:p-8 pt-6 flex-1 flex flex-col">
+                                        <div className="flex-1">
+                                            <p className="text-gray-600 dark:text-gray-300 leading-relaxed whitespace-pre-line">
+                                                {offre.description?.trim()}
+                                            </p>
                                         </div>
 
+                                        <div className="mt-8 pt-6 border-t border-gray-200 dark:border-white/10">
+                                            <a
+                                                href="/contact"
+                                                className="inline-block w-full text-center bg-black dark:bg-white text-white dark:text-black py-4 font-black uppercase tracking-widest rounded-lg transition-colors hover:bg-[#e3181f] dark:hover:bg-[#e3181f] hover:text-white"
+                                            >
+                                                Demander un devis
+                                            </a>
+                                        </div>
                                     </div>
+
+                                </div>
                                 );
                             })}
                         </div>
