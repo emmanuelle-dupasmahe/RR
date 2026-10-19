@@ -3,14 +3,15 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth.js';
 import { concertService, settingsService, BASE_URL } from '../services/api';
 import { Helmet } from 'react-helmet-async';
+import { publicAssetUrl } from '../utils/urls.js';
 
 function Home() {
     const { isAuthenticated } = useAuth();
     const [nextConcert, setNextConcert] = useState(null);
 
     // États pour les images (valeurs par défaut pointant sur tes fichiers actuels)
-    const [heroDesktop, setHeroDesktop] = useState('/images/groupe.jpg');
-    const [heroMobile, setHeroMobile] = useState('/images/RR_mobile.jpg');
+    const [heroDesktop, setHeroDesktop] = useState(publicAssetUrl('images/groupe.jpg'));
+    const [heroMobile, setHeroMobile] = useState(publicAssetUrl('images/RR_mobile.jpg'));
 
     useEffect(() => {
         // 1. Charger le prochain concert
