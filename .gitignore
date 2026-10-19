@@ -1,3 +1,9 @@
 /backend/node_modules
 /backend/.env
 /frontend/.env
+
+# Configuration locale et archives de production
+.env
+.env.*
+!.env.example
+/backend/uploads.zip

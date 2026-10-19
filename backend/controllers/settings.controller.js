@@ -24,7 +24,7 @@ export const updateSetting = async (req, res) => {
         const { key } = req.params;
         const { value } = req.body;
 
-        // on vérifie les permissions (admin uniquement)
+        // Vérifier les permissions (admin uniquement)
         if (req.user.role !== 'admin') {
             return res.status(403).json({ error: 'Accès interdit' });
         }

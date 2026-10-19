@@ -2,7 +2,7 @@
 import { query } from '../config/db.js';
 
 const GroupSetting = {
-    // on récupère tous les paramètres du groupe
+    // Récupérer tous les paramètres du groupe
     async findAll() {
         const results = await query('SELECT * FROM group_settings');
 
@@ -15,7 +15,7 @@ const GroupSetting = {
         return settings;
     },
 
-    // on récupère un paramètre par clé
+    // Récupérer un paramètre par clé
     async findByKey(key) {
         const sql = 'SELECT * FROM group_settings WHERE key_name = ?';
         const results = await query(sql, [key]);
