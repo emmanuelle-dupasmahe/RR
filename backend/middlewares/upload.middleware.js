@@ -1,11 +1,12 @@
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
+import { fileURLToPath } from 'url';
 
 // S'assurer que le dossier uploads existe
-const uploadDir = 'uploads/';
+const uploadDir = fileURLToPath(new URL('../uploads/', import.meta.url));
 if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir);
+    fs.mkdirSync(uploadDir, { recursive: true });
 }
 
 const storage = multer.diskStorage({

@@ -56,7 +56,7 @@ cd reservoir-rock
 PORT=5000
 DB_HOST=localhost
 DB_USER=root
-DB_PASS=
+DB_PASSWORD=
 DB_NAME=votre_bdd
 JWT_SECRET=votre_cle_secrete
 JWT_EXPIRES_IN=7d

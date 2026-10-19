@@ -2,13 +2,14 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth.js';
 import { guestbookService, memberService } from '../services/api';
 import { Helmet } from 'react-helmet-async';
+import { mediaUrl, publicAssetUrl } from '../utils/urls.js';
 
 // Données statiques avec les vrais numéros
 const contactsAdminInfo = [
-    { nom: "Éric", role: "Devis / Facture", tel: "06 09 97 81 24", fallbackPhoto: "/images/eric.jpg" },
-    { nom: "Martial", role: "Relation clientèle", tel: "06 80 22 94 14", fallbackPhoto: "/images/martial.jpg" },
-    { nom: "Romain", role: "Relation clientèle", tel: "06 18 75 14 29", fallbackPhoto: "/images/romain.jpg" },
-    { nom: "Jean-Marc", role: "Relation clientèle", tel: "06 87 13 62 00", fallbackPhoto: "/images/jeanmarc.jpg" }
+    { nom: "Éric", role: "Devis / Facture", tel: "06 09 97 81 24", fallbackPhoto: publicAssetUrl('images/eric.png') },
+    { nom: "Martial", role: "Relation clientèle", tel: "06 80 22 94 14", fallbackPhoto: publicAssetUrl('images/martiou.png') },
+    { nom: "Romain", role: "Relation clientèle", tel: "06 18 75 14 29", fallbackPhoto: publicAssetUrl('images/romain.png') },
+    { nom: "Jean-Marc", role: "Relation clientèle", tel: "06 87 13 62 00", fallbackPhoto: publicAssetUrl('images/JM.png') }
 ];
 
 // ── SOUS-COMPOSANT POUR MASQUER/AFFICHER LE NUMÉRO ──
@@ -58,8 +59,6 @@ function Contact() {
     const [status, setStatus] = useState({ type: '', text: '' });
     const [membresDB, setMembresDB] = useState([]);
 
-    const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-
     useEffect(() => {
         const fetchMembres = async () => {
             try {
@@ -93,9 +92,7 @@ function Contact() {
         let finalPhoto = staticInfo.fallbackPhoto;
 
         if (dbInfo && dbInfo.photo_url) {
-            finalPhoto = dbInfo.photo_url.startsWith('/uploads') 
-                ? `${BASE_URL}${dbInfo.photo_url}` 
-                : dbInfo.photo_url;
+            finalPhoto = mediaUrl(dbInfo.photo_url);
         }
         
         return {
