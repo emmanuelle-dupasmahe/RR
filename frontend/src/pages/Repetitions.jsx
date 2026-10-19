@@ -47,10 +47,12 @@ function Repetitions() {
     const fetchMorceaux = async () => {
         try {
             setLoading(true);
-            // On récupère toutes les répétitions 
+            // On récupère toutes les répétitions (comme dans le backstage)
             const data = await repetitionService.getAll(1, 100);
             const allData = Array.isArray(data) ? data : data.repetitions || [];
 
+            // --- FILTRE STRICT : Uniquement le contenu PUBLIC ---
+            // Même si un admin est connecté, il ne verra ici que ce que le public voit.
             const morceauxPublics = allData.filter(m => m.status === 'public');
 
             setMorceaux(morceauxPublics);

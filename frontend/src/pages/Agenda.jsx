@@ -464,7 +464,7 @@ function Agenda() {
 
                 {/* MODALE */}
                 {isModalOpen && (
-                    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[1050] flex items-center justify-center p-4">
                         <div className="bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-white/10 p-6 md:p-8 rounded-2xl shadow-2xl w-full max-w-md relative max-h-[90vh] overflow-y-auto">
 
                             <h2 className="text-lg font-black uppercase tracking-widest mb-6 border-b border-gray-100 dark:border-white/10 pb-4">
