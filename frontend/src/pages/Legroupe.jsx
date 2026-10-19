@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import LegroupeSkeleton from '../components/LegroupeSkeleton';
 import { memberService, settingsService } from '../services/api';
 import { Helmet } from 'react-helmet-async';
+import { mediaUrl, publicAssetUrl } from '../utils/urls.js';
 
 export default function Groupe() {
     const [membres, setMembres] = useState([]);
@@ -89,7 +90,7 @@ export default function Groupe() {
                             <div key={m.id} className="group flex flex-col items-center">
                                 <div className="relative w-full aspect-[3/4] overflow-hidden rounded-xl border border-black/10 dark:border-white/10 bg-gray-100 dark:bg-[#111] transition-all duration-500 group-hover:border-primary/50 group-hover:shadow-[0_0_30px_rgba(227,24,31,0.3)]">
                                     <img
-                                        src={m.photo_url || "/images/default-member.png"}
+                                        src={mediaUrl(m.photo_url) || publicAssetUrl('images/rr_trans.png')}
                                         alt={m.nom}
                                         className="w-full h-full object-cover grayscale transition-all duration-700 group-hover:grayscale-0 group-hover:scale-110"
                                     />

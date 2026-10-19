@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { offreService, BASE_URL } from '../services/api';
 import { Helmet } from 'react-helmet-async';
+import { Link } from 'react-router-dom';
 
 // Sépare "Option N°1 Concert Pop Rock" en { label: "Option N°1", titre: "Concert Pop Rock" }
 function splitTitre(titre = '') {
@@ -100,12 +101,12 @@ function Offres() {
                                         </div>
 
                                         <div className="mt-8 pt-6 border-t border-gray-200 dark:border-white/10">
-                                            <a
-                                                href="/contact"
+                                            <Link
+                                                to="/contact"
                                                 className="inline-block w-full text-center bg-black dark:bg-white text-white dark:text-black py-4 font-black uppercase tracking-widest rounded-lg transition-colors hover:bg-[#e3181f] dark:hover:bg-[#e3181f] hover:text-white"
                                             >
                                                 Demander un devis
-                                            </a>
+                                            </Link>
                                         </div>
                                     </div>
 

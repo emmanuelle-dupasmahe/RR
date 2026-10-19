@@ -1,10 +1,11 @@
 // services/api.js
+import { BACKEND_BASE_URL } from '../utils/urls.js';
 
 /**
  * CONFIGURATION DE L'ADRESSE IP
- * Si VITE_API_URL est vide, utilise une URL relative (même domaine)
+ * Sans VITE_API_URL, utilise le même domaine et le chemin du frontend.
  */
-export const BASE_URL = import.meta.env.VITE_API_URL || '';
+export const BASE_URL = BACKEND_BASE_URL;
 const API_URL = `${BASE_URL}/api`;
 
 /**

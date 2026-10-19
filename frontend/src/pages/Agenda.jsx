@@ -5,6 +5,7 @@ import { format, parse, startOfWeek, getDay } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { Helmet } from 'react-helmet-async';
+import { BASE_URL } from '../services/api';
 
 // ── CONFIGURATION DU CALENDRIER ──
 const locales = { 'fr': fr };
@@ -65,7 +66,7 @@ function Agenda() {
 
             try {
                 const token = localStorage.getItem('token');
-                const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/calendar`, {
+                const response = await fetch(`${BASE_URL}/api/calendar`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
 
@@ -193,7 +194,7 @@ function Agenda() {
         if (window.confirm("Êtes-vous sûr de vouloir supprimer cet événement ?")) {
             try {
                 const token = localStorage.getItem('token');
-                const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/calendar/${editingId}`, {
+                const response = await fetch(`${BASE_URL}/api/calendar/${editingId}`, {
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
@@ -283,8 +284,8 @@ function Agenda() {
         try {
             const token = localStorage.getItem('token');
             const url = editingId
-                ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/calendar/${editingId}`
-                : `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/calendar`;
+                ? `${BASE_URL}/api/calendar/${editingId}`
+                : `${BASE_URL}/api/calendar`;
             const method = editingId ? 'PUT' : 'POST';
 
             const response = await fetch(url, {
