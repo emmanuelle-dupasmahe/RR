@@ -63,7 +63,7 @@ function Dashboard() {
     const [newMember, setNewMember] = useState({ nom: '', instrument: '', ordre_affichage: 0 });
 
     const [messages, setMessages] = useState([]);
-    const [reponses, setReponses] = useState({}); // Objet pour stocker { messageId: "le texte" }
+    const [reponses, setReponses] = useState({});
 
     const handleChangementReponse = (id, texte) => {
         setReponses(prev => ({ ...prev, [id]: texte }));
@@ -80,6 +80,14 @@ function Dashboard() {
     // STATES POUR PHOTOS ET OFFRES
     const [photos, setPhotos] = useState([]);
     const [offres, setOffres] = useState([]);
+
+    // --- NOUVEAU : GESTIONNAIRE DE MODALE DE CONFIRMATION ---
+    const [confirmModal, setConfirmModal] = useState({ isOpen: false, message: '', onConfirm: null });
+
+    const requestConfirm = (message, onConfirmCallback) => {
+        setConfirmModal({ isOpen: true, message, onConfirm: onConfirmCallback });
+    };
+    // --------------------------------------------------------
 
     // FONCTIONS FETCH POUR PHOTOS ET OFFRES
     const fetchPhotos = async () => {
@@ -154,7 +162,6 @@ function Dashboard() {
     };
 
     const jumpToTime = (repId, time) => {
-
         const eventName = `jump-to-${String(repId).replace('wave-', '')}`;
         const event = new CustomEvent(eventName, { detail: time });
         window.dispatchEvent(event);
@@ -186,15 +193,15 @@ function Dashboard() {
         }
     };
 
-    const handleDelete = async (id) => {
-        if (!window.confirm("Supprimer cette date ?")) return;
-        try {
-            await concertService.delete(id);
-            fetchConcerts();
-            alert('Date supprimée');
-        } catch (err) {
-            alert('Erreur lors de la suppression');
-        }
+    const handleDelete = (id) => {
+        requestConfirm("Supprimer définitivement cette date de concert ?", async () => {
+            try {
+                await concertService.delete(id);
+                fetchConcerts();
+            } catch (err) {
+                alert('Erreur lors de la suppression');
+            }
+        });
     };
 
     const handleUpdateConcert = async (concert, selectedFile = null) => {
@@ -309,17 +316,10 @@ function Dashboard() {
 
         try {
             await repetitionService.create(data);
-
-
             setRepFormData({ titre: '', detail: '', url: '', start_time: 0, end_time: '', status: 'private' });
-
-
             setRepFile(null);
-
-
             setMarkers([]);
             setNewMarker({ time: '', label: '' });
-
 
             const fileInput = document.getElementById('audio-upload');
             if (fileInput) fileInput.value = '';
@@ -364,16 +364,15 @@ function Dashboard() {
     };
 
     // Supprimer un nouveau membre
-    const handleDeleteMember = async (id) => {
-        if (!window.confirm("Supprimer ce membre du groupe ?")) return;
-
-        try {
-            await memberService.delete(id);
-            setGroupMembers(groupMembers.filter(m => m.id !== id));
-            alert('Membre supprimé');
-        } catch (err) {
-            alert('Erreur lors de la suppression');
-        }
+    const handleDeleteMember = (id) => {
+        requestConfirm("Supprimer définitivement ce musicien du groupe ?", async () => {
+            try {
+                await memberService.delete(id);
+                setGroupMembers(groupMembers.filter(m => m.id !== id));
+            } catch (err) {
+                alert('Erreur lors de la suppression');
+            }
+        });
     };
 
     // Sauvegarder la réponse 
@@ -387,26 +386,27 @@ function Dashboard() {
     };
 
     // Supprimer un message
-    const handleDeleteMessage = async (id) => {
-        if (!window.confirm("Supprimer ce message ?")) return;
-        try {
-            await guestbookService.deleteMessage(id);
-            setMessages(messages.filter(m => m.id !== id));
-        } catch (err) {
-            console.error(err);
-        }
+    const handleDeleteMessage = (id) => {
+        requestConfirm("Supprimer définitivement ce message ?", async () => {
+            try {
+                await guestbookService.deleteMessage(id);
+                setMessages(messages.filter(m => m.id !== id));
+            } catch (err) {
+                console.error(err);
+            }
+        });
     };
 
-    //suppression repetes
-    const handleRepDelete = async (id) => {
-        if (!window.confirm("Supprimer ce morceau ?")) return;
-        try {
-            await repetitionService.delete(id);
-            fetchRepetitions();
-            alert('Morceau supprimé');
-        } catch (err) {
-            alert(`Erreur lors de la suppression : ${err.message || 'Erreur inconnue'}`);
-        }
+    // suppression repetes (AVEC LA MODALE)
+    const handleRepDelete = (id) => {
+        requestConfirm("Voulez-vous vraiment supprimer ce morceau ? L'action est irréversible.", async () => {
+            try {
+                await repetitionService.delete(id);
+                fetchRepetitions();
+            } catch (err) {
+                alert(`Erreur lors de la suppression : ${err.message || 'Erreur inconnue'}`);
+            }
+        });
     };
 
     //modification tournée
@@ -440,15 +440,15 @@ function Dashboard() {
         }
     };
 
-    const handleVideoDelete = async (id) => {
-        if (!window.confirm("Supprimer cette vidéo ?")) return;
-        try {
-            await videoService.delete(id);
-            fetchVideos();
-            alert('Vidéo supprimée');
-        } catch (err) {
-            alert('Erreur lors de la suppression');
-        }
+    const handleVideoDelete = (id) => {
+        requestConfirm("Supprimer définitivement cette vidéo ?", async () => {
+            try {
+                await videoService.delete(id);
+                fetchVideos();
+            } catch (err) {
+                alert('Erreur lors de la suppression');
+            }
+        });
     };
 
     //pour gérer les utilisateurs
@@ -471,14 +471,15 @@ function Dashboard() {
         }
     };
 
-    const handleDeleteUser = async (userId) => {
-        if (!window.confirm("Supprimer cet utilisateur ?")) return;
-        try {
-            await userService.delete(userId);
-            fetchUsers();
-        } catch (error) {
-            alert(error.message);
-        }
+    const handleDeleteUser = (userId) => {
+        requestConfirm("Supprimer définitivement cet utilisateur ?", async () => {
+            try {
+                await userService.delete(userId);
+                fetchUsers();
+            } catch (error) {
+                alert(error.message);
+            }
+        });
     };
 
     useEffect(() => {
@@ -769,6 +770,7 @@ function Dashboard() {
                             inputClass={inputClass}
                             btnClass={btnClass}
                             BASE_URL={BASE_URL}
+                            requestConfirm={requestConfirm}
                         />
                     )}
 
@@ -782,14 +784,45 @@ function Dashboard() {
                             inputClass={inputClass}
                             btnClass={btnClass}
                             BASE_URL={BASE_URL}
+                            requestConfirm={requestConfirm}
                         />
                     )}
 
                 </main>
             </div>
+
+            {/* MODALE DE CONFIRMATION (REMPLACE LES WINDOW.CONFIRM) */}
+            {confirmModal.isOpen && (
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm transition-opacity duration-300">
+                    <div className="bg-[#111] border border-white/10 p-8 rounded-2xl shadow-[0_0_50px_rgba(227,24,31,0.2)] max-w-md w-full mx-4 animate-in zoom-in-95 duration-300">
+                        <h3 className="text-2xl font-black uppercase text-white mb-4 flex items-center gap-3">
+                            <span className="text-[#e3181f]">⚠️</span> Attention
+                        </h3>
+                        <p className="text-gray-300 mb-8 font-medium">
+                            {confirmModal.message}
+                        </p>
+                        <div className="flex gap-4">
+                            <button
+                                onClick={() => setConfirmModal({ isOpen: false, message: '', onConfirm: null })}
+                                className="flex-1 px-4 py-3 rounded-lg font-black uppercase tracking-widest text-xs bg-white/5 text-white hover:bg-white/10 transition-colors cursor-pointer"
+                            >
+                                Annuler
+                            </button>
+                            <button
+                                onClick={() => {
+                                    if (confirmModal.onConfirm) confirmModal.onConfirm();
+                                    setConfirmModal({ isOpen: false, message: '', onConfirm: null });
+                                }}
+                                className="flex-1 px-4 py-3 rounded-lg font-black uppercase tracking-widest text-xs bg-[#e3181f] text-white hover:bg-red-700 transition-colors shadow-lg cursor-pointer"
+                            >
+                                Supprimer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
-
 }
 
 export default Dashboard;

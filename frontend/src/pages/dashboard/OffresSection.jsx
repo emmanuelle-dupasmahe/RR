@@ -1,14 +1,15 @@
 // pages/dashboard/OffresSection.jsx
 import { useState, useEffect } from 'react';
 
-function OffresSection({ SectionTitle, offres, fetchOffres, offreService, inputClass, btnClass, BASE_URL }) {
+// AJOUT DE requestConfirm dans les paramètres
+function OffresSection({ SectionTitle, offres, fetchOffres, offreService, inputClass, btnClass, BASE_URL, requestConfirm }) {
     const [editingId, setEditingId] = useState(null);
     const [titre, setTitre] = useState('');
     const [description, setDescription] = useState('');
     const [prix, setPrix] = useState('');
     const [file, setFile] = useState(null);
     const [isActive, setIsActive] = useState(true);
-    const [existingImage, setExistingImage] = useState(null); // NOUVEAU : On stocke l'image existante
+    const [existingImage, setExistingImage] = useState(null);
 
     const resetForm = () => {
         setEditingId(null);
@@ -17,7 +18,7 @@ function OffresSection({ SectionTitle, offres, fetchOffres, offreService, inputC
         setPrix('');
         setFile(null);
         setIsActive(true);
-        setExistingImage(null); // NOUVEAU : On réinitialise l'image existante
+        setExistingImage(null);
         const fileInput = document.getElementById('offre-image-upload');
         if (fileInput) fileInput.value = '';
     };
@@ -29,7 +30,7 @@ function OffresSection({ SectionTitle, offres, fetchOffres, offreService, inputC
         setPrix(offre.prix || '');
         setIsActive(offre.is_active === 1);
         setFile(null);
-        setExistingImage(offre.image_url); // NOUVEAU : On sauvegarde l'URL de l'image actuelle
+        setExistingImage(offre.image_url);
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
@@ -42,12 +43,9 @@ function OffresSection({ SectionTitle, offres, fetchOffres, offreService, inputC
         formData.append('prix', prix);
         formData.append('is_active', isActive ? '1' : '0');
 
-        // NOUVEAU : La logique d'envoi de l'image
         if (file) {
-            // Si on a sélectionné un nouveau fichier, on l'envoie
             formData.append('image', file);
         } else if (existingImage) {
-            // Sinon, si une image existait déjà, on renvoie son URL au backend pour qu'il la conserve
             formData.append('existing_image', existingImage);
         }
 
@@ -66,14 +64,16 @@ function OffresSection({ SectionTitle, offres, fetchOffres, offreService, inputC
         }
     };
 
-    const handleDelete = async (id) => {
-        if (!window.confirm("Supprimer définitivement cette offre ?")) return;
-        try {
-            await offreService.delete(id);
-            fetchOffres();
-        } catch (error) {
-            alert('Erreur lors de la suppression');
-        }
+    // NOUVELLE FONCTION DE SUPPRESSION AVEC LA MODALE
+    const handleDelete = (id) => {
+        requestConfirm("Supprimer définitivement cette offre ?", async () => {
+            try {
+                await offreService.delete(id);
+                fetchOffres();
+            } catch (error) {
+                alert('Erreur lors de la suppression');
+            }
+        });
     };
 
     return (

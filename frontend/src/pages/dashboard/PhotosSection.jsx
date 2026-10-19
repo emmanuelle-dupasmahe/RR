@@ -1,7 +1,8 @@
 // pages/dashboard/PhotosSection.jsx
 import { useState } from 'react';
 
-function PhotosSection({ SectionTitle, photos, fetchPhotos, photoService, inputClass, btnClass, BASE_URL }) {
+// AJOUT DE requestConfirm dans les paramètres
+function PhotosSection({ SectionTitle, photos, fetchPhotos, photoService, inputClass, btnClass, BASE_URL, requestConfirm }) {
     const [file, setFile] = useState(null);
     const [description, setDescription] = useState('');
     const [ordre, setOrdre] = useState(0);
@@ -31,14 +32,16 @@ function PhotosSection({ SectionTitle, photos, fetchPhotos, photoService, inputC
         }
     };
 
-    const handleDelete = async (id) => {
-        if (!window.confirm("Supprimer cette photo ?")) return;
-        try {
-            await photoService.delete(id);
-            fetchPhotos();
-        } catch (error) {
-            alert('Erreur lors de la suppression');
-        }
+    // NOUVELLE FONCTION DE SUPPRESSION AVEC LA MODALE
+    const handleDelete = (id) => {
+        requestConfirm("Voulez-vous vraiment supprimer cette photo de la galerie ?", async () => {
+            try {
+                await photoService.delete(id);
+                fetchPhotos();
+            } catch (error) {
+                alert('Erreur lors de la suppression');
+            }
+        });
     };
 
     return (
