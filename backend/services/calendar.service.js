@@ -46,7 +46,6 @@ export const getUpcomingEvents = async () => {
     try {
         const response = await calendar.events.list({
             calendarId: CALENDAR_ID,
-            // On enlève q: 'concert' pour que Google nous renvoie tout le calendrier sans restriction
             maxResults: 2500,
             singleEvents: true,
             orderBy: 'startTime',
@@ -54,19 +53,17 @@ export const getUpcomingEvents = async () => {
 
         const now = new Date();
 
-        // On filtre intelligemment les résultats en JavaScript
         const filteredEvents = response.data.items.filter(event => {
-            // On récupère la date de l'événement (gère les événements sur une journée entière ou avec heure précise)
-            const eventDate = new Date(event.start.dateTime || event.start.date);
-
+            // CORRECTION : On se base sur la date de FIN de l'événement pour savoir s'il est terminé
+            const eventEndDate = new Date(event.end.dateTime || event.end.date);
 
             // On cherche le mot "concert" de façon large, soit dans le titre, soit dans la description
             const titleMatch = event.summary && event.summary.toLowerCase().includes('concert');
             const descMatch = event.description && event.description.toLowerCase().includes('concert');
             const isConcert = titleMatch || descMatch;
 
-            // Règle : on conserve l'événement SI c'est dans le futur (indispos, réunions...) OU SI c'est un concert
-            return eventDate >= now || isConcert;
+            // Règle : on conserve l'événement SI sa date de FIN n'est pas passée OU SI c'est un concert
+            return eventEndDate >= now || isConcert;
         });
 
         return filteredEvents;

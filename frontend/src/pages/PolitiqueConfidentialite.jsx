@@ -50,7 +50,7 @@ function PolitiqueConfidentialite() {
                             <li>Droit d'accès, de rectification et de suppression de vos données.</li>
                             <li>Droit à la limitation du traitement et droit d'opposition.</li>
                         </ul>
-                        <p>Pour exercer ces droits, vous pouvez contacter le responsable du traitement à l'adresse suivante : [Email].</p>
+                        <p>Pour exercer ces droits, vous pouvez contacter le responsable du traitement à l'adresse suivante : [vdcmanoue@gmail.com].</p>
                     </section>
 
                     <section>

@@ -27,7 +27,7 @@ function Accessibilite() {
                         <h2 className="text-xl font-bold mb-4 text-primary uppercase tracking-wide">Retour d'information et contact</h2>
                         <p>Si vous n'arrivez pas à accéder à un contenu ou à un service de ce site, vous pouvez nous contacter pour être orienté vers une alternative accessible ou obtenir le contenu sous une autre forme :</p>
                         <ul className="list-disc pl-6 space-y-1 mt-2">
-                            <li>Par e-mail : [Email]</li>
+                            <li>Par e-mail : [vdcmanoue@gmail.com]</li>
                         </ul>
                     </section>
                 </div>

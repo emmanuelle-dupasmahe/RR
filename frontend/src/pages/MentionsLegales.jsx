@@ -14,7 +14,7 @@ function MentionsLegales() {
                         <ul className="list-disc pl-6 space-y-1">
                             <li><strong>Propriétaire du site :</strong> [Réservoir Rock]</li>
                             <li><strong>Adresse :</strong> [790 chemin des Puérats, 83140 Six-Fours-les-Plages]</li>
-                            <li><strong>Contact :</strong> [0609978124] — Téléphone : []</li>
+                            <li><strong>Contact :</strong> [Eric] — Téléphone : [0609978124]</li>
                             <li><strong>Directeur de la publication :</strong> [Réservoir Rock]</li>
                         </ul>
                     </section>
@@ -23,9 +23,11 @@ function MentionsLegales() {
                         <h2 className="text-xl font-bold mb-4 text-primary uppercase tracking-wide">2. Hébergement</h2>
                         <p className="mb-2">Le site est hébergé par :</p>
                         <ul className="list-disc pl-6 space-y-1">
-                            <li><strong>Nom de l'hébergeur :</strong> [Zeigadis]</li>
-                            <li><strong>Adresse :</strong> [83140 Six-Fours]</li>
-                            <li><strong>Site web / Contact :</strong> [Site web ou téléphone de l'hébergeur]</li>
+                            <li><strong>Nom de l'hébergeur :</strong> [OVH SAS]</li>
+                            <li><strong>Adresse :</strong> [Siège social : 2 rue Kellermann - 59100 Roubaix - France]</li>
+                            <li><strong>SRC :</strong> [Lille Métropole 424 761 419 00045]</li>
+                            <li><strong>Tel :</strong> [1007]</li>
+                            <li><strong>Site web :</strong> [https://www.ovhcloud.com]</li>
                         </ul>
                     </section>
 
