@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:domain": "VITE_BASE_PATH=/ VITE_API_URL= vite build --outDir dist-domain",
     "lint": "eslint .",
     "preview": "vite preview"
   },
