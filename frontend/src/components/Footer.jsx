@@ -31,8 +31,13 @@ function Footer() {
                     <div className="space-y-1">
                         {/* Texte copyright */}
                         <p className="m-0 text-[0.875rem] text-gray-500 dark:text-[#888]">
-                            Réservoir Rock - © {new Date().getFullYear()} Tous droits réservés. • Site réalisé par{' '}
-                            <a href="https://ma-nux.fr" target="_blank" rel="noopener" className="text-primary hover:underline transition-colors">Ma-nux</a>
+                            Réservoir Rock - © {new Date().getFullYear()} Tous droits réservés.
+                            {/* Sur mobile, la mention passe à la ligne et le séparateur est masqué */}
+                            <span className="hidden sm:inline"> • </span>
+                            <span className="block sm:inline">
+                                Site réalisé par{' '}
+                                <a href="https://ma-nux.fr" target="_blank" rel="noopener" className="text-primary hover:underline transition-colors">Ma-nux</a>
+                            </span>
                         </p>
 
                         {/* Crédits */}
