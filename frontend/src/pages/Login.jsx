@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth.js';
 import { Helmet } from 'react-helmet-async';
+import PasswordInput from '../components/PasswordInput.jsx';
 
 function Login() {
     const [email, setEmail] = useState('');
@@ -54,8 +55,7 @@ function Login() {
                         </div>
                         <div>
                             <label className="block text-slate-300 font-bold mb-2">Mot de passe</label>
-                            <input
-                                type="password"
+                            <PasswordInput
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 required

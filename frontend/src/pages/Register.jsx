@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth.js';
 import { Helmet } from 'react-helmet-async';
+import PasswordInput from '../components/PasswordInput.jsx';
 
 function Register() {
     const [formData, setFormData] = useState({
@@ -103,8 +104,7 @@ function Register() {
                         </div>
                         <div>
                             <label className="block text-slate-300 font-bold mb-2">Mot de passe</label>
-                            <input
-                                type="password"
+                            <PasswordInput
                                 name="password"
                                 value={formData.password}
                                 onChange={handleChange}
@@ -115,8 +115,7 @@ function Register() {
                         </div>
                         <div>
                             <label className="block text-slate-300 font-bold mb-2">Confirmer le mot de passe</label>
-                            <input
-                                type="password"
+                            <PasswordInput
                                 name="confirmPassword"
                                 value={formData.confirmPassword}
                                 onChange={handleChange}
