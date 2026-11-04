@@ -95,7 +95,7 @@ function Home() {
                     {nextConcert ? (
                         <div className="space-y-2">
                             <p className="text-[#cc1218] dark:text-white text-[0.92rem] md:text-[1.2rem] font-black uppercase tracking-[0.12em] md:tracking-[0.2em]">
-                                {new Date(nextConcert.date_concert).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
+                                {new Date(nextConcert.date_concert).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'Europe/Paris' })}
                             </p>
                             <p className="text-gray-900 dark:text-white text-[0.95rem] md:text-[1.1rem] font-semibold md:font-medium transition-colors leading-snug">
                                 {nextConcert.titre} <span className="text-[#ff0000] mx-2">//</span> {nextConcert.lieu}

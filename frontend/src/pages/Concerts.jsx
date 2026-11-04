@@ -41,10 +41,12 @@ function Concerts() {
     }, [selectedConcert]);
 
     const getFormattedDate = (dateString) => {
+        // Fuseau fixé sur Paris : sinon un visiteur (ou Google) à l'étranger verrait la veille
         const date = new Date(dateString);
-        const jour = date.getDate().toString().padStart(2, '0');
-        const mois = date.toLocaleString('fr-FR', { month: 'short' }).toUpperCase().replace('.', '');
-        const annee = date.getFullYear();
+        const timeZone = 'Europe/Paris';
+        const jour = date.toLocaleString('fr-FR', { day: '2-digit', timeZone });
+        const mois = date.toLocaleString('fr-FR', { month: 'short', timeZone }).toUpperCase().replace('.', '');
+        const annee = date.toLocaleString('fr-FR', { year: 'numeric', timeZone });
         return { jour, mois, annee };
     };
 

@@ -109,7 +109,7 @@ function ConcertsSection({
                                 <div className="group flex justify-between items-center">
                                     <div>
                                         <span className="text-[#e3181f] font-black text-xs tracking-tighter uppercase block mb-1">
-                                            {new Date(c.date_concert).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}
+                                            {new Date(c.date_concert).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'Europe/Paris' })}
                                         </span>
                                         <span className="text-lg font-bold uppercase tracking-tight text-black dark:text-white">{c.titre}</span>
                                         <p className="text-[11px] text-gray-500 dark:text-gray-400 uppercase font-bold tracking-widest mt-1">{c.lieu}</p>
