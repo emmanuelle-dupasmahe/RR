@@ -61,7 +61,7 @@ function Home() {
                 <title>Reservoir Rock | Groupe de Rock</title>
                 <meta
                     name="description"
-                    content="Reservoir Rock, groupe de rock : concerts, répétitions, vidéos et infos."
+                    content="Reservoir Rock, groupe de pop rock live festif du Var. Découvrez nos prochains concerts, nos vidéos et nos offres pour vos soirées et événements."
                 />
                 <link rel="canonical" href="https://resrock.fr/" />
             </Helmet>
