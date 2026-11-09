@@ -86,13 +86,14 @@ function Home() {
                     Réservoir Rock
                 </h1>
 
-                <section className="w-[92%] max-w-2xl px-5 py-5 md:px-10 md:py-8 mt-8 md:mt-14 rounded-2xl border border-primary/60 bg-white/65 dark:bg-primary/30 text-black dark:text-primary dark:shadow-none">
+                {/* Le cadre n'est affiché que s'il y a un concert à venir */}
+                {nextConcert && (
+                    <section className="w-[92%] max-w-2xl px-5 py-5 md:px-10 md:py-8 mt-8 md:mt-14 rounded-2xl border border-primary/60 bg-white/65 dark:bg-primary/30 text-black dark:text-primary dark:shadow-none">
 
-                    <h2 className="text-[1.15rem] md:text-[1.5rem] font-black uppercase mb-3 text-black dark:text-white transition-colors tracking-tight md:tracking-tighter">
-                        Prochain Concert
-                    </h2>
+                        <h2 className="text-[1.15rem] md:text-[1.5rem] font-black uppercase mb-3 text-black dark:text-white transition-colors tracking-tight md:tracking-tighter">
+                            Prochain Concert
+                        </h2>
 
-                    {nextConcert ? (
                         <div className="space-y-2">
                             <p className="text-[#cc1218] dark:text-white text-[0.92rem] md:text-[1.2rem] font-black uppercase tracking-[0.12em] md:tracking-[0.2em]">
                                 {new Date(nextConcert.date_concert).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'Europe/Paris' })}
@@ -112,12 +113,8 @@ function Home() {
                                 )}
                             </p>
                         </div>
-                    ) : (
-                        <p className="text-gray-600 dark:text-white/40 text-[0.95rem] md:text-[1rem] leading-[1.5] italic transition-colors">
-                            🎸 Nouvelles dates en préparation... À vos agendas !
-                        </p>
-                    )}
-                </section>
+                    </section>
+                )}
             </div>
         </>
     );
